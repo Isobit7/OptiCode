@@ -83,6 +83,7 @@ code-optimizer-explainer/
 ## 8. Reference Docs In This Repo
 
 - `PRD_Code_Optimizer_Explainer.md` — full product requirements
+- `PRODUCT_ROADMAP.md` — strategic roadmap detailing security scanner, PR summary, translator, and flowchart features
 - `FRONTEND_DASHBOARD_SPECS.md` — UI buttons, controls, and API response contracts for frontend developer
 - `Tech_Stack_Options.md` — why this stack was chosen
 - `System_Architecture.md` — detailed request flow and component responsibilities
@@ -93,6 +94,7 @@ code-optimizer-explainer/
 
 | Date | Change |
 |---|---|
+| 2026-07-24 | Added PRODUCT_ROADMAP.md detailing Security Audit, Code Translator, PR Reviewer, and Logic Flowcharts |
 | 2026-07-24 | Added FRONTEND_DASHBOARD_SPECS.md for frontend developer integration |
 | 2026-07-24 | Added explanation depth levels, humanize modes, structured alternatives with Big-O bounds, SEO 0-100 scoring, and 9-test backend test suite |
 | 2026-07-22 | Initial PRD, tech stack, architecture, and starter scaffold created |
