@@ -1,0 +1,39 @@
+#!/bin/bash
+# pre-commit hook: warns (or blocks, if STRICT=1) if source files changed
+# but MEMORY.md wasn't updated in the same commit.
+#
+# INSTALL: copy this file to .git/hooks/pre-commit and run: chmod +x .git/hooks/pre-commit
+# (git hooks aren't version-controlled by default, so this lives in /scripts and
+# you install it once per clone — see setup command at the bottom of this file)
+
+STRICT=0  # set to 1 to actually block the commit instead of just warning
+
+CHANGED_FILES=$(git diff --cached --name-only)
+
+# Did any real source files change?
+SOURCE_CHANGED=$(echo "$CHANGED_FILES" | grep -E '^(frontend/src/|backend/app/)' | grep -v -E '\.(test|spec)\.')
+
+# Was MEMORY.md updated in this same commit?
+MEMORY_UPDATED=$(echo "$CHANGED_FILES" | grep -x "MEMORY.md")
+
+if [ -n "$SOURCE_CHANGED" ] && [ -z "$MEMORY_UPDATED" ]; then
+  echo ""
+  echo "⚠️  WARNING: You're committing source changes but MEMORY.md was not updated."
+  echo "   Changed source files:"
+  echo "$SOURCE_CHANGED" | sed 's/^/     - /'
+  echo ""
+  echo "   If this commit includes a real decision, new feature, or architecture"
+  echo "   change, update MEMORY.md's Changelog before committing (ask your AI"
+  echo "   assistant to do it — that's its job per MEMORY.md's instructions)."
+  echo ""
+  if [ "$STRICT" = "1" ]; then
+    echo "❌ Commit blocked (STRICT mode). Update MEMORY.md or set STRICT=0 in the hook."
+    exit 1
+  fi
+fi
+
+exit 0
+
+# ---- ONE-TIME SETUP (run from repo root) ----
+# cp scripts/pre-commit .git/hooks/pre-commit
+# chmod +x .git/hooks/pre-commit

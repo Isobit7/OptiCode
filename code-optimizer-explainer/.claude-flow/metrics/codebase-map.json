@@ -1,0 +1,11 @@
+{
+  "timestamp": "2026-07-22T14:09:41.290Z",
+  "projectRoot": "S:\\PROJECT\\OptiCode\\code-optimizer-explainer",
+  "structure": {
+    "hasPackageJson": false,
+    "hasTsConfig": false,
+    "hasClaudeConfig": true,
+    "hasClaudeFlow": true
+  },
+  "scannedAt": 1784729381290
+}

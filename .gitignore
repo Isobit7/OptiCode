@@ -1,0 +1,37 @@
+# Environment variables
+.env
+.env.local
+.env.*.local
+*.env
+!*.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+
+# Node & Frontend
+node_modules/
+dist/
+build/
+.cache/
+
+# Databases & Runtime State
+.swarm/
+*.db
+*.db-shm
+*.db-wal
+
+# IDEs & System
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Flow / Agent logs
+.claude-flow/logs/
