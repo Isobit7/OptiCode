@@ -1,7 +1,7 @@
 import ast
 import logging
 import re
-from typing import List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple
 
 import black
 import jsbeautifier
@@ -70,9 +70,14 @@ def shorten(code: str, language: Optional[str] = None) -> str:
     return "\n".join(lines)
 
 
-def seo_optimize(html_code: str) -> Tuple[str, List[str]]:
-    """Performs static SEO inspection and automatic fixes on HTML markup using BeautifulSoup."""
+def seo_optimize(
+    html_code: str,
+) -> Tuple[str, List[str], int, List[Dict[str, str]]]:
+    """Performs static SEO inspection, calculates health score, and generates structured checklist items."""
     suggestions: List[str] = []
+    checklist: List[Dict[str, str]] = []
+    score_points: int = 0
+    total_checks: int = 8
 
     try:
         soup = BeautifulSoup(html_code, "html.parser")
@@ -83,9 +88,20 @@ def seo_optimize(html_code: str) -> Tuple[str, List[str]]:
             html_tag = soup.new_tag("html", lang="en")
             soup.insert(0, html_tag)
             suggestions.append("Wrapped HTML document in a valid <html> element.")
+            checklist.append(
+                {"category": "Lang", "status": "warning", "message": "Added missing <html> element."}
+            )
         elif not html_tag.get("lang"):
             html_tag["lang"] = "en"
             suggestions.append("Added 'lang=\"en\"' attribute to the <html> tag.")
+            checklist.append(
+                {"category": "Lang", "status": "warning", "message": "Added missing 'lang=\"en\"' attribute."}
+            )
+        else:
+            score_points += 1
+            checklist.append(
+                {"category": "Lang", "status": "pass", "message": f"<html> element contains lang=\"{html_tag.get('lang')}\"."}
+            )
 
         # 2. Ensure <head> tag exists
         head_tag = soup.find("head")
@@ -96,6 +112,14 @@ def seo_optimize(html_code: str) -> Tuple[str, List[str]]:
             else:
                 soup.insert(0, head_tag)
             suggestions.append("Created missing <head> section.")
+            checklist.append(
+                {"category": "Head", "status": "warning", "message": "Created missing <head> tag."}
+            )
+        else:
+            score_points += 1
+            checklist.append(
+                {"category": "Head", "status": "pass", "message": "<head> element present."}
+            )
 
         # 3. Check <title> tag
         title_tag = soup.find("title")
@@ -105,6 +129,14 @@ def seo_optimize(html_code: str) -> Tuple[str, List[str]]:
             head_tag.append(new_title)
             suggestions.append(
                 "Added missing <title> tag with descriptive placeholder title."
+            )
+            checklist.append(
+                {"category": "Title", "status": "warning", "message": "Added missing <title> element."}
+            )
+        else:
+            score_points += 1
+            checklist.append(
+                {"category": "Title", "status": "pass", "message": f"<title> present ('{title_tag.string.strip()}')."}
             )
 
         # 4. Check <meta name="description">
@@ -119,6 +151,14 @@ def seo_optimize(html_code: str) -> Tuple[str, List[str]]:
             )
             head_tag.append(new_desc)
             suggestions.append('Added missing <meta name="description"> tag.')
+            checklist.append(
+                {"category": "Meta", "status": "warning", "message": "Added missing meta description."}
+            )
+        else:
+            score_points += 1
+            checklist.append(
+                {"category": "Meta", "status": "pass", "message": "Meta description tag present."}
+            )
 
         # 5. Check <meta name="viewport">
         meta_viewport = soup.find("meta", attrs={"name": "viewport"})
@@ -132,16 +172,38 @@ def seo_optimize(html_code: str) -> Tuple[str, List[str]]:
             )
             head_tag.append(new_viewport)
             suggestions.append('Added responsive <meta name="viewport"> tag.')
+            checklist.append(
+                {"category": "Viewport", "status": "warning", "message": "Added responsive viewport meta tag."}
+            )
+        else:
+            score_points += 1
+            checklist.append(
+                {"category": "Viewport", "status": "pass", "message": "Viewport meta tag present."}
+            )
 
         # 6. Check <img> tags for alt attributes
         img_tags = soup.find_all("img")
         missing_alt = False
-        for img in img_tags:
-            if not img.get("alt"):
-                img["alt"] = "Image description"
-                missing_alt = True
-        if missing_alt:
-            suggestions.append("Added descriptive alt attributes to <img> tags.")
+        if img_tags:
+            for img in img_tags:
+                if not img.get("alt"):
+                    img["alt"] = "Image description"
+                    missing_alt = True
+            if missing_alt:
+                suggestions.append("Added descriptive alt attributes to <img> tags.")
+                checklist.append(
+                    {"category": "Alt", "status": "warning", "message": "Added missing alt attributes to img tags."}
+                )
+            else:
+                score_points += 1
+                checklist.append(
+                    {"category": "Alt", "status": "pass", "message": "All <img> tags have alt attributes."}
+                )
+        else:
+            score_points += 1
+            checklist.append(
+                {"category": "Alt", "status": "pass", "message": "No <img> tags present."}
+            )
 
         # 7. Check Heading Hierarchy
         h1_tags = soup.find_all("h1")
@@ -149,9 +211,20 @@ def seo_optimize(html_code: str) -> Tuple[str, List[str]]:
             suggestions.append(
                 "No <h1> heading found. Add a single primary <h1> heading for search engines."
             )
+            checklist.append(
+                {"category": "Headings", "status": "warning", "message": "Missing <h1> primary heading."}
+            )
         elif len(h1_tags) > 1:
             suggestions.append(
                 "Multiple <h1> headings found. Consider using a single <h1> heading per page."
+            )
+            checklist.append(
+                {"category": "Headings", "status": "warning", "message": "Multiple <h1> headings found."}
+            )
+        else:
+            score_points += 1
+            checklist.append(
+                {"category": "Headings", "status": "pass", "message": "Single <h1> primary heading present."}
             )
 
         # 8. Check Semantic Elements
@@ -161,10 +234,21 @@ def seo_optimize(html_code: str) -> Tuple[str, List[str]]:
             suggestions.append(
                 "Consider replacing generic <div> elements with semantic HTML tags (<main>, <header>, <footer>) for improved accessibility and indexing."
             )
+            checklist.append(
+                {"category": "Semantic", "status": "warning", "message": "No semantic HTML tags (<main>, <header>, etc.) detected."}
+            )
+        else:
+            score_points += 1
+            checklist.append(
+                {"category": "Semantic", "status": "pass", "message": "Semantic HTML layout tags detected."}
+            )
 
+        final_score = int((score_points / total_checks) * 100)
         optimized_html = soup.prettify()
-        return optimized_html, suggestions
+        return optimized_html, suggestions, final_score, checklist
 
     except Exception as err:
         logger.error(f"SEO static analysis error: {err}")
-        return html_code, [f"Error performing static analysis: {str(err)}"]
+        return html_code, [f"Error performing static analysis: {str(err)}"], 0, [
+            {"category": "Error", "status": "error", "message": str(err)}
+        ]

@@ -17,9 +17,12 @@ def seo_optimize_code(request: CodeRequest) -> SeoOptimizeResponse:
         )
 
     try:
-        optimized_code, suggestions = tools.seo_optimize(request.code)
+        optimized_code, suggestions, score, checklist = tools.seo_optimize(request.code)
         return SeoOptimizeResponse(
-            optimized_code=optimized_code, suggestions=suggestions
+            score=score,
+            optimized_code=optimized_code,
+            suggestions=suggestions,
+            checklist=checklist,
         )
     except HTTPException:
         raise

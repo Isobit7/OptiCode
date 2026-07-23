@@ -115,56 +115,99 @@ def _call_model(prompt: str, system_prompt: Optional[str] = None) -> str:
     raise RuntimeError(f"All configured LLM models failed. Last error: {last_error}")
 
 
-def explain(code: str, language: Optional[str] = None) -> Tuple[str, str]:
-    """Generates a plain-language explanation for the provided code."""
+def explain(
+    code: str, language: Optional[str] = None, depth: Optional[str] = "beginner"
+) -> Tuple[str, str, str]:
+    """Generates a plain-language explanation for the provided code with configurable depth."""
     detected = detect_language(code, language)
-    system_prompt = (
-        "You are an expert programming mentor. Provide a plain-language, beginner-friendly "
-        "explanation of the provided code. Break down key logic step-by-step."
-    )
-    prompt = f"Language: {detected}\n\nCode:\n```{detected}\n{code}\n```"
+    depth_level = (depth or "beginner").strip().lower()
+
+    if depth_level == "advanced":
+        system_prompt = (
+            "You are a principal software architect. Provide a deep, technical explanation "
+            "of the provided code. Analyze low-level execution behavior, algorithmic complexity "
+            "(Big-O time and space bounds), memory patterns, edge case vulnerabilities, and architectural design."
+        )
+    elif depth_level == "intermediate":
+        system_prompt = (
+            "You are a senior developer. Provide a clear, structured technical explanation "
+            "of the code. Detail data structures, function calls, control flow, and practical performance considerations."
+        )
+    else:
+        depth_level = "beginner"
+        system_prompt = (
+            "You are an expert programming mentor. Provide a plain-language, beginner-friendly "
+            "explanation of the provided code. Break down key logic step-by-step using clear, intuitive analogies."
+        )
+
+    prompt = f"Language: {detected}\nDepth Level: {depth_level}\n\nCode:\n```{detected}\n{code}\n```"
 
     try:
         explanation = _call_model(prompt, system_prompt=system_prompt)
-        return explanation, detected
+        return explanation, detected, depth_level
     except Exception as err:
         logger.error(f"Error in explain: {err}")
-        return f"Unable to generate explanation: {str(err)}", detected
+        return f"Unable to generate explanation: {str(err)}", detected, depth_level
 
 
-def humanize(code: str, language: Optional[str] = None) -> Tuple[str, str]:
-    """Rewrites AI-sounding or terse code into idiomatic, human-written code with comments."""
+def humanize(
+    code: str, language: Optional[str] = None, mode: Optional[str] = "de-ai"
+) -> Tuple[str, str, str]:
+    """Rewrites AI-sounding or terse code into idiomatic, human-written code with configurable mode."""
     detected = detect_language(code, language)
-    system_prompt = (
-        "You are an expert code reviewer. Rewrite the following code so it looks natural, "
-        "idiomatic, human-written, and readable. Add helpful comments explaining intent, "
-        "and use clear variable names. Do NOT change functionality or output behavior. "
-        "Return ONLY the rewritten code without surrounding commentary."
-    )
-    prompt = f"Language: {detected}\n\nCode:\n```{detected}\n{code}\n```"
+    mode_used = (mode or "de-ai").strip().lower()
+
+    if mode_used == "simplify":
+        system_prompt = (
+            "You are a clear-code advocate. Restructure and simplify the code for maximum readability. "
+            "Use clear variable names, break complex nested expressions into logical steps, and add explanatory comments."
+        )
+    elif mode_used == "idiomatic":
+        system_prompt = (
+            "You are a language specialist. Rewrite the code using modern, idiomatic patterns "
+            "and standard style conventions of the language. Preserve exact functionality while employing standard idioms."
+        )
+    else:
+        mode_used = "de-ai"
+        system_prompt = (
+            "You are an expert code reviewer. Rewrite the following code so it looks natural, "
+            "idiomatic, human-written, and readable. Remove AI-generated boilerplate clichés, use clear variable names, "
+            "and add helpful comments explaining developer intent. Return ONLY the rewritten code."
+        )
+
+    prompt = f"Language: {detected}\nMode: {mode_used}\n\nCode:\n```{detected}\n{code}\n```"
 
     try:
         humanized = _call_model(prompt, system_prompt=system_prompt)
         cleaned = re.sub(
             r"^```(?:\w+)?\n|```$", "", humanized.strip(), flags=re.MULTILINE
         ).strip()
-        return cleaned, detected
+        return cleaned, detected, mode_used
     except Exception as err:
         logger.error(f"Error in humanize: {err}")
-        return f"// Unable to humanize code: {str(err)}\n{code}", detected
+        return f"// Unable to humanize code: {str(err)}\n{code}", detected, mode_used
 
 
 def alternatives(
     code: str, language: Optional[str] = None
-) -> Tuple[List[Dict[str, str]], str]:
-    """Provides 2-3 alternative code implementations labeled with one-line tradeoffs."""
+) -> Tuple[List[Dict[str, Any]], str]:
+    """Provides 2-3 alternative code implementations labeled with tradeoffs, pros/cons, and complexity."""
     detected = detect_language(code, language)
     system_prompt = (
         "You are a software architect. Provide 2-3 distinct alternative implementations "
-        "of the given code. For each alternative, provide the code and a concise, one-line tradeoff summary "
-        "(e.g., 'more performant using vectorization', 'fewer external dependencies').\n"
-        "Output ONLY valid JSON matching this schema:\n"
-        '[\n  {"code": "...", "tradeoff": "..."}\n]'
+        "of the given code (e.g., Functional/Vectorized, Memory-Efficient/Streaming, Standard Idiomatic).\n"
+        "Output ONLY valid JSON matching this exact array schema:\n"
+        "[\n"
+        '  {\n'
+        '    "name": "Approach Title",\n'
+        '    "code": "alternative code snippet",\n'
+        '    "tradeoff": "One-line tradeoff summary",\n'
+        '    "pros": ["advantage 1", "advantage 2"],\n'
+        '    "cons": ["disadvantage 1"],\n'
+        '    "time_complexity": "O(N)",\n'
+        '    "space_complexity": "O(1)"\n'
+        "  }\n"
+        "]"
     )
     prompt = f"Language: {detected}\n\nCode:\n```{detected}\n{code}\n```"
 
@@ -173,29 +216,45 @@ def alternatives(
         json_str = re.sub(r"^```json\s*|^```\s*|```$", "", raw_output.strip()).strip()
 
         parsed = json.loads(json_str)
-        results: List[Dict[str, str]] = []
+        results: List[Dict[str, Any]] = []
         if isinstance(parsed, list):
             for item in parsed:
-                if isinstance(item, dict) and "code" in item and "tradeoff" in item:
+                if isinstance(item, dict) and "code" in item:
                     results.append(
                         {
+                            "name": str(item.get("name", "Alternative Implementation")),
                             "code": str(item["code"]),
-                            "tradeoff": str(item["tradeoff"]),
+                            "tradeoff": str(item.get("tradeoff", "Alternative approach")),
+                            "pros": [str(p) for p in item.get("pros", [])] if isinstance(item.get("pros"), list) else [],
+                            "cons": [str(c) for c in item.get("cons", [])] if isinstance(item.get("cons"), list) else [],
+                            "time_complexity": str(item.get("time_complexity")) if item.get("time_complexity") else None,
+                            "space_complexity": str(item.get("space_complexity")) if item.get("space_complexity") else None,
                         }
                     )
         if results:
             return results, detected
+
         return [
             {
+                "name": "Alternative Implementation",
                 "code": raw_output,
                 "tradeoff": "Alternative implementation provided by LLM.",
+                "pros": ["Provides different approach"],
+                "cons": [],
+                "time_complexity": None,
+                "space_complexity": None,
             }
         ], detected
     except Exception as err:
         logger.error(f"Error in alternatives: {err}")
         return [
             {
+                "name": "Original Fallback",
                 "code": code,
                 "tradeoff": f"Unable to parse alternatives: {str(err)}",
+                "pros": [],
+                "cons": [str(err)],
+                "time_complexity": None,
+                "space_complexity": None,
             }
         ], detected

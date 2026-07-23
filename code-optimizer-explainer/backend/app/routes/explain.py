@@ -2,7 +2,7 @@ import logging
 from fastapi import APIRouter, Depends, HTTPException, Request
 
 from app.llm_interface import client as llm
-from app.models import CodeRequest, ExplainResponse, MAX_LINES
+from app.models import ExplainRequest, ExplainResponse, MAX_LINES
 from app.rate_limiter import check_rate_limit
 
 logger = logging.getLogger("code_optimizer.routes.explain")
@@ -14,7 +14,7 @@ router = APIRouter()
     response_model=ExplainResponse,
     dependencies=[Depends(check_rate_limit)],
 )
-def explain_code(request: CodeRequest) -> ExplainResponse:
+def explain_code(request: ExplainRequest) -> ExplainResponse:
     if request.line_count() > MAX_LINES:
         raise HTTPException(
             status_code=400,
@@ -22,8 +22,14 @@ def explain_code(request: CodeRequest) -> ExplainResponse:
         )
 
     try:
-        explanation, detected_lang = llm.explain(request.code, request.language)
-        return ExplainResponse(explanation=explanation, detected_language=detected_lang)
+        explanation, detected_lang, depth_level = llm.explain(
+            request.code, request.language, request.depth
+        )
+        return ExplainResponse(
+            explanation=explanation,
+            detected_language=detected_lang,
+            depth_level=depth_level,
+        )
     except HTTPException:
         raise
     except Exception as err:
