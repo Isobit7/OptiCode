@@ -22,12 +22,12 @@ A free, open-source web app called **Code Optimizer & Explainer**. Users paste a
 
 | Feature | What it does |
 |---|---|
-| **Explainer** | Plain-language explanation of pasted code, adjustable depth |
-| **Humanizer** | Both: (a) rewrites AI-generated code to look human-written, and (b) simplifies/comments code for readability |
-| **Prettifier** | Formats code to language-standard style conventions |
-| **Shortener** | Minifies/condenses code while preserving behavior |
-| **SEO-Friendly Optimizer** | Optimizes HTML meta tags, semantic structure, naming/docs for discoverability |
-| **Code Alternatives** | Generates 2-3 alternative implementations with tradeoff labels |
+| **Explainer** | Plain-language explanation of pasted code, adjustable depth (`beginner`, `intermediate`, `advanced`) |
+| **Humanizer** | Rewrites code with configurable modes: `de-ai` (remove AI clichés), `simplify` (readable structure), `idiomatic` (standard idioms) |
+| **Prettifier** | Formats code to language-standard style conventions (Black for Python, JSBeautifier for Web) |
+| **Shortener** | Minifies/condenses code while preserving behavior (AST-based for Python, regex for Web/C) |
+| **SEO-Friendly Optimizer** | Static HTML analysis returning a 0–100 SEO health score, structured checklist, and optimized markup |
+| **Code Alternatives** | Generates 2-3 alternative implementations with tradeoff labels, pros/cons lists, and $O(...)$ time/space bounds |
 
 Input/output handling: always show original input, transformed output, and a diff view.
 
@@ -36,8 +36,8 @@ Input/output handling: always show original input, transformed output, and a dif
 - **Frontend:** React (Vite), deployed on **Vercel**
 - **Backend:** FastAPI (Python), deployed on **Render/Fly.io** (not Vercel)
 - **Database:** Supabase (Postgres + optional Auth)
-- **LLM layer:** Custom-built interface (`backend/app/llm_interface/`) — isolated so the model/provider can be swapped without touching the rest of the app
-- **Deterministic tools:** Prettify/Shorten/SEO run WITHOUT the LLM (formatters/minifiers/static analysis)
+- **LLM layer:** Custom-built interface (`backend/app/llm_interface/client.py`) with multi-model fallback (`poolside/laguna-s-2.1:free`, `google/gemma-4-31b-it:free`)
+- **Deterministic tools:** Prettify/Shorten/SEO run WITHOUT the LLM (Black, JSBeautifier, BeautifulSoup static analysis)
 
 ## 4. Key Product Decisions (update this section as new decisions are made)
 
@@ -47,12 +47,13 @@ Input/output handling: always show original input, transformed output, and a dif
 - Login is optional — anonymous use fully works; login only needed to save history
 - No fixed launch deadline — quality over speed
 - Web-app only for v1 (no browser extension/public API yet — v2 candidates)
+- Frontend dashboard buttons & API contracts fully specified in `FRONTEND_DASHBOARD_SPECS.md` for frontend teammate integration.
 
 ## 5. Architecture Rules (update this section if architecture changes)
 
 - Frontend never calls Supabase directly for data — only FastAPI does. Frontend may call Supabase directly ONLY for Auth, using the public anon key.
 - All secrets live server-side in FastAPI, never in frontend code.
-- One FastAPI route per feature (`/api/explain`, `/api/humanize`, `/api/prettify`, `/api/shorten`, `/api/seo-optimize`, `/api/alternatives`), plus `/api/history`.
+- One FastAPI route per feature (`/api/explain`, `/api/humanize`, `/api/prettify`, `/api/shorten`, `/api/seo-optimize`, `/api/alternatives`), plus `/api/auth` and `/api/history`.
 - Supabase Row Level Security so users only read/write their own history.
 - Rate-limit `/api/*` to control LLM inference cost.
 
@@ -60,20 +61,21 @@ Input/output handling: always show original input, transformed output, and a dif
 
 ```
 code-optimizer-explainer/
+├── FRONTEND_DASHBOARD_SPECS.md   Full UI buttons & API integration specs for frontend developer
 ├── frontend/               React app (Vercel)
 │   └── src/api/             backend.js (FastAPI calls), supabaseClient.js (auth only)
 └── backend/                 FastAPI app (Render/Fly.io)
-    └── app/
-        ├── routes/           one file per feature
-        ├── llm_interface/    ONLY place that calls the LLM provider
-        ├── deterministic_tools/  prettify/shorten/seo — no LLM
-        ├── db/                Supabase client wrapper
-        └── models.py          request/response schemas
+    ├── app/
+    │   ├── routes/           one file per feature
+    │   ├── llm_interface/    OpenRouter LLM provider client with multi-model fallback
+    │   ├── deterministic_tools/ prettify/shorten/seo — Black, JSBeautifier, BeautifulSoup
+    │   ├── db/                Supabase client wrapper
+    │   └── models.py          Pydantic request/response schemas
+    └── tests/                Pytest suite (test_backend_routes.py)
 ```
 
 ## 7. Open Decisions (move items out of here into Section 4 once resolved)
 
-- Which LLM/model + inference provider (currently a stub in `llm_interface/client.py`)
 - Open-source license (MIT/Apache 2.0/etc.)
 - Auth provider details for Supabase login (email vs. OAuth)
 - Data retention policy for saved history
@@ -81,6 +83,7 @@ code-optimizer-explainer/
 ## 8. Reference Docs In This Repo
 
 - `PRD_Code_Optimizer_Explainer.md` — full product requirements
+- `FRONTEND_DASHBOARD_SPECS.md` — UI buttons, controls, and API response contracts for frontend developer
 - `Tech_Stack_Options.md` — why this stack was chosen
 - `System_Architecture.md` — detailed request flow and component responsibilities
 - `README.md` — setup/run instructions
@@ -90,6 +93,8 @@ code-optimizer-explainer/
 
 | Date | Change |
 |---|---|
+| 2026-07-24 | Added FRONTEND_DASHBOARD_SPECS.md for frontend developer integration |
+| 2026-07-24 | Added explanation depth levels, humanize modes, structured alternatives with Big-O bounds, SEO 0-100 scoring, and 9-test backend test suite |
 | 2026-07-22 | Initial PRD, tech stack, architecture, and starter scaffold created |
 
 ---
