@@ -5,8 +5,9 @@ import { ResultsPanel, type ChatMessage } from "./ResultsPanel";
 import { SidebarHistory, type HistoryItem } from "./SidebarHistory";
 import { SignInModal } from "./SignInModal";
 import { PreferencesDropdown, type ExplainDepth, type HumanizeMode } from "./PreferencesDropdown";
+import { SettingsModal } from "./SettingsModal";
 import { runAction, fetchCurrentUser, logoutUser, fetchHistory, type ActionId, type ActionResult } from "@/api/backend";
-import { Sun, Moon, PanelLeft, LogOut, UserRound } from "lucide-react";
+import { Sun, Moon, PanelLeft, LogOut, UserRound, Settings } from "lucide-react";
 
 const LOCAL_STORAGE_KEY = "code_companion_history";
 
@@ -19,6 +20,7 @@ export function OptimizerApp() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSignInOpen, setIsSignInOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [explainDepth, setExplainDepth] = useState<ExplainDepth>("intermediate");
@@ -229,8 +231,8 @@ export function OptimizerApp() {
               explainDepth={explainDepth}
               onExplainDepthChange={setExplainDepth}
               humanizeMode={humanizeMode}
-              onHumanizeModeChange={setHumanizeMode}
-            />
+              onHumanizeModeChange={setHumanizeMode} />
+
           </div>
 
           <div className="flex items-center gap-2">
@@ -246,7 +248,15 @@ export function OptimizerApp() {
                   title="Sign out"
                 >
                   <LogOut className="h-4 w-4" />
-                </button>
+</button>
+            <button
+              type="button"
+              onClick={() => setIsSettingsOpen(true)}
+              className="p-2 rounded-lg hover:bg-accent transition-colors text-muted-foreground hover:text-foreground"
+              title="Settings"
+            >
+              <Settings className="h-4 w-4" />
+            </button>
               </div>
             ) : (
               <button
@@ -290,8 +300,8 @@ export function OptimizerApp() {
                 onSubmit={handleSubmit}
                 loading={loading}
                 activeAction={activeAction}
-                onSelectAction={handleSelectAction}
-              />
+                onSelectAction={handleSelectAction} />
+
             </div>
           </div>
         ) : (
@@ -313,8 +323,8 @@ export function OptimizerApp() {
                   onSubmit={handleSubmit}
                   loading={loading}
                   activeAction={activeAction}
-                  onSelectAction={handleSelectAction}
-                />
+                onSelectAction={handleSelectAction} />
+
               </div>
             </div>
           </div>
@@ -325,7 +335,16 @@ export function OptimizerApp() {
         isOpen={isSignInOpen}
         onClose={() => setIsSignInOpen(false)}
         onSuccess={checkUserSession}
-      />
+        />
+        <SettingsModal
+          isOpen={isSettingsOpen}
+          onClose={() => setIsSettingsOpen(false)}
+          theme={theme}
+          onToggleTheme={handleToggleTheme}
+          currentUser={currentUser}
+          onSignIn={() => setIsSignInOpen(true)}
+          onSignOut={handleLogout}
+        />
     </div>
   );
 }

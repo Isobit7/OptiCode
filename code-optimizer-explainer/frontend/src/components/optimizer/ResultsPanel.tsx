@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Copy } from "lucide-react";
 
 export interface ChatMessage {
@@ -201,4 +201,24 @@ function MarkdownRenderer({ content }: { content: string }) {
   return <div className="space-y-1">{blocks}</div>;
 }
 
-/* ... rest of the file ... */
+export function ResultsPanel({ messages = [], original, result, loading, error }: Props) {
+  // If there is a single result (non-chat) use it directly
+  const chatMessages = messages.length ? messages : original ? [{ id: 'msg_initial', original, result, loading, error }] : [];
+
+  return (
+    <div className="space-y-4">
+      {chatMessages.map((msg) => (
+        <div key={msg.id} className="space-y-2">
+          {msg.original && (
+            <SafeCodeBlock code={msg.original} language="" />
+          )}
+          {msg.loading && <div className="text-sm text-muted-foreground">Loading...</div>}
+          {msg.error && <div className="text-sm text-destructive">{msg.error}</div>}
+          {msg.result && (
+            <MarkdownRenderer content={msg.result.output || ''} />
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
