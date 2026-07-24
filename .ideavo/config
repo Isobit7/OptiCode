@@ -1,0 +1,86 @@
+{
+  "systemSetup": [
+    {
+      "name": "Install pip",
+      "command": "curl -sSL https://bootstrap.pypa.io/get-pip.py -o get-pip.py && python3 get-pip.py --user --break-system-packages && rm get-pip.py"
+    }
+  ],
+  "templateName": "custom",
+  "projectDependencies": [
+    {
+      "name": "Install Backend Dependencies",
+      "command": "pip install -r requirements.txt --break-system-packages --user",
+      "workdir": "code-optimizer-explainer/backend"
+    },
+    {
+      "name": "Install Frontend Dependencies",
+      "command": "npm install",
+      "workdir": "code-optimizer-explainer/frontend"
+    }
+  ],
+  "codeChecks": [
+    {
+      "name": "Lint Frontend",
+      "command": "npm run lint",
+      "workdir": "code-optimizer-explainer/frontend"
+    }
+  ],
+  "buildSteps": [
+    {
+      "name": "Build Frontend",
+      "command": "npm run build",
+      "workdir": "code-optimizer-explainer/frontend"
+    },
+    {
+      "name": "Build Docker Image",
+      "command": "docker build -t code-optimizer-explainer-backend .",
+      "workdir": "code-optimizer-explainer/backend"
+    }
+  ],
+  "runStep": [
+    {
+      "name": "Run Backend Dev Server",
+      "command": "uvicorn app.main:app --reload --host 0.0.0.0 --port 8000",
+      "port": "8000",
+      "workdir": "code-optimizer-explainer/backend"
+    },
+    {
+      "name": "Run Frontend Dev Server",
+      "command": "npm run dev -- --port 3000 --host 0.0.0.0",
+      "port": "3000",
+      "workdir": "code-optimizer-explainer/frontend"
+    }
+  ],
+  "deploySteps": [
+    {
+      "name": "Deploy Frontend to Vercel",
+      "command": "npx vercel --prod",
+      "workdir": "code-optimizer-explainer/frontend"
+    },
+    {
+      "name": "Deploy Backend to Render",
+      "command": "docker build -t code-optimizer-backend . && docker push",
+      "workdir": "code-optimizer-explainer/backend"
+    }
+  ],
+  "cleanupFiles": [
+    "code-optimizer-explainer/frontend/node_modules",
+    "code-optimizer-explainer/frontend/dist",
+    "code-optimizer-explainer/frontend/.env",
+    "code-optimizer-explainer/backend/.env",
+    "code-optimizer-explainer/backend/__pycache__",
+    "code-optimizer-explainer/backend/**/__pycache__",
+    "get-pip.py"
+  ],
+  "packageManager": "npm",
+  "envPaths": [
+    {
+      "name": "backend",
+      "path": "code-optimizer-explainer/backend/.env"
+    },
+    {
+      "name": "frontend",
+      "path": "code-optimizer-explainer/frontend/.env"
+    }
+  ]
+}
