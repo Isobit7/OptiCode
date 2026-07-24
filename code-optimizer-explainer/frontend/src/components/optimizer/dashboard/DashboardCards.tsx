@@ -87,12 +87,7 @@ export function DashboardCards({ totalSessions, totalLines, recentAction, histor
               whileHover={{ y: -2 }}
             >
               <div className={`absolute inset-0 bg-gradient-to-br ${card.accent} opacity-60 pointer-events-none`} />
-              <img
-                src="/assets/image_2.png"
-                alt=""
-                aria-hidden
-                className="absolute inset-0 w-full h-full object-cover opacity-[0.06] pointer-events-none mix-blend-overlay"
-              />
+
               <div className="relative flex items-center gap-3">
                 <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 border border-primary/20">
                   <Icon className="h-4 w-4 text-primary" />

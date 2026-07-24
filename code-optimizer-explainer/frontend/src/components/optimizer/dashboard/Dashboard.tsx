@@ -16,12 +16,7 @@ export function Dashboard({ totalSessions, totalLines, recentAction }: Dashboard
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: 'easeOut' }}
     >
-      {/* Decorative background image */}
-      <img
-        src="/assets/image_2.png"
-        alt="Dashboard decoration"
-        className="absolute inset-0 w-full h-full object-cover opacity-15 pointer-events-none"
-      />
+
       <div className="relative p-4 sm:p-6">
         <h2 className="text-lg font-medium text-foreground flex items-center gap-2 mb-3">
           <BarChart3 className="h-5 w-5 text-primary" /> Dashboard
