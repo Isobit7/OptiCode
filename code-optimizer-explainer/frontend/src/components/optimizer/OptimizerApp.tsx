@@ -6,6 +6,7 @@ import { SidebarHistory, type HistoryItem } from "./SidebarHistory";
 import { SignInModal } from "./SignInModal";
 import { PreferencesDropdown, type ExplainDepth, type HumanizeMode } from "./PreferencesDropdown";
 import { SettingsModal } from "./SettingsModal";
+import { Dashboard } from "./Dashboard";
 import { runAction, fetchCurrentUser, logoutUser, fetchHistory, type ActionId, type ActionResult } from "@/api/backend";
 import { Sun, Moon, PanelLeft, LogOut, UserRound, Settings } from "lucide-react";
 
@@ -198,6 +199,9 @@ export function OptimizerApp() {
 
   const hasActiveContent = !!(submittedCode || result || loading || messages.length > 0);
 
+  const totalLines = history.reduce((acc, item) => acc + (item.code ? item.code.split("\n").length : 0), 0);
+  const recentAction = history[0]?.action;
+
   return (
     <div className="flex h-screen w-full bg-background text-foreground overflow-hidden">
       <SidebarHistory
@@ -278,6 +282,10 @@ export function OptimizerApp() {
             </button>
           </div>
         </header>
+
+        {history.length > 0 && (
+          <Dashboard totalSessions={history.length} totalLines={totalLines} recentAction={recentAction} />
+        )}
 
         {!hasActiveContent ? (
           <div className="flex-1 flex flex-col items-center justify-center px-4 sm:px-8 max-w-3xl mx-auto w-full gap-8">
