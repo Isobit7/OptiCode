@@ -216,9 +216,11 @@ export function ResultsPanel({ messages = [], original, result, loading, error }
           )}
           {msg.loading && <div className="text-sm text-muted-foreground">Loading...</div>}
           {msg.error && <div className="text-sm text-destructive">{msg.error}</div>}
-          {msg.result && (
-            <MarkdownRenderer content={msg.result.output || ''} />
-          )}
+{msg.result && (
+              <div className="max-w-full sm:max-w-[400px] overflow-x-auto bg-card/10 rounded-lg p-2">
+                <MarkdownRenderer content={msg.result.output || ''} />
+              </div>
+            )}
         </div>
       ))}
     </div>
