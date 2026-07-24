@@ -188,14 +188,17 @@ export function SidebarHistory({
   const [activeTab, setActiveTab] = useState<"all" | "starred" | "templates">("all");
   const [searchQuery, setSearchQuery] = useState("");
 
-  const filteredHistory = history.filter((item) => {
+  const safeHistory = Array.isArray(history) ? history : [];
+
+  const filteredHistory = safeHistory.filter((item) => {
+    if (!item) return false;
     if (activeTab === "starred" && !item.starred) return false;
     if (!searchQuery.trim()) return true;
     const query = searchQuery.toLowerCase();
     return (
-      item.code.toLowerCase().includes(query) ||
-      ACTION_LABELS[item.action]?.toLowerCase().includes(query) ||
-      item.language.toLowerCase().includes(query)
+      (item.code && item.code.toLowerCase().includes(query)) ||
+      (item.action && ACTION_LABELS[item.action]?.toLowerCase().includes(query)) ||
+      (item.language && item.language.toLowerCase().includes(query))
     );
   });
 
@@ -212,7 +215,7 @@ export function SidebarHistory({
 
   const exportHistoryJSON = () => {
     const dataStr =
-      "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(history, null, 2));
+      "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(safeHistory, null, 2));
     const downloadAnchor = document.createElement("a");
     downloadAnchor.setAttribute("href", dataStr);
     downloadAnchor.setAttribute("download", `code_companion_history_${Date.now()}.json`);
@@ -221,7 +224,7 @@ export function SidebarHistory({
     downloadAnchor.remove();
   };
 
-  const totalLines = history.reduce((acc, item) => acc + item.code.split("\n").length, 0);
+  const totalLines = safeHistory.reduce((acc, item) => acc + (item?.code ? item.code.split("\n").length : 0), 0);
 
   return (
     <aside

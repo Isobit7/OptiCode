@@ -3,7 +3,7 @@
 const BASE_URL =
   (typeof import.meta !== "undefined" &&
     (import.meta as unknown as { env?: { VITE_API_BASE_URL?: string } }).env?.VITE_API_BASE_URL) ||
-  "";
+  "http://localhost:8000";
 
 export type ActionId =
   "explain" | "humanize" | "prettify" | "shorten" | "seo-optimize" | "alternatives";

@@ -94,6 +94,7 @@ export function OptimizerApp() {
   };
 
   // History & Sidebar state
+  const [history, setHistory] = useState<HistoryItem[]>([]);
   const [currentUser, setCurrentUser] = useState<any>(null);
 
   const checkUserSession = useCallback(async () => {
@@ -101,7 +102,7 @@ export function OptimizerApp() {
     setCurrentUser(user);
     if (user) {
       const serverHistory = await fetchHistory(user.user_id);
-      if (serverHistory && serverHistory.length > 0) {
+      if (serverHistory && Array.isArray(serverHistory) && serverHistory.length > 0) {
         const mappedItems: HistoryItem[] = serverHistory.map((h: any) => ({
           id: h.id || `hist_${Date.now()}`,
           timestamp: h.created_at ? new Date(h.created_at).getTime() : Date.now(),
@@ -135,7 +136,8 @@ export function OptimizerApp() {
     try {
       const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
       if (saved) {
-        setHistory(JSON.parse(saved));
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) setHistory(parsed);
       }
     } catch {
       // Ignore localStorage read errors
@@ -273,7 +275,7 @@ export function OptimizerApp() {
       </div>
 
       <SidebarHistory
-        history={history}
+        history={Array.isArray(history) ? history : []}
         activeId={activeHistoryId}
         collapsed={sidebarCollapsed}
         onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
@@ -319,36 +321,61 @@ export function OptimizerApp() {
           </div>
         </header>
 
-        {/* Hero Section */}
-        <section className="relative mx-auto w-full max-w-3xl px-4 pt-6 text-center sm:px-8 sm:pt-12">
-          <h1 className="font-headings text-balance text-3xl font-bold tracking-tight text-[var(--text-on-dark-primary)] sm:text-5xl sm:leading-tight">
-            Analyze, Refine & Rewrite Any Code Instantly.
-          </h1>
-          <p className="mt-4 text-pretty text-sm text-[var(--text-on-dark-primary)]/85 sm:text-base max-w-2xl mx-auto leading-relaxed">
-            Paste your snippet, pick an AI action, and elevate your codebase with high-speed
-            refactoring, bug fixes, and plain-language insights.
-          </p>
-        </section>
+        {/* ChatGPT-Style Dynamic Layout */}
+        {!(submittedCode || result || loading) ? (
+          /* Initial Landing View */
+          <>
+            <section className="relative mx-auto w-full max-w-3xl px-4 pt-6 text-center sm:px-8 sm:pt-12">
+              <h1 className="font-headings text-balance text-3xl font-bold tracking-tight text-[var(--text-on-dark-primary)] sm:text-5xl sm:leading-tight">
+                Analyze, Refine & Rewrite Any Code Instantly.
+              </h1>
+              <p className="mt-4 text-pretty text-sm text-[var(--text-on-dark-primary)]/85 sm:text-base max-w-2xl mx-auto leading-relaxed">
+                Paste your snippet, pick an AI action, and elevate your codebase with high-speed
+                refactoring, bug fixes, and plain-language insights.
+              </p>
+            </section>
 
-        <section className="mx-auto w-full max-w-3xl px-4 pt-8 sm:px-8">
-          <CodeInputBar
-            code={code}
-            onChange={setCode}
-            language={language}
-            onLanguageChange={setLanguage}
-            onSubmit={handleSubmit}
-            loading={loading}
-            hasActiveAction={activeAction !== null}
-          />
+            <section className="mx-auto w-full max-w-3xl px-4 pt-8 sm:px-8 pb-16">
+              <CodeInputBar
+                code={code}
+                onChange={setCode}
+                language={language}
+                onLanguageChange={setLanguage}
+                onSubmit={handleSubmit}
+                loading={loading}
+                hasActiveAction={activeAction !== null}
+              />
 
-          <div className="mt-5">
-            <ActionPills active={activeAction} loading={loading} onSelect={handleSelectAction} />
+              <div className="mt-5">
+                <ActionPills active={activeAction} loading={loading} onSelect={handleSelectAction} />
+              </div>
+            </section>
+          </>
+        ) : (
+          /* Active Response View (ChatGPT Mode: Output on top, Input Anchored at Bottom) */
+          <div className="flex-1 flex flex-col justify-between min-h-0">
+            {/* Top Response Output View */}
+            <main className="flex-1 px-4 sm:px-8 pt-4 pb-32 max-w-4xl mx-auto w-full overflow-y-auto">
+              <ResultsPanel original={submittedCode} result={result} loading={loading} error={error} />
+            </main>
+
+            {/* Sticky Bottom Anchored Input Box (ChatGPT Style) */}
+            <div className="sticky bottom-0 z-30 w-full bg-[#0d1017]/95 backdrop-blur-2xl border-t border-white/10 shadow-2xl py-3 px-4 sm:px-8">
+              <div className="max-w-4xl mx-auto space-y-2.5">
+                <ActionPills active={activeAction} loading={loading} onSelect={handleSelectAction} />
+                <CodeInputBar
+                  code={code}
+                  onChange={setCode}
+                  language={language}
+                  onLanguageChange={setLanguage}
+                  onSubmit={handleSubmit}
+                  loading={loading}
+                  hasActiveAction={activeAction !== null}
+                />
+              </div>
+            </div>
           </div>
-        </section>
-
-        <section className="px-4 pb-16 sm:px-8">
-          <ResultsPanel original={submittedCode} result={result} loading={loading} error={error} />
-        </section>
+        )}
       </div>
 
       <SignInModal
