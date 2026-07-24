@@ -6,7 +6,7 @@ import { SidebarHistory, type HistoryItem } from "./SidebarHistory";
 import { SignInModal } from "./SignInModal";
 import { PreferencesDropdown, type ExplainDepth, type HumanizeMode } from "./PreferencesDropdown";
 import { runAction, fetchCurrentUser, logoutUser, fetchHistory, type ActionId, type ActionResult } from "@/api/backend";
-import { Sparkles, UserRound, ShieldCheck, Terminal, LogOut, ArrowDown } from "lucide-react";
+import { Sun, Moon, PanelLeft, LogOut, UserRound } from "lucide-react";
 
 const LOCAL_STORAGE_KEY = "code_companion_history";
 
@@ -21,86 +21,26 @@ export function OptimizerApp() {
   const [isSignInOpen, setIsSignInOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  // Preference states for Explainer Depth & Humanizer Mode
   const [explainDepth, setExplainDepth] = useState<ExplainDepth>("intermediate");
   const [humanizeMode, setHumanizeMode] = useState<HumanizeMode>("de-ai");
-
-  // Theme state: light or dark (SSR safe)
   const [theme, setTheme] = useState<"light" | "dark">("light");
 
   useEffect(() => {
     try {
       const saved = localStorage.getItem("opticode_theme");
       if (saved === "dark") setTheme("dark");
-    } catch (err) {
-      void err;
-    }
+    } catch { /* ignore */ }
   }, []);
 
   useEffect(() => {
-    if (theme === "dark") {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
-    try {
-      localStorage.setItem("opticode_theme", theme);
-    } catch (err) {
-      void err;
-    }
+    document.documentElement.classList.toggle("dark", theme === "dark");
+    try { localStorage.setItem("opticode_theme", theme); } catch { /* ignore */ }
   }, [theme]);
 
-  const handleToggleTheme = (e?: React.MouseEvent) => {
-    const isDark = theme === "dark";
-
-    if (
-      typeof document !== "undefined" &&
-      "startViewTransition" in document &&
-      !window.matchMedia("(prefers-reduced-motion: reduce)").matches
-    ) {
-      const x = e?.clientX ?? window.innerWidth / 2;
-      const y = e?.clientY ?? window.innerHeight / 2;
-
-      const endRadius = Math.hypot(
-        Math.max(x, window.innerWidth - x),
-        Math.max(y, window.innerHeight - y),
-      );
-
-      const transition = (
-        document as unknown as {
-          startViewTransition: (cb: () => void) => { ready: Promise<void> };
-        }
-      ).startViewTransition(() => {
-        setTheme(isDark ? "light" : "dark");
-      });
-
-      transition.ready
-        .then(() => {
-          const clipPath = [
-            `circle(0px at ${x}px ${y}px)`,
-            `circle(${endRadius}px at ${x}px ${y}px)`,
-          ];
-          document.documentElement.animate(
-            {
-              clipPath: isDark ? [...clipPath].reverse() : clipPath,
-            },
-            {
-              duration: 500,
-              easing: "cubic-bezier(0.4, 0, 0.2, 1)",
-              pseudoElement: isDark ? "::view-transition-old(root)" : "::view-transition-new(root)",
-            },
-          );
-        })
-        .catch((err) => {
-          void err;
-        });
-    } else {
-      setTheme((prev) => (prev === "dark" ? "light" : "dark"));
-    }
+  const handleToggleTheme = () => {
+    setTheme((prev) => (prev === "dark" ? "light" : "dark"));
   };
 
-  // History & Sidebar state
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [currentUser, setCurrentUser] = useState<any>(null);
 
@@ -127,9 +67,7 @@ export function OptimizerApp() {
     }
   }, []);
 
-  useEffect(() => {
-    checkUserSession();
-  }, [checkUserSession]);
+  useEffect(() => { checkUserSession(); }, [checkUserSession]);
 
   const handleLogout = async () => {
     await logoutUser();
@@ -137,7 +75,7 @@ export function OptimizerApp() {
   };
 
   const [activeHistoryId, setActiveHistoryId] = useState<string | null>(null);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
 
   useEffect(() => {
     try {
@@ -146,18 +84,12 @@ export function OptimizerApp() {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed)) setHistory(parsed);
       }
-    } catch {
-      // Ignore localStorage read errors
-    }
+    } catch { /* ignore */ }
   }, []);
 
   const saveHistory = (items: HistoryItem[]) => {
     setHistory(items);
-    try {
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(items));
-    } catch {
-      // Ignore write errors
-    }
+    try { localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(items)); } catch { /* ignore */ }
   };
 
   const scrollToBottom = () => {
@@ -171,15 +103,13 @@ export function OptimizerApp() {
       if (!code.trim() || loading) return;
       const inputSnippet = code;
       const msgId = `msg_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
-      
-      // Clear code input field immediately for next input
+
       setCode("");
       setLoading(true);
       setError(null);
       setResult(null);
       setSubmittedCode(inputSnippet);
 
-      // Append new message entry to thread
       const newMsg: ChatMessage = {
         id: msgId,
         original: inputSnippet,
@@ -193,13 +123,9 @@ export function OptimizerApp() {
       try {
         const res = await runAction(action, inputSnippet, language, { explainDepth, humanizeMode });
         setResult(res);
-
-        // Update message thread entry with result
         setMessages((prev) =>
           prev.map((m) => (m.id === msgId ? { ...m, result: res, loading: false } : m))
         );
-
-        // Add to history
         const newItem: HistoryItem = {
           id: `hist_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
           timestamp: Date.now(),
@@ -211,15 +137,11 @@ export function OptimizerApp() {
         setActiveHistoryId(newItem.id);
         setHistory((prev) => {
           const updated = [newItem, ...prev];
-          try {
-            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updated));
-          } catch (err) {
-            void err;
-          }
+          try { localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updated)); } catch { /* ignore */ }
           return updated;
         });
       } catch {
-        const errText = "We couldn't reach the AI service. Check your connection and try again in a moment.";
+        const errText = "Something went wrong. Check your connection and try again.";
         setError(errText);
         setMessages((prev) =>
           prev.map((m) => (m.id === msgId ? { ...m, loading: false, error: errText } : m))
@@ -229,7 +151,7 @@ export function OptimizerApp() {
         scrollToBottom();
       }
     },
-    [code, language, loading],
+    [code, language, loading, explainDepth, humanizeMode],
   );
 
   const handleSelectAction = (id: ActionId) => {
@@ -263,11 +185,8 @@ export function OptimizerApp() {
 
   const handleDeleteHistory = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    const updated = history.filter((item) => item.id !== id);
-    saveHistory(updated);
-    if (activeHistoryId === id) {
-      setActiveHistoryId(null);
-    }
+    saveHistory(history.filter((item) => item.id !== id));
+    if (activeHistoryId === id) setActiveHistoryId(null);
   };
 
   const handleClearAllHistory = () => {
@@ -275,44 +194,10 @@ export function OptimizerApp() {
     setActiveHistoryId(null);
   };
 
-  const handleToggleStar = (id: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    const updated = history.map((item) =>
-      item.id === id ? { ...item, starred: !item.starred } : item,
-    );
-    saveHistory(updated);
-  };
-
-  const handleSelectTemplate = (templateCode: string, lang: string) => {
-    setCode(templateCode);
-    setLanguage(lang || "auto");
-    setActiveAction(null);
-    setResult(null);
-    setSubmittedCode("");
-    setActiveHistoryId(null);
-    setError(null);
-  };
+  const hasActiveContent = !!(submittedCode || result || loading || messages.length > 0);
 
   return (
-    <div
-      className="relative flex h-screen w-full max-h-screen overflow-hidden transition-colors duration-500"
-      style={{ background: "var(--app-gradient)" }}
-    >
-      {/* Ambient Background Multi-Point Light Spheres */}
-      <div className="pointer-events-none absolute inset-0 overflow-hidden z-0">
-        {/* Top-Center Warm Sunset Beam */}
-        <div className="absolute -top-40 left-1/2 -translate-x-1/2 h-[520px] w-[900px] rounded-full bg-gradient-to-b from-orange-500/25 via-amber-500/15 to-transparent blur-[140px] dark:from-orange-500/30 dark:via-purple-600/20 dark:blur-[160px]" />
-
-        {/* Top-Right Orange Glow Sphere */}
-        <div className="absolute -top-32 -right-32 h-[500px] w-[500px] rounded-full bg-orange-500/20 blur-[130px] dark:bg-orange-600/25 dark:blur-[150px] animate-pulse" />
-
-        {/* Left-Center Cosmic Violet Aura Orb */}
-        <div className="absolute top-1/3 -left-36 h-[500px] w-[500px] rounded-full bg-pink-500/15 blur-[120px] dark:bg-purple-600/25 dark:blur-[150px] animate-float" />
-
-        {/* Bottom-Right Indigo Ambient Glow */}
-        <div className="absolute -bottom-40 right-10 h-[550px] w-[550px] rounded-full bg-indigo-500/15 blur-[140px] dark:bg-indigo-700/25 dark:blur-[160px]" />
-      </div>
-
+    <div className="flex h-screen w-full bg-background text-foreground overflow-hidden">
       <SidebarHistory
         history={Array.isArray(history) ? history : []}
         activeId={activeHistoryId}
@@ -320,10 +205,8 @@ export function OptimizerApp() {
         onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
         onNewSession={handleNewSession}
         onSelectHistory={handleSelectHistory}
-        onToggleStar={handleToggleStar}
         onDeleteHistory={handleDeleteHistory}
         onClearAll={handleClearAllHistory}
-        onSelectTemplate={handleSelectTemplate}
         theme={theme}
         onToggleTheme={handleToggleTheme}
         currentUser={currentUser}
@@ -331,33 +214,72 @@ export function OptimizerApp() {
         onSignOut={handleLogout}
       />
 
-      <div className="flex-1 flex flex-col h-full min-w-0 overflow-hidden">
-        {/* Top Header Bar */}
-        <header className="relative flex w-full items-center justify-between px-4 py-3.5 sm:px-6 lg:px-8">
-          {/* Left Title: ChatGPT-Style OptiCode Model Dropdown */}
-          <PreferencesDropdown
-            explainDepth={explainDepth}
-            onExplainDepthChange={setExplainDepth}
-            humanizeMode={humanizeMode}
-            onHumanizeModeChange={setHumanizeMode}
-          />
+      <div className="flex-1 flex flex-col min-w-0">
+        <header className="flex items-center justify-between px-4 sm:px-6 h-14 border-b border-border bg-background/80 backdrop-blur-sm">
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+              className="p-2 rounded-lg hover:bg-accent transition-colors text-muted-foreground hover:text-foreground"
+              title="Toggle sidebar"
+            >
+              <PanelLeft className="h-4 w-4" />
+            </button>
+            <PreferencesDropdown
+              explainDepth={explainDepth}
+              onExplainDepthChange={setExplainDepth}
+              humanizeMode={humanizeMode}
+              onHumanizeModeChange={setHumanizeMode}
+            />
+          </div>
 
-          {/* Right Header Navigation — account moved to sidebar Settings */}
-          <div className="flex items-center gap-3" />
+          <div className="flex items-center gap-2">
+            {currentUser ? (
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-muted-foreground hidden sm:inline">
+                  {currentUser.email?.split("@")[0] || "User"}
+                </span>
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="p-2 rounded-lg hover:bg-accent transition-colors text-muted-foreground hover:text-foreground"
+                  title="Sign out"
+                >
+                  <LogOut className="h-4 w-4" />
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setIsSignInOpen(true)}
+                className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg bg-primary text-primary-foreground hover:opacity-90 transition-opacity"
+              >
+                <UserRound className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">Sign in</span>
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={handleToggleTheme}
+              className="p-2 rounded-lg hover:bg-accent transition-colors text-muted-foreground hover:text-foreground"
+              title="Toggle theme"
+            >
+              {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            </button>
+          </div>
         </header>
 
-        {/* BeeBot Layout Workspace */}
-        {!(submittedCode || result || loading) ? (
-          /* BeeBot Greeting & Input View */
-          <div className="flex-1 flex flex-col items-center justify-center px-4 sm:px-8 py-4 max-w-4xl mx-auto w-full overflow-y-auto no-scrollbar h-full min-h-0">
-            <section className="text-center mb-6 space-y-2.5">
-              <h1 className="font-headings text-3xl sm:text-5xl font-bold tracking-tight text-[var(--text-on-dark-primary)]">
-                {currentUser ? `Welcome back, ${currentUser.email?.split("@")[0] || currentUser.full_name || "Developer"}` : "Paste your code — let's clean it up"}
+        {!hasActiveContent ? (
+          <div className="flex-1 flex flex-col items-center justify-center px-4 sm:px-8 max-w-3xl mx-auto w-full gap-8">
+            <div className="text-center space-y-2">
+              <h1 className="text-4xl sm:text-5xl font-bold tracking-tight flex items-center justify-center gap-2">
+                <span className="text-primary">Opti</span>
+                <span>Code</span>
               </h1>
-              <p className="text-sm sm:text-base text-[var(--text-on-dark-primary)]/80 max-w-xl mx-auto">
-                Transform, explain, prettify, or optimize any snippet instantly with AI.
+              <p className="text-sm text-muted-foreground max-w-md mx-auto">
+                Paste your code below. Explain, humanize, prettify, shorten, optimize SEO, or explore alternatives.
               </p>
-            </section>
+            </div>
 
             <div className="w-full">
               <CodeInputBar
@@ -373,29 +295,16 @@ export function OptimizerApp() {
             </div>
           </div>
         ) : (
-          /* Active Response View (BeeBot Output + Attached Bottom Bar) */
-          <div className="flex-1 flex flex-col justify-between min-h-0 h-full overflow-y-auto relative">
-            <main className="flex-1 px-4 sm:px-8 pt-4 pb-36 max-w-4xl mx-auto w-full">
-              <ResultsPanel messages={messages} original={submittedCode} result={result} loading={loading} error={error} />
-              <div ref={messagesEndRef} />
-            </main>
+          <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+            <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-6">
+              <div className="max-w-3xl mx-auto">
+                <ResultsPanel messages={messages} original={submittedCode} result={result} loading={loading} error={error} />
+                <div ref={messagesEndRef} />
+              </div>
+            </div>
 
-            {/* Floating Scroll to Bottom Button */}
-            {messages.length > 1 && (
-              <button
-                type="button"
-                onClick={() => messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })}
-                title="Scroll to latest response"
-                className="absolute bottom-28 right-8 z-40 inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-orange-500 to-amber-500 text-white px-3.5 py-1.5 text-xs font-semibold shadow-warm-lg hover:scale-105 hover:-translate-y-0.5 active:scale-95 transition-all duration-200 cursor-pointer animate-pop-in border border-white/30 backdrop-blur-md"
-              >
-                <ArrowDown className="h-3.5 w-3.5" />
-                <span>Latest</span>
-              </button>
-            )}
-
-            {/* Sticky Bottom Input Bar with Embedded Feature Chips */}
-            <div className="sticky bottom-0 z-30 w-full bg-gradient-to-t from-[var(--app-gradient)] via-white/20 to-transparent dark:from-[#0c0c0e]/95 dark:via-[#0c0c0e]/60 dark:to-transparent backdrop-blur-md py-4 px-4 sm:px-8 transition-colors duration-300">
-              <div className="max-w-4xl mx-auto">
+            <div className="border-t border-border bg-background/80 backdrop-blur-sm px-4 sm:px-6 py-4">
+              <div className="max-w-3xl mx-auto">
                 <CodeInputBar
                   code={code}
                   onChange={setCode}
@@ -420,4 +329,3 @@ export function OptimizerApp() {
     </div>
   );
 }
-
