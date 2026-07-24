@@ -98,7 +98,7 @@ export function DashboardCards({ totalSessions, totalLines, recentAction, histor
                   <Icon className="h-4 w-4 text-primary" />
                 </div>
                 <div className="min-w-0">
-                  <div className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+                  <div className="text-xs sm:text-sm font-medium uppercase tracking-wider text-muted-foreground">
                     {card.title}
                   </div>
                   <div className="text-base font-semibold text-foreground truncate">{card.value}</div>

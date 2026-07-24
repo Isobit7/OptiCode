@@ -291,8 +291,8 @@ export function OptimizerApp() {
           <div className="flex-1 flex flex-col items-center justify-center px-4 sm:px-8 max-w-3xl mx-auto w-full gap-8">
             <div className="text-center space-y-2">
               <h1 className="text-4xl sm:text-5xl font-bold tracking-tight flex items-center justify-center gap-2">
-                <span className="text-primary">Opti</span>
-                <span>Code</span>
+                <span className="text-foreground">Opti</span>
+                <span className="text-primary">Code</span>
               </h1>
               <p className="text-sm text-muted-foreground max-w-md mx-auto">
                 Paste your code below. Explain, humanize, prettify, shorten, optimize SEO, or explore alternatives.
