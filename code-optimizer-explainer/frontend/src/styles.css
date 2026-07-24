@@ -164,28 +164,28 @@
 }
 
 .dark {
-  --background: oklch(0.09 0 0);
+  --background: oklch(0.14 0.02 40);
   --foreground: oklch(0.98 0 0);
-  --card: oklch(0.12 0 0);
+  --card: oklch(0.17 0.02 40);
   --card-foreground: oklch(0.98 0 0);
-  --popover: oklch(0.12 0 0);
+  --popover: oklch(0.17 0.02 40);
   --popover-foreground: oklch(0.98 0 0);
   --primary: var(--orange-500);
   --primary-foreground: oklch(1 0 0);
-  --secondary: oklch(0.18 0 0);
+  --secondary: oklch(0.22 0.02 40);
   --secondary-foreground: oklch(0.8 0 0);
-  --muted: oklch(0.15 0 0);
-  --muted-foreground: oklch(0.6 0 0);
-  --accent: oklch(0.15 0 0);
-  --accent-foreground: oklch(0.8 0 0);
+  --muted: oklch(0.2 0.02 40);
+  --muted-foreground: oklch(0.7 0.02 40);
+  --accent: oklch(0.22 0.05 40);
+  --accent-foreground: oklch(0.9 0 0);
   --destructive: oklch(0.637 0.237 25.331);
   --destructive-foreground: oklch(1 0 0);
-  --border: oklch(0.2 0 0);
-  --input: oklch(0.2 0 0);
+  --border: oklch(0.3 0.03 40);
+  --input: oklch(0.25 0.02 40);
   --ring: var(--orange-500);
-  --sidebar: oklch(0.08 0 0);
+  --sidebar: oklch(0.14 0.02 40);
   --sidebar-foreground: oklch(0.98 0 0);
-  --sidebar-border: oklch(0.15 0 0);
+  --sidebar-border: oklch(0.25 0.03 40);
 }
 
 @layer base {
@@ -219,11 +219,11 @@
 }
 
 .dark ::-webkit-scrollbar-thumb {
-  background: oklch(0.3 0 0);
+  background: oklch(0.4 0.05 40);
 }
 
 .dark ::-webkit-scrollbar-thumb:hover {
-  background: oklch(0.4 0 0);
+  background: oklch(0.5 0.08 40);
 }
 
 .no-scrollbar::-webkit-scrollbar {
@@ -276,6 +276,26 @@
 @keyframes shimmer {
   0% { background-position: -200% 0; }
   100% { background-position: 200% 0; }
+}
+
+.gradient-primary {
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(in oklch, var(--orange-500) 12%, transparent) 0%,
+      color-mix(in oklch, var(--pink-400) 10%, transparent) 50%,
+      color-mix(in oklch, var(--orange-500) 12%, transparent) 100%
+    );
+}
+
+.dark .gradient-primary {
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(in oklch, var(--orange-500) 18%, transparent) 0%,
+      color-mix(in oklch, var(--pink-400) 14%, transparent) 50%,
+      color-mix(in oklch, var(--orange-500) 18%, transparent) 100%
+    );
 }
 
 .animate-fade-in-up {

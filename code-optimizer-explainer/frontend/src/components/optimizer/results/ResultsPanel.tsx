@@ -206,7 +206,7 @@ function MarkdownRenderer({ content }: { content: string }) {
 function ResultBox({ content }: { content: string }) {
   const [collapsed, setCollapsed] = useState(true);
   return (
-    <div className={`overflow-x-auto ${collapsed ? 'max-w-[300px]' : 'max-w-full'} bg-card/10 rounded-lg p-2 transition-all`}> 
+    <div className={`overflow-x-auto ${collapsed ? 'max-w-[300px]' : 'max-w-full'} gradient-primary rounded-lg p-2 border border-primary/30 transition-all`}>
       <MarkdownRenderer content={content} />
       <button
         type="button"

@@ -248,7 +248,7 @@ export function SidebarHistory({
                 "relative flex items-center justify-between gap-2 py-1.5 px-2.5 rounded-lg border transition-all duration-200 cursor-pointer text-left backdrop-blur-md hover:translate-x-0.5 shadow-xs",
                 isSelected
                   ? "bg-accent/20 text-accent border-accent/40 font-medium"
-                  : "bg-transparent hover:bg-muted/30 hover:text-foreground/80",
+                  : "bg-transparent hover:gradient-primary hover:text-foreground/80",
               ].join(" ")}
             >
               <div className="flex items-center gap-2 min-w-0 flex-1">
@@ -278,7 +278,7 @@ export function SidebarHistory({
 
   if (collapsed) {
     return (
-      <aside className="w-14 h-full shrink-0 border-r border-border bg-sidebar/40 backdrop-blur-md flex flex-col items-center py-3 gap-2">
+      <aside className="w-14 h-full shrink-0 border-r border-primary/30 gradient-primary backdrop-blur-md flex flex-col items-center py-3 gap-2">
         <button
           type="button"
           onClick={onToggleCollapse}
@@ -310,8 +310,8 @@ export function SidebarHistory({
   }
 
   return (
-    <aside className="w-72 h-full shrink-0 border-r border-border bg-sidebar/40 backdrop-blur-md flex flex-col overflow-hidden">
-      <div className="p-4 border-b border-border">
+    <aside className="w-72 h-full shrink-0 border-r border-primary/30 gradient-primary backdrop-blur-md flex flex-col overflow-hidden">
+      <div className="p-4 border-b border-primary/30">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <div className="h-7 w-7 rounded-lg bg-primary/10 flex items-center justify-center">
@@ -336,7 +336,7 @@ export function SidebarHistory({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search history…"
-              className="w-full pl-7 pr-2 py-1.5 text-xs rounded-lg bg-muted/40 border border-border focus:outline-none focus:ring-1 focus:ring-ring placeholder:text-muted-foreground/50"
+              className="w-full pl-7 pr-2 py-1.5 text-xs rounded-lg gradient-primary border border-primary/30 focus:outline-none focus:ring-1 focus:ring-ring placeholder:text-muted-foreground/50"
             />
           </div>
           <button
@@ -349,11 +349,11 @@ export function SidebarHistory({
           </button>
         </div>
 
-        <div className="flex items-center gap-1 p-0.5 bg-muted/30 rounded-lg">
+        <div className="flex items-center gap-1 p-0.5 gradient-primary rounded-lg">
           <button
             onClick={() => setActiveTab("all")}
             className={`flex-1 text-xs px-3 py-1.5 rounded-md transition-colors ${
-              activeTab === "all" ? "bg-background text-foreground shadow-xs" : "text-muted-foreground hover:text-foreground"
+              activeTab === "all" ? "gradient-primary text-foreground" : "text-muted-foreground hover:text-foreground"
             }`}
           >
             History
@@ -361,7 +361,7 @@ export function SidebarHistory({
           <button
             onClick={() => setActiveTab("templates")}
             className={`flex-1 text-xs px-3 py-1.5 rounded-md transition-colors ${
-              activeTab === "templates" ? "bg-background text-foreground shadow-xs" : "text-muted-foreground hover:text-foreground"
+              activeTab === "templates" ? "gradient-primary text-foreground" : "text-muted-foreground hover:text-foreground"
             }`}
           >
             Templates
@@ -415,14 +415,14 @@ export function SidebarHistory({
                     result: { action: "explain", output: "" },
                   } as HistoryItem)
                 }
-                className="p-3 rounded-lg border border-border bg-muted/20 hover:bg-muted/40 transition-colors cursor-pointer"
+                className="p-3 rounded-lg border border-primary/30 gradient-primary hover:gradient-primary transition-colors cursor-pointer"
               >
                 <div className="flex items-center gap-2 mb-1">
                   <Star className="h-3 w-3 text-primary" />
                   <span className="text-xs font-medium text-foreground">{tpl.title}</span>
                 </div>
                 <p className="text-[10px] text-muted-foreground/70 line-clamp-2">{tpl.description}</p>
-                <div className="mt-1.5 inline-block px-1.5 py-0.5 text-[9px] font-mono rounded bg-muted text-muted-foreground">
+                <div className="mt-1.5 inline-block px-1.5 py-0.5 text-[9px] font-mono rounded gradient-primary text-muted-foreground">
                   {tpl.language}
                 </div>
               </div>
@@ -431,7 +431,7 @@ export function SidebarHistory({
         )}
       </div>
 
-      <div className="border-t border-border p-3 space-y-2">
+      <div className="border-t border-primary/30 p-3 space-y-2">
         <div className="flex items-center justify-between text-xs">
           <div className="flex items-center gap-1.5 text-muted-foreground">
             <BarChart3 className="h-3.5 w-3.5" />

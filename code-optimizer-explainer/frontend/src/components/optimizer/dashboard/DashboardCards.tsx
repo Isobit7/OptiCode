@@ -66,7 +66,7 @@ export function DashboardCards({ totalSessions, totalLines, recentAction, histor
   return (
     <>
       <motion.div
-        className="grid grid-cols-1 sm:grid-cols-3 gap-3 px-4 sm:px-6 py-4"
+        className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 px-4 sm:px-6 py-4"
         initial="hidden"
         animate="visible"
         variants={{
@@ -79,7 +79,7 @@ export function DashboardCards({ totalSessions, totalLines, recentAction, histor
           return (
             <motion.div
               key={idx}
-              className="relative rounded-xl border border-border bg-card/60 backdrop-blur-sm p-3.5 overflow-hidden hover:border-primary/30 transition-colors"
+              className="relative rounded-xl border border-primary/30 gradient-primary p-3.5 overflow-hidden hover:border-primary/20 transition-colors"
               variants={{
                 hidden: { opacity: 0, y: -8, scale: 0.98 },
                 visible: { opacity: 1, y: 0, scale: 1, transition: { type: "spring", stiffness: 300, damping: 24 } },
@@ -110,7 +110,7 @@ export function DashboardCards({ totalSessions, totalLines, recentAction, histor
       </motion.div>
       {/* Sessions chart */}
       <motion.div
-        className="mt-4 px-4 sm:px-6"
+        className="mt-4 px-4 sm:px-6 border-t border-primary/30 gradient-primary pt-4"
         initial="hidden"
         animate="visible"
         variants={{

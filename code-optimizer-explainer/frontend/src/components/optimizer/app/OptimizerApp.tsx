@@ -203,9 +203,11 @@ export function OptimizerApp() {
   const recentAction = history[0]?.action;
 
   return (
-    <div className="relative flex h-screen w-full bg-background text-foreground overflow-hidden">
+    <div className="relative flex h-screen w-full overflow-hidden">
+      {/* Gradient background for whole app */}
+      <div className="absolute inset-0 pointer-events-none animate-shimmer bg-gradient-to-r from-orange-500/15 via-pink-500/10 to-orange-500/15 opacity-30" />
         {/* Animated background gradient */}
-        <div className="absolute inset-0 pointer-events-none animate-shimmer bg-gradient-to-r from-orange-500/10 via-pink-500/10 to-orange-500/10 opacity-30" />
+
       <SidebarHistory
         history={Array.isArray(history) ? history : []}
         activeId={activeHistoryId}
@@ -223,12 +225,12 @@ export function OptimizerApp() {
       />
 
       <div className="flex-1 flex flex-col min-w-0">
-        <header className="flex items-center justify-between px-4 sm:px-6 h-14 border-b border-border bg-background/80 backdrop-blur-sm">
+        <header className="flex items-center justify-between px-4 sm:px-6 h-14 border-b border-primary/30 bg-gradient-to-r from-orange-500/15 via-pink-500/10 to-orange-500/15 backdrop-blur-sm">
           <div className="flex items-center gap-3">
             <button
               type="button"
               onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-              className="p-2 rounded-lg hover:bg-accent transition-colors text-muted-foreground hover:text-foreground"
+              className="p-2 rounded-lg hover:bg-primary/10 transition-colors text-muted-foreground hover:text-foreground"
               title="Toggle sidebar"
             >
               <PanelLeft className="h-4 w-4" />
@@ -250,19 +252,19 @@ export function OptimizerApp() {
                 <button
                   type="button"
                   onClick={handleLogout}
-                  className="p-2 rounded-lg hover:bg-accent transition-colors text-muted-foreground hover:text-foreground"
+className="p-2 rounded hover:bg-primary/5 focus-visible:ring-2 focus-visible:ring-primary text-muted-foreground hover:text-foreground transition-colors"
                   title="Sign out"
                 >
                   <LogOut className="h-4 w-4" />
 </button>
-            <button
-              type="button"
-              onClick={() => setIsSettingsOpen(true)}
-              className="p-2 rounded-lg hover:bg-accent transition-colors text-muted-foreground hover:text-foreground"
-              title="Settings"
-            >
-              <Settings className="h-4 w-4" />
-            </button>
+<button
+                type="button"
+                onClick={() => setIsSettingsOpen(true)}
+                className="p-2 rounded hover:bg-primary/5 focus-visible:ring-2 focus-visible:ring-primary text-muted-foreground hover:text-foreground transition-colors"
+                title="Settings"
+              >
+                <Settings className="h-4 w-4" />
+              </button>
               </div>
             ) : (
               <button
@@ -274,14 +276,14 @@ export function OptimizerApp() {
                 <span className="hidden sm:inline">Sign in</span>
               </button>
             )}
-            <button
-              type="button"
-              onClick={handleToggleTheme}
-              className="p-2 rounded-lg hover:bg-accent transition-colors text-muted-foreground hover:text-foreground"
-              title="Toggle theme"
-            >
-              {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-            </button>
+<button
+                type="button"
+                onClick={handleToggleTheme}
+                className="p-2 rounded hover:bg-primary/5 focus-visible:ring-2 focus-visible:ring-primary text-muted-foreground hover:text-foreground transition-colors"
+                title="Toggle theme"
+              >
+                {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+              </button>
           </div>
         </header>
 
@@ -321,7 +323,7 @@ export function OptimizerApp() {
               </div>
             </div>
 
-            <div className="border-t border-border bg-background/80 backdrop-blur-sm px-4 sm:px-6 py-4">
+            <div className="border-t border-primary/30 gradient-primary backdrop-blur-sm px-4 sm:px-6 py-4">
               <div className="max-w-3xl mx-auto">
                 <CodeInputBar
                   code={code}
