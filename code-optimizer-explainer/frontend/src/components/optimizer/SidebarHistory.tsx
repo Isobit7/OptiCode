@@ -465,18 +465,7 @@ export function SidebarHistory({
 )}
           </div>
 
-        {!collapsed && (
-          <div className="mt-auto p-2 flex flex-col items-center gap-2 border-t border-border/20 dark:border-border/10 bg-background/10 dark:bg-background/5 backdrop-blur-md">
-            <button
-              type="button"
-              onClick={(e) => onToggleTheme(e)}
-              title={theme === "dark" ? "Light theme" : "Dark theme"}
-              className="p-2 rounded-lg hover:bg-accent transition-colors text-muted-foreground hover:text-foreground"
-            >
-              {theme === "dark" ? <Moon className="h-3 w-3 text-accent" /> : <Sun className="h-3 w-3 text-accent" />}
-            </button>
-          </div>
-        )}
+
       </aside>
     );
   }
