@@ -330,7 +330,14 @@ export function SidebarHistory({
 
       <div className="flex-1 overflow-y-auto px-2 py-1 space-y-1.5 scrollbar-thin">
         {filteredHistory.length === 0 ? (
-          !collapsed && (
+else {
+          <div className="mt-auto p-2 flex flex-col items-center gap-2 border-t border-border/20 dark:border-border/10 bg-background/10 dark:bg-background/5 backdrop-blur-md">
+            <button
+              type="button"
+              onClick={(e) => onToggleTheme(e)}
+            }
+          }
+        )
             <div className="text-center py-8 px-4 text-xs text-muted-foreground/60 space-y-2">
               {searchQuery ? (
                 <>
@@ -461,9 +468,8 @@ export function SidebarHistory({
                   )}
                 </div>
               </div>
-            )}
-          )}
-        </div>
+)}
+          </div>
 
         {!collapsed && (
           <div className="mt-auto p-2 flex flex-col items-center gap-2 border-t border-border/20 dark:border-border/10 bg-background/10 dark:bg-background/5 backdrop-blur-md">
