@@ -203,6 +203,22 @@ function MarkdownRenderer({ content }: { content: string }) {
   return <div className="space-y-1">{blocks}</div>;
 }
 
+function ResultBox({ content }: { content: string }) {
+  const [collapsed, setCollapsed] = useState(true);
+  return (
+    <div className={`overflow-x-auto ${collapsed ? 'max-w-[300px]' : 'max-w-full'} bg-card/10 rounded-lg p-2 transition-all`}> 
+      <MarkdownRenderer content={content} />
+      <button
+        type="button"
+        onClick={() => setCollapsed(!collapsed)}
+        className="mt-1 text-xs text-primary hover:underline"
+      >
+        {collapsed ? 'Expand' : 'Collapse'}
+      </button>
+    </div>
+  );
+}
+
 export function ResultsPanel({ messages = [], original, result, loading, error }: Props) {
   // If there is a single result (non-chat) use it directly
   const chatMessages = messages.length ? messages : original ? [{ id: 'msg_initial', original, result, loading, error }] : [];
@@ -217,9 +233,7 @@ export function ResultsPanel({ messages = [], original, result, loading, error }
           {msg.loading && <div className="text-sm text-muted-foreground">Loading...</div>}
           {msg.error && <div className="text-sm text-destructive">{msg.error}</div>}
 {msg.result && (
-              <div className="max-w-full sm:max-w-[400px] overflow-x-auto bg-card/10 rounded-lg p-2">
-                <MarkdownRenderer content={msg.result.output || ''} />
-              </div>
+              <ResultBox content={msg.result.output || ''} />
             )}
         </div>
       ))}
