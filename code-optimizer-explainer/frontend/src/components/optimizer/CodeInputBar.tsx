@@ -1,6 +1,6 @@
-import { useRef } from "react";
-import { ArrowUp, Code2, Eraser, ClipboardPaste, Languages } from "lucide-react";
-
+import { useRef, useState, useEffect } from "react";
+import { ArrowUp, Code2, Eraser, ClipboardPaste, Languages, BookOpen, UserRound, Sparkles, Minimize2, Search, Shuffle, Command } from "lucide-react";
+import type { ActionId } from "@/api/backend";
 import { VoiceInputButton } from "@/components/custom/VoiceInputButton";
 
 interface Props {
@@ -11,6 +11,7 @@ interface Props {
   onSubmit: () => void;
   loading: boolean;
   hasActiveAction: boolean;
+  onSelectAction?: (actionId: ActionId) => void;
 }
 
 const LANGS = [
@@ -30,6 +31,15 @@ const LANGS = [
   "php",
   "sql",
   "bash",
+];
+
+const SLASH_COMMANDS: Array<{ id: ActionId; label: string; cmd: string; icon: typeof BookOpen; description: string }> = [
+  { id: "explain", label: "Explain", cmd: "/explain", icon: BookOpen, description: "Plain-language code walkthrough" },
+  { id: "humanize", label: "Humanize", cmd: "/humanize", icon: UserRound, description: "Rewrite code to feel human-authored" },
+  { id: "prettify", label: "Prettify", cmd: "/prettify", icon: Sparkles, description: "Auto-format to standard language style" },
+  { id: "shorten", label: "Shorten", cmd: "/shorten", icon: Minimize2, description: "Condense and minify code" },
+  { id: "seo-optimize", label: "SEO Optimize", cmd: "/seo", icon: Search, description: "Improve HTML metadata & structure for SEO" },
+  { id: "alternatives", label: "Alternatives", cmd: "/alternatives", icon: Shuffle, description: "Generate 2-3 alternative implementations" },
 ];
 
 const QUICK_PROMPTS = [
@@ -58,8 +68,73 @@ export function CodeInputBar({
   onSubmit,
   loading,
   hasActiveAction,
+  onSelectAction,
 }: Props) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [showSlashMenu, setShowSlashMenu] = useState(false);
+  const [slashQuery, setSlashQuery] = useState("");
+  const [selectedIndex, setSelectedIndex] = useState(0);
+
+  // Check if input ends with a slash command trigger
+  const handleCodeChange = (text: string) => {
+    onChange(text);
+
+    // Detect slash command at cursor position
+    const cursor = textareaRef.current?.selectionStart ?? text.length;
+    const textBeforeCursor = text.slice(0, cursor);
+    const lastSlashIdx = textBeforeCursor.lastIndexOf("/");
+
+    if (lastSlashIdx !== -1) {
+      const match = textBeforeCursor.slice(lastSlashIdx);
+      if (/^\/[a-zA-Z-]*$/.test(match)) {
+        setShowSlashMenu(true);
+        setSlashQuery(match.toLowerCase());
+        setSelectedIndex(0);
+        return;
+      }
+    }
+    setShowSlashMenu(false);
+  };
+
+  const filteredCommands = SLASH_COMMANDS.filter(
+    (c) => c.cmd.startsWith(slashQuery) || c.label.toLowerCase().includes(slashQuery.replace("/", ""))
+  );
+
+  const executeSlashCommand = (cmd: (typeof SLASH_COMMANDS)[0]) => {
+    // Remove the slash query from the code string
+    const cursor = textareaRef.current?.selectionStart ?? code.length;
+    const textBeforeCursor = code.slice(0, cursor);
+    const lastSlashIdx = textBeforeCursor.lastIndexOf("/");
+
+    let cleanCode = code;
+    if (lastSlashIdx !== -1) {
+      cleanCode = code.slice(0, lastSlashIdx) + code.slice(cursor);
+    }
+
+    onChange(cleanCode.trim());
+    setShowSlashMenu(false);
+
+    if (onSelectAction) {
+      onSelectAction(cmd.id);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (showSlashMenu && filteredCommands.length > 0) {
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        setSelectedIndex((prev) => (prev + 1) % filteredCommands.length);
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        setSelectedIndex((prev) => (prev - 1 + filteredCommands.length) % filteredCommands.length);
+      } else if (e.key === "Enter" || e.key === "Tab") {
+        e.preventDefault();
+        executeSlashCommand(filteredCommands[selectedIndex]);
+      } else if (e.key === "Escape") {
+        setShowSlashMenu(false);
+      }
+    }
+  };
 
   const handlePaste = async () => {
     try {
@@ -78,6 +153,48 @@ export function CodeInputBar({
 
   return (
     <div className="group relative mx-auto w-full max-w-3xl animate-fade-in-up">
+      {/* Slash Commands Floating Popover Menu */}
+      {showSlashMenu && filteredCommands.length > 0 && (
+        <div className="absolute -top-64 left-0 z-50 w-full max-w-md overflow-hidden rounded-2xl border border-zinc-800 bg-[#0d1017]/95 p-2 text-white shadow-2xl backdrop-blur-2xl animate-fadeIn">
+          <div className="flex items-center gap-2 border-b border-zinc-800/80 px-3 py-2 text-xs font-bold text-amber-400">
+            <Command className="h-3.5 w-3.5" />
+            <span>SLASH COMMANDS</span>
+            <span className="ml-auto text-[10px] font-normal text-zinc-500">Press ↑ ↓ Enter to select</span>
+          </div>
+
+          <div className="max-h-48 overflow-y-auto py-1">
+            {filteredCommands.map((cmd, idx) => {
+              const Icon = cmd.icon;
+              const isSelected = idx === selectedIndex;
+              return (
+                <button
+                  key={cmd.id}
+                  type="button"
+                  onClick={() => executeSlashCommand(cmd)}
+                  onMouseEnter={() => setSelectedIndex(idx)}
+                  className={`flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left transition cursor-pointer ${
+                    isSelected ? "bg-amber-500 text-zinc-950 font-semibold" : "hover:bg-zinc-800/60 text-zinc-200"
+                  }`}
+                >
+                  <div className={`grid h-7 w-7 shrink-0 place-items-center rounded-lg ${isSelected ? "bg-zinc-950 text-amber-400" : "bg-zinc-800 text-orange-400"}`}>
+                    <Icon className="h-4 w-4" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold">{cmd.label}</span>
+                      <span className={`font-mono text-[10px] ${isSelected ? "text-zinc-900" : "text-amber-400"}`}>{cmd.cmd}</span>
+                    </div>
+                    <p className={`truncate text-[11px] ${isSelected ? "text-zinc-800" : "text-zinc-400"}`}>
+                      {cmd.description}
+                    </p>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       {/* Focus glow ring */}
       <div
         className="absolute -inset-0.5 rounded-[34px] opacity-0 transition-opacity duration-500 group-focus-within:opacity-100 animate-glow-pulse"
@@ -88,7 +205,7 @@ export function CodeInputBar({
         }}
       />
       <div
-        className="relative mx-auto w-full max-w-3xl rounded-[32px] border p-5 transition-all duration-300 focus-within:shadow-[var(--glow-focus)] focus-within:scale-[1.005] sm:p-6 bg-white dark:bg-[#121215]/95 border-[#1C1C22]/12 dark:border-zinc-800/90"
+        className="relative mx-auto w-full max-w-3xl rounded-[24px] border p-3.5 transition-all duration-300 focus-within:shadow-[var(--glow-focus)] focus-within:scale-[1.002] sm:p-4 bg-white dark:bg-[#121215]/95 border-[#1C1C22]/12 dark:border-zinc-800/90"
         style={{
           boxShadow: "var(--shadow-float)",
         }}
@@ -96,15 +213,16 @@ export function CodeInputBar({
         <textarea
           ref={textareaRef}
           value={code}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder="Paste your code here... ✦˚"
-          rows={5}
+          onChange={(e) => handleCodeChange(e.target.value)}
+          onKeyDown={handleKeyDown}
+          placeholder="Paste your code here or type / for AI commands (e.g. /explain, /humanize, /prettify)... ✦˚"
+          rows={2}
           spellCheck={false}
-          className="block w-full resize-none bg-transparent font-mono text-[15px] leading-relaxed outline-none text-[#1C1C22] dark:text-[#FAFAFA] placeholder:text-[#6B6B75] dark:placeholder:text-zinc-500 transition-colors"
+          className="block w-full resize-none bg-transparent font-mono text-[14px] leading-relaxed outline-none text-[#1C1C22] dark:text-[#FAFAFA] placeholder:text-[#6B6B75] dark:placeholder:text-zinc-500 transition-colors max-h-36 overflow-y-auto"
         />
 
         {/* Quick Prompt Tags from msgbox.js */}
-        <div className="mt-2 flex flex-wrap gap-1.5 pt-1">
+        <div className="mt-1 flex flex-wrap gap-1.5 pt-0.5">
           {QUICK_PROMPTS.map((qp) => (
             <button
               key={qp.label}
@@ -113,7 +231,7 @@ export function CodeInputBar({
                 onChange(qp.prompt);
                 textareaRef.current?.focus();
               }}
-              className="rounded-full bg-zinc-100 dark:bg-white/10 px-3 py-1 text-[11px] font-semibold text-zinc-700 dark:text-zinc-200 hover:bg-orange-500 hover:text-white dark:hover:bg-orange-500 transition cursor-pointer border border-zinc-200 dark:border-white/10"
+              className="rounded-full bg-zinc-100 dark:bg-white/10 px-2.5 py-0.5 text-[10px] font-semibold text-zinc-700 dark:text-zinc-200 hover:bg-orange-500 hover:text-white dark:hover:bg-orange-500 transition cursor-pointer border border-zinc-200 dark:border-white/10"
             >
               {qp.label}
             </button>
@@ -178,22 +296,13 @@ export function CodeInputBar({
           <button
             type="button"
             onClick={onSubmit}
-            disabled={loading || !code.trim() || !hasActiveAction}
-            title={hasActiveAction ? "Run selected action" : "Choose an action below"}
-            className="grid h-11 w-11 shrink-0 place-items-center rounded-full transition-all duration-300 hover:scale-110 active:scale-90 shadow-md hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-40 cursor-pointer"
-            style={{ background: "var(--accent-deep)", color: "#FFFFFF" }}
+            disabled={loading || !code.trim()}
+            className="group relative inline-flex items-center gap-2 overflow-hidden rounded-full py-2.5 px-5 font-semibold text-xs transition-all duration-300 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40 shadow-lg cursor-pointer bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 text-white hover:brightness-110"
           >
-            {loading ? (
-              <span
-                className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"
-                aria-label="Loading"
-              />
-            ) : (
-              <ArrowUp
-                className="h-5 w-5 transition-transform duration-200 group-hover:-translate-y-0.5"
-                strokeWidth={2}
-              />
-            )}
+            <span className="relative z-10 font-bold uppercase tracking-wider">
+              {loading ? "Processing..." : "Run Action"}
+            </span>
+            <ArrowUp className="relative z-10 h-4 w-4 transition-transform duration-300 group-hover:-translate-y-0.5" strokeWidth={2.5} />
           </button>
         </div>
       </div>

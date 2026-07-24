@@ -95,6 +95,7 @@ code-optimizer-explainer/
 ## 9. Changelog
 *(Newest entry on top. One line per change — date + what changed + why, if non-obvious.)*
 
+| 2026-07-24 | Added Notion/Slack-style Slash Commands popover menu (/explain, /humanize, /prettify, /shorten, /seo, /alternatives) with keyboard selection (Arrow keys + Enter/Tab) in CodeInputBar.tsx |
 | 2026-07-24 | Implemented ChatGPT-style layout transition in OptimizerApp.tsx: anchored CodeInputBar + ActionPills to sticky bottom dock when response is active, rendering ResultsPanel in top viewport |
 | 2026-07-24 | Integrated full React frontend application from frontendopticode into OptiCode/code-optimizer-explainer/frontend, connecting UI components and SignInModal to backend auth, sessions, and AI APIs |
 | 2026-07-24 | Added WhatsApp OTP authentication (`/api/auth/whatsapp/send-otp`, `/api/auth/whatsapp/verify`) storing user profiles (`auth_provider="whatsapp"`), active sessions, and cookies in DB |

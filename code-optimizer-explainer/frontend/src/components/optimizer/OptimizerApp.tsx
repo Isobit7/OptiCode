@@ -344,6 +344,7 @@ export function OptimizerApp() {
                 onSubmit={handleSubmit}
                 loading={loading}
                 hasActiveAction={activeAction !== null}
+                onSelectAction={handleSelectAction}
               />
 
               <div className="mt-5">
@@ -371,6 +372,7 @@ export function OptimizerApp() {
                   onSubmit={handleSubmit}
                   loading={loading}
                   hasActiveAction={activeAction !== null}
+                  onSelectAction={handleSelectAction}
                 />
               </div>
             </div>
