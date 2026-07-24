@@ -276,5 +276,211 @@ export function SidebarHistory({
     );
   };
 
-  // return block replaced
+  if (collapsed) {
+    return (
+      <aside className="w-14 h-full shrink-0 border-r border-border bg-sidebar/40 backdrop-blur-md flex flex-col items-center py-3 gap-2">
+        <button
+          type="button"
+          onClick={onToggleCollapse}
+          title="Expand sidebar"
+          className="p-2 rounded-lg hover:bg-accent transition-colors text-muted-foreground hover:text-foreground"
+        >
+          <PanelLeftOpen className="h-4 w-4" />
+        </button>
+        <button
+          type="button"
+          onClick={onNewSession}
+          title="New session"
+          className="p-2 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
+        >
+          <Sparkles className="h-4 w-4" />
+        </button>
+        <div className="mt-auto flex flex-col items-center gap-2">
+          <button
+            type="button"
+            onClick={onToggleTheme}
+            title="Toggle theme"
+            className="p-2 rounded-lg hover:bg-accent transition-colors text-muted-foreground hover:text-foreground"
+          >
+            {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+          </button>
+        </div>
+      </aside>
+    );
   }
+
+  return (
+    <aside className="w-72 h-full shrink-0 border-r border-border bg-sidebar/40 backdrop-blur-md flex flex-col overflow-hidden">
+      <div className="p-4 border-b border-border">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <div className="h-7 w-7 rounded-lg bg-primary/10 flex items-center justify-center">
+              <Sparkles className="h-4 w-4 text-primary" />
+            </div>
+            <span className="text-sm font-semibold text-foreground">OptiCode</span>
+          </div>
+          <button
+            type="button"
+            onClick={onToggleCollapse}
+            title="Collapse sidebar"
+            className="p-1.5 rounded-lg hover:bg-accent transition-colors text-muted-foreground hover:text-foreground"
+          >
+            <PanelLeftClose className="h-4 w-4" />
+          </button>
+        </div>
+
+        <div className="flex items-center gap-2 mb-3">
+          <div className="relative flex-1">
+            <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground/50 pointer-events-none" />
+            <input
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search history…"
+              className="w-full pl-7 pr-2 py-1.5 text-xs rounded-lg bg-muted/40 border border-border focus:outline-none focus:ring-1 focus:ring-ring placeholder:text-muted-foreground/50"
+            />
+          </div>
+          <button
+            type="button"
+            onClick={onNewSession}
+            title="New session"
+            className="p-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
+          >
+            <Sparkles className="h-3.5 w-3.5" />
+          </button>
+        </div>
+
+        <div className="flex items-center gap-1 p-0.5 bg-muted/30 rounded-lg">
+          <button
+            onClick={() => setActiveTab("all")}
+            className={`flex-1 text-xs px-3 py-1.5 rounded-md transition-colors ${
+              activeTab === "all" ? "bg-background text-foreground shadow-xs" : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            History
+          </button>
+          <button
+            onClick={() => setActiveTab("templates")}
+            className={`flex-1 text-xs px-3 py-1.5 rounded-md transition-colors ${
+              activeTab === "templates" ? "bg-background text-foreground shadow-xs" : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            Templates
+          </button>
+        </div>
+      </div>
+
+      <div className="flex-1 overflow-y-auto px-2 pb-2">
+        {activeTab === "all" ? (
+          <div className="space-y-1">
+            <div className="flex items-center justify-between px-1 pt-1">
+              <span className="text-[10px] font-medium text-muted-foreground/60 uppercase tracking-wider">
+                {filteredHistory.length} sessions · {totalLines} lines
+              </span>
+              {safeHistory.length > 0 && (
+                <button
+                  type="button"
+                  onClick={exportHistoryJSON}
+                  title="Export history"
+                  className="p-1 rounded hover:bg-accent text-muted-foreground hover:text-foreground"
+                >
+                  <Download className="h-3 w-3" />
+                </button>
+              )}
+            </div>
+            {safeHistory.length === 0 ? (
+              <div className="text-center py-10 px-3">
+                <History className="h-8 w-8 text-muted-foreground/30 mx-auto mb-2" />
+                <p className="text-xs text-muted-foreground/60">No history yet</p>
+              </div>
+            ) : (
+              <>
+                {renderGroup("Today", todayItems)}
+                {renderGroup("This week", weekItems)}
+                {renderGroup("Older", olderItems)}
+              </>
+            )}
+          </div>
+        ) : (
+          <div className="space-y-2 pt-2">
+            {TEMPLATES.map((tpl, idx) => (
+              <div
+                key={idx}
+                onClick={() =>
+                  onSelectHistory({
+                    id: `tpl_${Date.now()}_${idx}`,
+                    timestamp: Date.now(),
+                    action: "explain",
+                    code: tpl.code,
+                    language: tpl.language,
+                    result: { action: "explain", output: "" },
+                  } as HistoryItem)
+                }
+                className="p-3 rounded-lg border border-border bg-muted/20 hover:bg-muted/40 transition-colors cursor-pointer"
+              >
+                <div className="flex items-center gap-2 mb-1">
+                  <Star className="h-3 w-3 text-primary" />
+                  <span className="text-xs font-medium text-foreground">{tpl.title}</span>
+                </div>
+                <p className="text-[10px] text-muted-foreground/70 line-clamp-2">{tpl.description}</p>
+                <div className="mt-1.5 inline-block px-1.5 py-0.5 text-[9px] font-mono rounded bg-muted text-muted-foreground">
+                  {tpl.language}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="border-t border-border p-3 space-y-2">
+        <div className="flex items-center justify-between text-xs">
+          <div className="flex items-center gap-1.5 text-muted-foreground">
+            <BarChart3 className="h-3.5 w-3.5" />
+            <span>{safeHistory.length} sessions</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <button
+              type="button"
+              onClick={onToggleTheme}
+              title="Toggle theme"
+              className="p-1.5 rounded-lg hover:bg-accent transition-colors text-muted-foreground hover:text-foreground"
+            >
+              {theme === "dark" ? <Sun className="h-3.5 w-3.5" /> : <Moon className="h-3.5 w-3.5" />}
+            </button>
+            {safeHistory.length > 0 && (
+              <button
+                type="button"
+                onClick={onClearAll}
+                title="Clear all"
+                className="p-1.5 rounded-lg hover:bg-destructive/10 hover:text-destructive transition-colors text-muted-foreground"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </button>
+            )}
+          </div>
+        </div>
+        {currentUser ? (
+          <div className="flex items-center justify-between px-1">
+            <span className="text-xs text-muted-foreground truncate">{currentUser.email?.split("@")[0] || currentUser.full_name || "User"}</span>
+            <button
+              type="button"
+              onClick={onSignOut}
+              title="Sign out"
+              className="p-1.5 rounded-lg hover:bg-accent transition-colors text-muted-foreground hover:text-foreground"
+            >
+              <LogOut className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={onSignIn}
+            className="w-full flex items-center justify-center gap-1.5 text-xs px-3 py-2 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
+          >
+            <UserRound className="h-3.5 w-3.5" />
+            Sign in
+          </button>
+        )}
+      </div>
+    </aside>
+  );
+}
