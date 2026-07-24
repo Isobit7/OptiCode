@@ -157,13 +157,21 @@ function generateLocalResult(action: ActionId, code: string, language: string): 
   }
 }
 
+export interface ActionOptions {
+  explainDepth?: "beginner" | "intermediate" | "advanced";
+  humanizeMode?: "de-ai" | "idiomatic" | "simplify";
+}
+
 export async function runAction(
   action: ActionId,
   code: string,
   language: string,
+  options?: ActionOptions,
 ): Promise<ActionResult> {
   const payload: Record<string, unknown> = { code };
   if (action !== "seo-optimize") payload.language = language;
+  if (action === "explain" && options?.explainDepth) payload.depth = options.explainDepth;
+  if (action === "humanize" && options?.humanizeMode) payload.mode = options.humanizeMode;
 
   try {
     switch (action) {

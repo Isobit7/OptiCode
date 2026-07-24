@@ -1,7 +1,8 @@
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState } from "react";
 import { ArrowUp, Code2, Eraser, ClipboardPaste, Languages, BookOpen, UserRound, Sparkles, Minimize2, Search, Shuffle, Command } from "lucide-react";
 import type { ActionId } from "@/api/backend";
 import { VoiceInputButton } from "@/components/custom/VoiceInputButton";
+import { ActionPills } from "./ActionPills";
 
 interface Props {
   code: string;
@@ -10,8 +11,8 @@ interface Props {
   onLanguageChange: (v: string) => void;
   onSubmit: () => void;
   loading: boolean;
-  hasActiveAction: boolean;
-  onSelectAction?: (actionId: ActionId) => void;
+  activeAction: ActionId | null;
+  onSelectAction: (actionId: ActionId) => void;
 }
 
 const LANGS = [
@@ -42,23 +43,14 @@ const SLASH_COMMANDS: Array<{ id: ActionId; label: string; cmd: string; icon: ty
   { id: "alternatives", label: "Alternatives", cmd: "/alternatives", icon: Shuffle, description: "Generate 2-3 alternative implementations" },
 ];
 
-const QUICK_PROMPTS = [
-  {
-    label: "✦ Imagine Something...",
-    prompt:
-      "function calculateTotal(items) {\n  return items.reduce((acc, item) => acc + item.price, 0);\n}",
-  },
-  {
-    label: "Analyse Data",
-    prompt:
-      "const processData = async (dataset) => {\n  const filtered = dataset.filter(x => x.active);\n  return filtered.map(x => ({ id: x.id, value: x.val * 2 }));\n};",
-  },
-  {
-    label: "Create An Image Component",
-    prompt:
-      '<div className="card">\n  <img src="/avatar.jpg" alt="Profile" />\n  <h2>User Profile</h2>\n</div>',
-  },
-];
+const ACTION_BUTTON_LABELS: Record<ActionId, string> = {
+  explain: "EXPLAIN",
+  humanize: "HUMANIZE",
+  prettify: "PRETTIFY",
+  shorten: "SHORTEN",
+  "seo-optimize": "SEO OPTIMIZE",
+  alternatives: "ALTERNATIVES",
+};
 
 export function CodeInputBar({
   code,
@@ -67,7 +59,7 @@ export function CodeInputBar({
   onLanguageChange,
   onSubmit,
   loading,
-  hasActiveAction,
+  activeAction,
   onSelectAction,
 }: Props) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -79,7 +71,6 @@ export function CodeInputBar({
   const handleCodeChange = (text: string) => {
     onChange(text);
 
-    // Detect slash command at cursor position
     const cursor = textareaRef.current?.selectionStart ?? text.length;
     const textBeforeCursor = text.slice(0, cursor);
     const lastSlashIdx = textBeforeCursor.lastIndexOf("/");
@@ -101,7 +92,6 @@ export function CodeInputBar({
   );
 
   const executeSlashCommand = (cmd: (typeof SLASH_COMMANDS)[0]) => {
-    // Remove the slash query from the code string
     const cursor = textareaRef.current?.selectionStart ?? code.length;
     const textBeforeCursor = code.slice(0, cursor);
     const lastSlashIdx = textBeforeCursor.lastIndexOf("/");
@@ -113,10 +103,7 @@ export function CodeInputBar({
 
     onChange(cleanCode.trim());
     setShowSlashMenu(false);
-
-    if (onSelectAction) {
-      onSelectAction(cmd.id);
-    }
+    onSelectAction(cmd.id);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -151,11 +138,15 @@ export function CodeInputBar({
     textareaRef.current?.focus();
   };
 
+  const actionButtonText = activeAction
+    ? ACTION_BUTTON_LABELS[activeAction]
+    : "RUN ACTION";
+
   return (
-    <div className="group relative mx-auto w-full max-w-3xl animate-fade-in-up">
+    <div className="group relative mx-auto w-full max-w-4xl animate-fade-in-up">
       {/* Slash Commands Floating Popover Menu */}
       {showSlashMenu && filteredCommands.length > 0 && (
-        <div className="absolute -top-64 left-0 z-50 w-full max-w-md overflow-hidden rounded-2xl border border-zinc-800 bg-[#0d1017]/95 p-2 text-white shadow-2xl backdrop-blur-2xl animate-fadeIn">
+        <div className="absolute -top-64 left-0 z-50 w-full max-w-md overflow-hidden rounded-2xl border border-zinc-800 bg-[#0d1017]/95 p-2 text-white shadow-2xl backdrop-blur-2xl animate-pop-in">
           <div className="flex items-center gap-2 border-b border-zinc-800/80 px-3 py-2 text-xs font-bold text-amber-400">
             <Command className="h-3.5 w-3.5" />
             <span>SLASH COMMANDS</span>
@@ -197,57 +188,45 @@ export function CodeInputBar({
 
       {/* Focus glow ring */}
       <div
-        className="absolute -inset-0.5 rounded-[34px] opacity-0 transition-opacity duration-500 group-focus-within:opacity-100 animate-glow-pulse"
+        className="absolute -inset-0.5 rounded-[28px] opacity-0 transition-opacity duration-500 group-focus-within:opacity-100 animate-glow-pulse"
         style={{
           background:
             "linear-gradient(135deg, rgba(244,145,74,0.45) 0%, rgba(232,89,12,0.25) 50%, rgba(239,168,192,0.3) 100%)",
           filter: "blur(10px)",
         }}
       />
+
+      {/* BeeBot Integrated Container Box */}
       <div
-        className="relative mx-auto w-full max-w-3xl rounded-[24px] border p-3.5 transition-all duration-300 focus-within:shadow-[var(--glow-focus)] focus-within:scale-[1.002] sm:p-4 bg-white dark:bg-[#121215]/95 border-[#1C1C22]/12 dark:border-zinc-800/90"
-        style={{
-          boxShadow: "var(--shadow-float)",
-        }}
+        className="relative mx-auto w-full max-w-4xl rounded-3xl border p-4 transition-all duration-300 focus-within:shadow-warm-lg focus-within:border-orange-500/40 sm:p-5 bg-white/75 dark:bg-[#121215]/95 border-white/80 dark:border-white/15 shadow-warm-lg backdrop-blur-2xl"
       >
         <textarea
           ref={textareaRef}
           value={code}
           onChange={(e) => handleCodeChange(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="Paste your code here or type / for AI commands (e.g. /explain, /humanize, /prettify)... ✦˚"
-          rows={2}
+          placeholder="Paste your code here or type / for AI commands... ✦˚"
+          rows={3}
           spellCheck={false}
-          className="block w-full resize-none bg-transparent font-mono text-[14px] leading-relaxed outline-none text-[#1C1C22] dark:text-[#FAFAFA] placeholder:text-[#6B6B75] dark:placeholder:text-zinc-500 transition-colors max-h-36 overflow-y-auto"
+          className="block w-full resize-none bg-transparent font-mono text-[14px] leading-relaxed outline-none text-[#1C1C22] dark:text-[#FAFAFA] placeholder:text-[#6B6B75] dark:placeholder:text-zinc-500 transition-colors max-h-48 overflow-y-auto"
         />
 
-        {/* Quick Prompt Tags from msgbox.js */}
-        <div className="mt-1 flex flex-wrap gap-1.5 pt-0.5">
-          {QUICK_PROMPTS.map((qp) => (
-            <button
-              key={qp.label}
-              type="button"
-              onClick={() => {
-                onChange(qp.prompt);
-                textareaRef.current?.focus();
-              }}
-              className="rounded-full bg-zinc-100 dark:bg-white/10 px-2.5 py-0.5 text-[10px] font-semibold text-zinc-700 dark:text-zinc-200 hover:bg-orange-500 hover:text-white dark:hover:bg-orange-500 transition cursor-pointer border border-zinc-200 dark:border-white/10"
-            >
-              {qp.label}
-            </button>
-          ))}
+        {/* BeeBot Feature Chips Attached Directly Inside Input Container */}
+        <div className="mt-3 pt-3 border-t border-zinc-100 dark:border-white/10 flex items-center justify-between gap-2 flex-wrap">
+          <ActionPills active={activeAction} loading={loading} onSelect={onSelectAction} compact />
         </div>
 
-        <div className="mt-4 flex items-center justify-between gap-3 border-t border-zinc-100 dark:border-white/10 pt-3">
+        {/* BeeBot Controls Footer Bar */}
+        <div className="mt-3 flex items-center justify-between gap-3 border-t border-zinc-100 dark:border-white/10 pt-3">
           <div className="flex items-center gap-2 sm:gap-3 text-[#6B6B75] dark:text-zinc-400">
             <div className="flex items-center gap-1">
               <button
                 type="button"
                 onClick={handlePaste}
                 title="Paste from clipboard"
-                className="rounded-full p-2 transition-all duration-200 hover:bg-[#1C1C22]/5 dark:hover:bg-white/10 hover:text-[#1C1C22] dark:hover:text-white hover:scale-110 active:scale-95 cursor-pointer"
+                className="rounded-full p-1.5 transition-all duration-200 hover:bg-[#1C1C22]/5 dark:hover:bg-white/10 hover:text-[#1C1C22] dark:hover:text-white hover:scale-110 active:scale-95 cursor-pointer"
               >
-                <ClipboardPaste className="h-[18px] w-[18px]" strokeWidth={1.75} />
+                <ClipboardPaste className="h-4 w-4" strokeWidth={1.75} />
               </button>
 
               <VoiceInputButton onSpeechResult={handleSpeechResult} />
@@ -256,29 +235,29 @@ export function CodeInputBar({
                 type="button"
                 onClick={() => onChange("")}
                 title="Clear"
-                className="rounded-full p-2 transition-all duration-200 hover:bg-[#1C1C22]/5 dark:hover:bg-white/10 hover:text-[#1C1C22] dark:hover:text-white hover:scale-110 active:scale-95 cursor-pointer"
+                className="rounded-full p-1.5 transition-all duration-200 hover:bg-[#1C1C22]/5 dark:hover:bg-white/10 hover:text-[#1C1C22] dark:hover:text-white hover:scale-110 active:scale-95 cursor-pointer"
               >
-                <Eraser className="h-[18px] w-[18px]" strokeWidth={1.75} />
+                <Eraser className="h-4 w-4" strokeWidth={1.75} />
               </button>
             </div>
 
-            <div className="h-5 w-px bg-[#1C1C22]/15 dark:bg-white/15" aria-hidden />
+            <div className="h-4 w-px bg-[#1C1C22]/15 dark:bg-white/15" aria-hidden />
 
-            <div className="flex items-center gap-2">
-              <Code2 className="h-[18px] w-[18px]" strokeWidth={1.75} />
+            <div className="flex items-center gap-1.5">
+              <Code2 className="h-4 w-4" strokeWidth={1.75} />
               <div className="hidden text-xs sm:block">
                 {code.length} char{code.length === 1 ? "" : "s"}
               </div>
             </div>
 
-            <div className="h-5 w-px bg-[#1C1C22]/15 dark:bg-white/15" aria-hidden />
+            <div className="h-4 w-px bg-[#1C1C22]/15 dark:bg-white/15" aria-hidden />
 
-            <label className="flex items-center gap-2 text-xs cursor-pointer">
-              <Languages className="h-[18px] w-[18px]" strokeWidth={1.75} />
+            <label className="flex items-center gap-1.5 text-xs cursor-pointer">
+              <Languages className="h-4 w-4" strokeWidth={1.75} />
               <select
                 value={language}
                 onChange={(e) => onLanguageChange(e.target.value)}
-                className="rounded-md bg-transparent px-1 py-1 text-xs outline-none cursor-pointer transition-colors text-[#1C1C22] dark:text-zinc-200"
+                className="rounded-md bg-transparent px-1 py-0.5 text-xs outline-none cursor-pointer transition-colors text-[#1C1C22] dark:text-zinc-200"
               >
                 {LANGS.map((l) => (
                   <option
@@ -293,16 +272,17 @@ export function CodeInputBar({
             </label>
           </div>
 
+          {/* Primary Action Button with Dynamic Label */}
           <button
             type="button"
             onClick={onSubmit}
             disabled={loading || !code.trim()}
-            className="group relative inline-flex items-center gap-2 overflow-hidden rounded-full py-2.5 px-5 font-semibold text-xs transition-all duration-300 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40 shadow-lg cursor-pointer bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 text-white hover:brightness-110"
+            className="group relative inline-flex items-center gap-2 overflow-hidden rounded-full py-2 px-5 font-bold text-xs transition-all duration-300 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40 shadow-lg cursor-pointer bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 text-white hover:brightness-110"
           >
-            <span className="relative z-10 font-bold uppercase tracking-wider">
-              {loading ? "Processing..." : "Run Action"}
+            <span className="relative z-10 uppercase tracking-wider font-extrabold">
+              {loading ? "PROCESSING..." : actionButtonText}
             </span>
-            <ArrowUp className="relative z-10 h-4 w-4 transition-transform duration-300 group-hover:-translate-y-0.5" strokeWidth={2.5} />
+            <ArrowUp className="relative z-10 h-3.5 w-3.5 transition-transform duration-300 group-hover:-translate-y-0.5" strokeWidth={2.5} />
           </button>
         </div>
       </div>

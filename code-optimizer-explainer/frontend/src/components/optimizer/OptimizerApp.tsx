@@ -1,11 +1,12 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useRef } from "react";
 import { CodeInputBar } from "./CodeInputBar";
 import { ActionPills } from "./ActionPills";
-import { ResultsPanel } from "./ResultsPanel";
+import { ResultsPanel, type ChatMessage } from "./ResultsPanel";
 import { SidebarHistory, type HistoryItem } from "./SidebarHistory";
 import { SignInModal } from "./SignInModal";
+import { PreferencesDropdown, type ExplainDepth, type HumanizeMode } from "./PreferencesDropdown";
 import { runAction, fetchCurrentUser, logoutUser, fetchHistory, type ActionId, type ActionResult } from "@/api/backend";
-import { Sparkles, UserRound, ShieldCheck, Terminal, LogOut } from "lucide-react";
+import { Sparkles, UserRound, ShieldCheck, Terminal, LogOut, ArrowDown } from "lucide-react";
 
 const LOCAL_STORAGE_KEY = "code_companion_history";
 
@@ -18,6 +19,12 @@ export function OptimizerApp() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSignInOpen, setIsSignInOpen] = useState(false);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Preference states for Explainer Depth & Humanizer Mode
+  const [explainDepth, setExplainDepth] = useState<ExplainDepth>("intermediate");
+  const [humanizeMode, setHumanizeMode] = useState<HumanizeMode>("de-ai");
 
   // Theme state: light or dark (SSR safe)
   const [theme, setTheme] = useState<"light" | "dark">("light");
@@ -153,23 +160,51 @@ export function OptimizerApp() {
     }
   };
 
+  const scrollToBottom = () => {
+    setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, 100);
+  };
+
   const run = useCallback(
     async (action: ActionId) => {
       if (!code.trim() || loading) return;
+      const inputSnippet = code;
+      const msgId = `msg_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
+      
+      // Clear code input field immediately for next input
+      setCode("");
       setLoading(true);
       setError(null);
       setResult(null);
-      setSubmittedCode(code);
+      setSubmittedCode(inputSnippet);
+
+      // Append new message entry to thread
+      const newMsg: ChatMessage = {
+        id: msgId,
+        original: inputSnippet,
+        result: null,
+        loading: true,
+        error: null,
+      };
+      setMessages((prev) => [...prev, newMsg]);
+      scrollToBottom();
+
       try {
-        const res = await runAction(action, code, language);
+        const res = await runAction(action, inputSnippet, language, { explainDepth, humanizeMode });
         setResult(res);
+
+        // Update message thread entry with result
+        setMessages((prev) =>
+          prev.map((m) => (m.id === msgId ? { ...m, result: res, loading: false } : m))
+        );
 
         // Add to history
         const newItem: HistoryItem = {
           id: `hist_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
           timestamp: Date.now(),
           action,
-          code,
+          code: inputSnippet,
           language,
           result: res,
         };
@@ -184,11 +219,14 @@ export function OptimizerApp() {
           return updated;
         });
       } catch {
-        setError(
-          "We couldn't reach the AI service. Check your connection and try again in a moment.",
+        const errText = "We couldn't reach the AI service. Check your connection and try again in a moment.";
+        setError(errText);
+        setMessages((prev) =>
+          prev.map((m) => (m.id === msgId ? { ...m, loading: false, error: errText } : m))
         );
       } finally {
         setLoading(false);
+        scrollToBottom();
       }
     },
     [code, language, loading],
@@ -208,16 +246,17 @@ export function OptimizerApp() {
     setActiveAction(null);
     setResult(null);
     setSubmittedCode("");
+    setMessages([]);
     setActiveHistoryId(null);
     setError(null);
   };
 
   const handleSelectHistory = (item: HistoryItem) => {
-    setCode(item.code);
     setLanguage(item.language || "auto");
     setActiveAction(item.action);
     setResult(item.result);
     setSubmittedCode(item.code);
+    setMessages([{ id: item.id, original: item.code, result: item.result }]);
     setActiveHistoryId(item.id);
     setError(null);
   };
@@ -256,7 +295,7 @@ export function OptimizerApp() {
 
   return (
     <div
-      className="relative flex min-h-screen w-full overflow-x-hidden transition-colors duration-500"
+      className="relative flex h-screen w-full max-h-screen overflow-hidden transition-colors duration-500"
       style={{ background: "var(--app-gradient)" }}
     >
       {/* Ambient Background Multi-Point Light Spheres */}
@@ -287,55 +326,40 @@ export function OptimizerApp() {
         onSelectTemplate={handleSelectTemplate}
         theme={theme}
         onToggleTheme={handleToggleTheme}
+        currentUser={currentUser}
+        onSignIn={() => setIsSignInOpen(true)}
+        onSignOut={handleLogout}
       />
 
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col h-full min-w-0 overflow-hidden">
         {/* Top Header Bar */}
-        <header className="relative flex w-full items-center justify-end px-4 py-4 sm:px-6 lg:px-8">
-          {/* Right Header Navigation Actions */}
-          <div className="flex items-center gap-3">
-            {currentUser ? (
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-semibold text-white/90 bg-white/10 px-3 py-1.5 rounded-xl border border-white/20">
-                  👤 {currentUser.email || currentUser.full_name || "User"}
-                </span>
-                <button
-                  type="button"
-                  onClick={handleLogout}
-                  className="inline-flex items-center gap-1.5 rounded-xl bg-red-500/20 px-3 py-1.5 text-xs font-semibold text-red-300 border border-red-500/30 hover:bg-red-500/30 transition-all duration-200 cursor-pointer shadow-sm"
-                >
-                  <LogOut className="h-3.5 w-3.5" />
-                  <span>Sign out</span>
-                </button>
-              </div>
-            ) : (
-              <button
-                type="button"
-                onClick={() => setIsSignInOpen(true)}
-                className="inline-flex items-center gap-2 rounded-xl bg-white/15 dark:bg-white/10 px-4 py-2 text-xs font-semibold text-white backdrop-blur-md border border-white/20 hover:bg-white/25 hover:border-white/35 transition-all duration-200 cursor-pointer shadow-sm active:scale-95"
-              >
-                <UserRound className="h-3.5 w-3.5 opacity-80" />
-                <span>Sign in</span>
-              </button>
-            )}
-          </div>
+        <header className="relative flex w-full items-center justify-between px-4 py-3.5 sm:px-6 lg:px-8">
+          {/* Left Title: ChatGPT-Style OptiCode Model Dropdown */}
+          <PreferencesDropdown
+            explainDepth={explainDepth}
+            onExplainDepthChange={setExplainDepth}
+            humanizeMode={humanizeMode}
+            onHumanizeModeChange={setHumanizeMode}
+          />
+
+          {/* Right Header Navigation — account moved to sidebar Settings */}
+          <div className="flex items-center gap-3" />
         </header>
 
-        {/* ChatGPT-Style Dynamic Layout */}
+        {/* BeeBot Layout Workspace */}
         {!(submittedCode || result || loading) ? (
-          /* Initial Landing View */
-          <>
-            <section className="relative mx-auto w-full max-w-3xl px-4 pt-6 text-center sm:px-8 sm:pt-12">
-              <h1 className="font-headings text-balance text-3xl font-bold tracking-tight text-[var(--text-on-dark-primary)] sm:text-5xl sm:leading-tight">
-                Analyze, Refine & Rewrite Any Code Instantly.
+          /* BeeBot Greeting & Input View */
+          <div className="flex-1 flex flex-col items-center justify-center px-4 sm:px-8 py-4 max-w-4xl mx-auto w-full overflow-y-auto no-scrollbar h-full min-h-0">
+            <section className="text-center mb-6 space-y-2.5">
+              <h1 className="font-headings text-3xl sm:text-5xl font-bold tracking-tight text-[var(--text-on-dark-primary)]">
+                {currentUser ? `Welcome back, ${currentUser.email?.split("@")[0] || currentUser.full_name || "Developer"}` : "Paste your code — let's clean it up"}
               </h1>
-              <p className="mt-4 text-pretty text-sm text-[var(--text-on-dark-primary)]/85 sm:text-base max-w-2xl mx-auto leading-relaxed">
-                Paste your snippet, pick an AI action, and elevate your codebase with high-speed
-                refactoring, bug fixes, and plain-language insights.
+              <p className="text-sm sm:text-base text-[var(--text-on-dark-primary)]/80 max-w-xl mx-auto">
+                Transform, explain, prettify, or optimize any snippet instantly with AI.
               </p>
             </section>
 
-            <section className="mx-auto w-full max-w-3xl px-4 pt-8 sm:px-8 pb-16">
+            <div className="w-full">
               <CodeInputBar
                 code={code}
                 onChange={setCode}
@@ -343,27 +367,35 @@ export function OptimizerApp() {
                 onLanguageChange={setLanguage}
                 onSubmit={handleSubmit}
                 loading={loading}
-                hasActiveAction={activeAction !== null}
+                activeAction={activeAction}
                 onSelectAction={handleSelectAction}
               />
-
-              <div className="mt-5">
-                <ActionPills active={activeAction} loading={loading} onSelect={handleSelectAction} />
-              </div>
-            </section>
-          </>
+            </div>
+          </div>
         ) : (
-          /* Active Response View (ChatGPT Mode: Output on top, Input Anchored at Bottom) */
-          <div className="flex-1 flex flex-col justify-between min-h-0">
-            {/* Top Response Output View */}
-            <main className="flex-1 px-4 sm:px-8 pt-4 pb-32 max-w-4xl mx-auto w-full overflow-y-auto">
-              <ResultsPanel original={submittedCode} result={result} loading={loading} error={error} />
+          /* Active Response View (BeeBot Output + Attached Bottom Bar) */
+          <div className="flex-1 flex flex-col justify-between min-h-0 h-full overflow-y-auto relative">
+            <main className="flex-1 px-4 sm:px-8 pt-4 pb-36 max-w-4xl mx-auto w-full">
+              <ResultsPanel messages={messages} original={submittedCode} result={result} loading={loading} error={error} />
+              <div ref={messagesEndRef} />
             </main>
 
-            {/* Sticky Bottom Anchored Input Box (ChatGPT Style) */}
-            <div className="sticky bottom-0 z-30 w-full bg-[#0d1017]/95 backdrop-blur-2xl border-t border-white/10 shadow-2xl py-3 px-4 sm:px-8">
-              <div className="max-w-4xl mx-auto space-y-2.5">
-                <ActionPills active={activeAction} loading={loading} onSelect={handleSelectAction} />
+            {/* Floating Scroll to Bottom Button */}
+            {messages.length > 1 && (
+              <button
+                type="button"
+                onClick={() => messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })}
+                title="Scroll to latest response"
+                className="absolute bottom-28 right-8 z-40 inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-orange-500 to-amber-500 text-white px-3.5 py-1.5 text-xs font-semibold shadow-warm-lg hover:scale-105 hover:-translate-y-0.5 active:scale-95 transition-all duration-200 cursor-pointer animate-pop-in border border-white/30 backdrop-blur-md"
+              >
+                <ArrowDown className="h-3.5 w-3.5" />
+                <span>Latest</span>
+              </button>
+            )}
+
+            {/* Sticky Bottom Input Bar with Embedded Feature Chips */}
+            <div className="sticky bottom-0 z-30 w-full bg-gradient-to-t from-[var(--app-gradient)] via-white/20 to-transparent dark:from-[#0c0c0e]/95 dark:via-[#0c0c0e]/60 dark:to-transparent backdrop-blur-md py-4 px-4 sm:px-8 transition-colors duration-300">
+              <div className="max-w-4xl mx-auto">
                 <CodeInputBar
                   code={code}
                   onChange={setCode}
@@ -371,7 +403,7 @@ export function OptimizerApp() {
                   onLanguageChange={setLanguage}
                   onSubmit={handleSubmit}
                   loading={loading}
-                  hasActiveAction={activeAction !== null}
+                  activeAction={activeAction}
                   onSelectAction={handleSelectAction}
                 />
               </div>

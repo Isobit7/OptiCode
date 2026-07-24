@@ -205,18 +205,21 @@ def explain(
         system_prompt = (
             "You are a principal software architect. Provide a deep, technical explanation "
             "of the provided code. Analyze low-level execution behavior, algorithmic complexity "
-            "(Big-O time and space bounds), memory patterns, edge case vulnerabilities, and architectural design."
+            "(Big-O time and space bounds), memory patterns, edge case vulnerabilities, and architectural design. "
+            "Format your response using clean Markdown with section headings (###), bullet points (-), bold key terms, and code snippets."
         )
     elif depth_level == "intermediate":
         system_prompt = (
             "You are a senior developer. Provide a clear, structured technical explanation "
-            "of the code. Detail data structures, function calls, control flow, and practical performance considerations."
+            "of the code. Detail data structures, function calls, control flow, and practical performance considerations. "
+            "Format your response using clean Markdown with section headings (###), bullet points (-), bold key terms, and code snippets."
         )
     else:
         depth_level = "beginner"
         system_prompt = (
             "You are an expert programming mentor. Provide a plain-language, beginner-friendly "
-            "explanation of the provided code. Break down key logic step-by-step using clear, intuitive analogies."
+            "explanation of the provided code. Break down key logic step-by-step using clear, intuitive analogies. "
+            "Format your response using clean Markdown with section headings (###), bullet points (-), bold key terms, and code snippets."
         )
 
     prompt = f"Language: {detected}\nDepth Level: {depth_level}\n\nCode:\n```{detected}\n{code}\n```"

@@ -95,6 +95,36 @@ code-optimizer-explainer/
 ## 9. Changelog
 *(Newest entry on top. One line per change — date + what changed + why, if non-obvious.)*
 
+| 2026-07-24 | Redesigned header title into a ChatGPT-style `OptiCode ▾` model selector dropdown listing Explainer Models (Standard, Beginner, Pro Architect) and Humanizer Modes (De-AI, Idiomatic, Simplified) as rich option rows with checkmarks (`✓`) in PreferencesDropdown.tsx & OptimizerApp.tsx |
+| 2026-07-24 | Added glassmorphic `PreferencesDropdown` button next to `OptiCode` header title allowing dynamic selection of Explainer Depth (Beginner, Intermediate, Advanced) and Humanizer Style (De-AI Natural, Idiomatic Clean, Simplified) passed directly to backend requests in PreferencesDropdown.tsx, backend.ts, & OptimizerApp.tsx |
+| 2026-07-24 | Positioned `History` and `Saved` navigation bar buttons directly in the sidebar footer right above the `Settings` bar button in SidebarHistory.tsx |
+| 2026-07-24 | Separated History and Saved into distinct, stacked full-width navigation bar buttons (`[ 🕒 History (7) ]` and `[ ⭐ Saved (0) ]`) in SidebarHistory.tsx |
+| 2026-07-24 | Cleaned collapsed sidebar rail: removed history items from collapsed state (`if (collapsed) return null`) so rail contains only expand, new session, and settings controls in SidebarHistory.tsx |
+| 2026-07-24 | Restored original vibrant orange and pink background gradient (`style={{ background: "var(--app-gradient)" }}`) while retaining all surface depth, warm shadows, 2-tier font hierarchy, pill micro-interactions, and floating scroll pill button in OptimizerApp.tsx |
+| 2026-07-24 | Completed 7-point design system overhaul: radial mesh gradient + SVG grain texture overlay, warm palette shadows (`shadow-warm-md`), 2-tier font hierarchy, locked radius scale (8px/16px/24px), warm outline action pills with hover lift, and refined glass scroll button across OptimizerApp, SidebarHistory, ActionPills, CodeInputBar, & ResultsPanel |
+| 2026-07-24 | Integrated professional AI MarkdownRenderer: parses bullet points with accent dots, numbered steps, section headers (`###`), inline code badges, and code blocks in ResultsPanel.tsx & client.py |
+| 2026-07-24 | Redesigned output cards to theme-aware ambient glassmorphism (`bg-white/80 dark:bg-[#121620]/95 backdrop-blur-2xl`) matching the exact background palette vibe in ResultsPanel.tsx |
+| 2026-07-24 | Expanded text blocks to display 100% full content: removed `max-w-2xl`, `max-h-48`, `max-h-[500px]`, and `max-w-[110px]` height/width restrictions in ResultsPanel.tsx & SidebarHistory.tsx |
+| 2026-07-24 | Positioned vertical scrollbar on the far right edge of the full-width workspace container (instead of centered in the middle of max-w-4xl) in OptimizerApp.tsx |
+| 2026-07-24 | Enabled visible sleek up-down scrollbar (`6px rgba(249, 115, 22, 0.45)` thumb) and added floating scroll-to-bottom button (`<ArrowDown />`) in OptimizerApp.tsx & styles.css |
+| 2026-07-24 | Enabled multi-turn chat conversation stream: every submission appends a new message turn, automatically clears input box (`setCode("")`) for next input, and scrolls down smoothly in OptimizerApp.tsx & ResultsPanel.tsx |
+| 2026-07-24 | Eliminated ugly native browser scrollbars globally: added custom thin 4px scrollbar styling and `.no-scrollbar` utilities across workspace containers in styles.css & OptimizerApp.tsx |
+| 2026-07-24 | Matched bottom sticky bar background directly to page color palette gradient (`bg-gradient-to-t from-[var(--app-gradient)]`) removing all borders for seamless floating card aesthetic in OptimizerApp.tsx |
+| 2026-07-24 | Fixed black background box around bottom sticky input bar by switching container to theme-aware glassmorphism (`bg-white/40 dark:bg-[#0d1017]/95`) in OptimizerApp.tsx |
+| 2026-07-24 | Redesigned history items to thin, single-line slides with truncated code previews, relative time tags, and slide hover micro-interactions in SidebarHistory.tsx |
+| 2026-07-24 | Updated header title **OptiCode** to solid pure white text (`text-white font-black drop-shadow-md`) across all themes in OptimizerApp.tsx |
+| 2026-07-24 | Updated header title **OptiCode** to crisp bold white text (`text-zinc-900 dark:text-white font-extrabold`) in OptimizerApp.tsx |
+| 2026-07-24 | Styled header title **OptiCode** with sunset orange-amber gradient (`from-orange-500 via-amber-500 to-rose-500 bg-clip-text text-transparent`) matching the design color palette in OptimizerApp.tsx |
+| 2026-07-24 | Placed bold **OptiCode** branding title on the left side of top main workspace header bar in OptimizerApp.tsx |
+| 2026-07-24 | Removed "OptiCode" text from sidebar top header in SidebarHistory.tsx, displaying only the clean logo icon |
+| 2026-07-24 | Created dedicated Settings bar button in sidebar footer with expandable drawer housing Theme mode selector (Light/Dark), session stats, and export/clear controls |
+| 2026-07-24 | Redesigned ResultsPanel.tsx to match Claude AI conversation thread UI: right-aligned user input chat bubble, left-aligned markdown/code AI stream block with thought summary badge and copy buttons |
+| 2026-07-24 | Separated History and Starred into two dedicated sidebar tabs with individual item counter badges, dynamic search placeholders, and tailored empty states in SidebarHistory.tsx |
+| 2026-07-24 | Removed Templates tab and template rendering section from SidebarHistory.tsx, leaving clean History & Starred navigation tabs |
+| 2026-07-24 | Reduced sidebar width from w-72 sm:w-80 down to slim w-56 sm:w-64 with compact padding and font styling in SidebarHistory.tsx |
+| 2026-07-24 | Updated SidebarHistory header: removed OptiCode and Dashboard (0) text, placed interactive Settings button directly next to the logo |
+| 2026-07-24 | Added Refined & Snappy micro-interactions (pop-in popover animations, tactile button feedback 150ms cubic-bezier, shimmer loading waves) and prefers-reduced-motion accessibility support in styles.css & CodeInputBar.tsx |
+| 2026-07-24 | Implemented BeeBot two-panel workspace layout pattern: attached action chips inside CodeInputBar border, dynamic submit button labels (e.g. EXPLAIN, PRETTIFY), and grouped history sessions (Today, Last 7 Days, Older) in SidebarHistory.tsx |
 | 2026-07-24 | Added Notion/Slack-style Slash Commands popover menu (/explain, /humanize, /prettify, /shorten, /seo, /alternatives) with keyboard selection (Arrow keys + Enter/Tab) in CodeInputBar.tsx |
 | 2026-07-24 | Implemented ChatGPT-style layout transition in OptimizerApp.tsx: anchored CodeInputBar + ActionPills to sticky bottom dock when response is active, rendering ResultsPanel in top viewport |
 | 2026-07-24 | Integrated full React frontend application from frontendopticode into OptiCode/code-optimizer-explainer/frontend, connecting UI components and SignInModal to backend auth, sessions, and AI APIs |
