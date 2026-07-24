@@ -6,7 +6,7 @@ import { SidebarHistory, type HistoryItem } from "./SidebarHistory";
 import { SignInModal } from "./SignInModal";
 import { PreferencesDropdown, type ExplainDepth, type HumanizeMode } from "./PreferencesDropdown";
 import { SettingsModal } from "./SettingsModal";
-import { Dashboard } from "./Dashboard";
+import { DashboardCards } from "./DashboardCards";
 import { runAction, fetchCurrentUser, logoutUser, fetchHistory, type ActionId, type ActionResult } from "@/api/backend";
 import { Sun, Moon, PanelLeft, LogOut, UserRound, Settings } from "lucide-react";
 
@@ -284,7 +284,7 @@ export function OptimizerApp() {
         </header>
 
         {history.length > 0 && (
-          <Dashboard totalSessions={history.length} totalLines={totalLines} recentAction={recentAction} />
+          <DashboardCards totalSessions={history.length} totalLines={totalLines} recentAction={recentAction} />
         )}
 
         {!hasActiveContent ? (
