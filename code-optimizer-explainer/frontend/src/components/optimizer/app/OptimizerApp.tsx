@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useState, useRef } from "react";
-import { CodeInputBar } from "./CodeInputBar";
-import { ActionPills } from "./ActionPills";
-import { ResultsPanel, type ChatMessage } from "./ResultsPanel";
-import { SidebarHistory, type HistoryItem } from "./SidebarHistory";
-import { SignInModal } from "./SignInModal";
-import { PreferencesDropdown, type ExplainDepth, type HumanizeMode } from "./PreferencesDropdown";
-import { SettingsModal } from "./SettingsModal";
-import { DashboardCards } from "./DashboardCards";
+import { CodeInputBar } from "../input/CodeInputBar";
+import { ActionPills } from "../input/ActionPills";
+import { ResultsPanel, type ChatMessage } from "../results/ResultsPanel";
+import { SidebarHistory, type HistoryItem } from "../sidebar/SidebarHistory";
+import { SignInModal } from "../modals/SignInModal";
+import { PreferencesDropdown, type ExplainDepth, type HumanizeMode } from "../modals/PreferencesDropdown";
+import { SettingsModal } from "../modals/SettingsModal";
+import { DashboardCards } from "../dashboard/DashboardCards";
 import { runAction, fetchCurrentUser, logoutUser, fetchHistory, type ActionId, type ActionResult } from "@/api/backend";
 import { Sun, Moon, PanelLeft, LogOut, UserRound, Settings } from "lucide-react";
 

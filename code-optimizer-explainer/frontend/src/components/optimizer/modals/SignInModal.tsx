@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { X, LogIn, UserPlus } from "lucide-react";
-import { registerUser, loginUser, loginGoogle } from "../../api/backend";
+import { registerUser, loginUser, loginGoogle } from "../../../api/backend";
 
 interface SignInModalProps {
   isOpen: boolean;

@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import type { ActionResult } from "@/api/backend";
+import type { ReactNode } from "react";
 import { Copy } from "lucide-react";
 
 export interface ChatMessage {
