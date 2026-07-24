@@ -1,9 +1,11 @@
 # MEMORY.md
+
 ## Persistent Project Memory — Auto-Updated
 
 > ⚠️ **MANDATORY INSTRUCTION FOR ANY AI ASSISTANT WORKING IN THIS REPO** (Claude Code, Cursor, Copilot, etc.):
 >
 > This file is the single source of truth for project context. You MUST:
+>
 > 1. **Read this entire file before doing any work**, every session.
 > 2. **After making ANY change** — new feature, architecture decision, tech stack swap, file added/removed, bug fix that changes behavior, decision the user makes — **update this file in the same turn**, before ending your response. Do not wait to be asked.
 > 3. Update the specific section that changed (Sections 3-7 below), and add one line to the **Changelog** (Section 9) with the date and what changed.
@@ -83,6 +85,9 @@ code-optimizer-explainer/
 ## 8. Reference Docs In This Repo
 
 - `PRD_Code_Optimizer_Explainer.md` — full product requirements
+- `PROJECT_SYSTEM_OVERVIEW_AND_REQUEST_FLOW.md` — visual system overview, sequence diagrams, component map, and request lifecycle
+- `OPTICODE_FULL_SPECIFICATION_MASTER.md` — single master document containing all 3 specs verbatim (Dashboard Specs, Zero Disturbance UX, Product Roadmap)
+- `ZERO_DISTURBANCE_UX_AND_STANDOUT_FEATURES.md` — technical architecture for zero-error resilience and standout features
 - `PRODUCT_ROADMAP.md` — strategic roadmap detailing security scanner, PR summary, translator, and flowchart features
 - `FRONTEND_DASHBOARD_SPECS.md` — UI buttons, controls, and API response contracts for frontend developer
 - `Tech_Stack_Options.md` — why this stack was chosen
@@ -94,6 +99,14 @@ code-optimizer-explainer/
 
 | Date | Change |
 |---|---|
+| 2026-07-24 | Added WhatsApp OTP authentication (`/api/auth/whatsapp/send-otp`, `/api/auth/whatsapp/verify`) storing user profiles (`auth_provider="whatsapp"`), active sessions, and cookies in DB |
+| 2026-07-24 | Integrated Email, Google OAuth, and Phone SMS OTP authentication with database storage for user profiles (`user_profiles`), active sessions, and cookie token metadata (`user_sessions`) in backend |
+| 2026-07-24 | Created PROJECT_SYSTEM_OVERVIEW_AND_REQUEST_FLOW.md detailing full system architecture, Mermaid sequence diagrams, component maps, and request lifecycles |
+| 2026-07-24 | Integrated Triple Provider Architecture (Groq API Primary -> Google Gemini 2.5 Flash Secondary -> OpenRouter Pool Tertiary) in backend/app/llm_interface/client.py |
+| 2026-07-24 | Expanded LLM fallback model chain to 6 high-capacity free models (Llama 3.3 70B, DeepSeek R1, Qwen 2.5 Coder, Gemma 2, Mistral 7B, Poolside) to prevent 429 rate limit failures |
+| 2026-07-24 | Created OPTICODE_FULL_SPECIFICATION_MASTER.md consolidating Dashboard Specs, Zero Disturbance UX Architecture, and Product Roadmap into one complete document |
+| 2026-07-24 | Created MASTER_SYSTEM_AND_PRODUCT_SPECIFICATION.md combining Dashboard Specs, Zero Disturbance UX Architecture, and Product Roadmap into a single master document |
+| 2026-07-24 | Added ZERO_DISTURBANCE_UX_AND_STANDOUT_FEATURES.md detailing multi-tier failovers, React Error Boundaries, and standout features |
 | 2026-07-24 | Added PRODUCT_ROADMAP.md detailing Security Audit, Code Translator, PR Reviewer, and Logic Flowcharts |
 | 2026-07-24 | Added FRONTEND_DASHBOARD_SPECS.md for frontend developer integration |
 | 2026-07-24 | Added explanation depth levels, humanize modes, structured alternatives with Big-O bounds, SEO 0-100 scoring, and 9-test backend test suite |

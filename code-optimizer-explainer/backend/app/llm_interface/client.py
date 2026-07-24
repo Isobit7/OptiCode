@@ -13,7 +13,14 @@ LLM_API_KEY: Optional[str] = os.getenv("LLM_API_KEY")
 LLM_API_URL: str = os.getenv(
     "LLM_API_URL", "https://openrouter.ai/api/v1/chat/completions"
 )
-DEFAULT_MODELS: str = "poolside/laguna-s-2.1:free,google/gemma-4-31b-it:free"
+DEFAULT_MODELS: str = (
+    "meta-llama/llama-3.3-70b-instruct:free,"
+    "deepseek/deepseek-r1:free,"
+    "qwen/qwen-2.5-coder-32b-instruct:free,"
+    "google/gemma-2-9b-it:free,"
+    "mistralai/mistral-7b-instruct:free,"
+    "poolside/laguna-s-2.1:free"
+)
 
 
 def detect_language(code: str, language: Optional[str] = None) -> str:
@@ -60,59 +67,131 @@ def detect_language(code: str, language: Optional[str] = None) -> str:
 
 
 def _call_model(prompt: str, system_prompt: Optional[str] = None) -> str:
-    """Sends prompt to the configured LLM API provider, trying primary and fallback models."""
-    api_key = os.getenv("LLM_API_KEY") or os.getenv("OPENROUTER_API_KEY")
-    if not api_key:
-        logger.warning("LLM_API_KEY environment variable is missing. Returning stub.")
-        return "[STUB] Set LLM_API_KEY in environment to enable real LLM responses."
+    """Sends prompt to configured LLM providers (Groq first for <500ms speed, Google Gemini 2nd, OpenRouter 3rd)."""
+    groq_key = os.getenv("GROQ_API_KEY")
+    gemini_key = os.getenv("GEMINI_API_KEY")
+    openrouter_key = os.getenv("LLM_API_KEY") or os.getenv("OPENROUTER_API_KEY")
 
-    headers: Dict[str, str] = {
-        "Authorization": f"Bearer {api_key}",
-        "Content-Type": "application/json",
-        "HTTP-Referer": "https://github.com/code-optimizer-explainer",
-        "X-Title": "Code Optimizer & Explainer",
-    }
+    if not groq_key and not gemini_key and not openrouter_key:
+        logger.warning("No LLM API keys configured. Returning stub.")
+        return "[STUB] Set GROQ_API_KEY, GEMINI_API_KEY, or LLM_API_KEY in environment to enable real LLM responses."
 
     messages: List[Dict[str, str]] = []
     if system_prompt:
         messages.append({"role": "system", "content": system_prompt})
     messages.append({"role": "user", "content": prompt})
 
-    raw_models = os.getenv("LLM_MODEL_NAME", DEFAULT_MODELS)
-    model_candidates = [m.strip() for m in raw_models.split(",") if m.strip()]
-
     last_error: Optional[str] = None
 
-    for model_name in model_candidates:
-        payload: Dict[str, Any] = {
-            "model": model_name,
-            "messages": messages,
-            "temperature": 0.2,
+    # Provider 1: Try Groq API (Ultra-Fast <500ms LPU Inference)
+    if groq_key:
+        groq_url = "https://api.groq.com/openai/v1/chat/completions"
+        groq_headers = {
+            "Authorization": f"Bearer {groq_key}",
+            "Content-Type": "application/json",
         }
+        raw_groq_models = os.getenv(
+            "GROQ_MODELS",
+            "llama-3.3-70b-versatile,deepseek-r1-distill-llama-70b,llama3-8b-8192",
+        )
+        groq_models = [m.strip() for m in raw_groq_models.split(",") if m.strip()]
 
-        try:
-            logger.info(f"Attempting LLM call with model: {model_name}")
-            with httpx.Client(timeout=45.0) as client:
-                response = client.post(LLM_API_URL, headers=headers, json=payload)
-                if response.status_code == 200:
-                    data = response.json()
-                    choices = data.get("choices", [])
-                    if choices and len(choices) > 0:
-                        logger.info(f"LLM call succeeded with model: {model_name}")
-                        return choices[0]["message"]["content"].strip()
+        for g_model in groq_models:
+            payload = {
+                "model": g_model,
+                "messages": messages,
+                "temperature": 0.2,
+            }
+            try:
+                logger.info(f"Attempting Groq API call with model: {g_model}")
+                with httpx.Client(timeout=15.0) as client:
+                    response = client.post(groq_url, headers=groq_headers, json=payload)
+                    if response.status_code == 200:
+                        data = response.json()
+                        choices = data.get("choices", [])
+                        if choices and len(choices) > 0:
+                            logger.info(f"Groq API call succeeded with model: {g_model}")
+                            return choices[0]["message"]["content"].strip()
+                    logger.warning(
+                        f"Groq model {g_model} returned HTTP {response.status_code}: {response.text}"
+                    )
+                    last_error = f"Groq {g_model} HTTP {response.status_code}: {response.text}"
+            except Exception as err:
+                logger.warning(f"Failed attempt with Groq model {g_model}: {err}")
+                last_error = str(err)
 
-                logger.warning(
-                    f"Model {model_name} returned HTTP {response.status_code}: {response.text}"
-                )
-                last_error = (
-                    f"Model {model_name} HTTP {response.status_code}: {response.text}"
-                )
+    # Provider 2: Try Google Gemini API (Google AI Studio)
+    if gemini_key:
+        raw_gemini_models = os.getenv("GEMINI_MODELS", "gemini-2.5-flash,gemini-1.5-flash")
+        gemini_models = [m.strip() for m in raw_gemini_models.split(",") if m.strip()]
 
-        except Exception as err:
-            logger.warning(f"Failed attempt with model {model_name}: {err}")
-            last_error = str(err)
+        full_user_text = prompt
+        if system_prompt:
+            full_user_text = f"System Instruction: {system_prompt}\n\nUser Prompt: {prompt}"
 
-    raise RuntimeError(f"All configured LLM models failed. Last error: {last_error}")
+        for g_model in gemini_models:
+            url = f"https://generativelanguage.googleapis.com/v1beta/models/{g_model}:generateContent?key={gemini_key}"
+            payload = {
+                "contents": [{"parts": [{"text": full_user_text}]}],
+                "generationConfig": {"temperature": 0.2},
+            }
+            try:
+                logger.info(f"Attempting Gemini API call with model: {g_model}")
+                with httpx.Client(timeout=15.0) as client:
+                    response = client.post(url, json=payload)
+                    if response.status_code == 200:
+                        data = response.json()
+                        candidates = data.get("candidates", [])
+                        if candidates and len(candidates) > 0:
+                            parts = candidates[0].get("content", {}).get("parts", [])
+                            if parts and "text" in parts[0]:
+                                logger.info(f"Gemini API call succeeded with model: {g_model}")
+                                return parts[0]["text"].strip()
+                    logger.warning(
+                        f"Gemini model {g_model} returned HTTP {response.status_code}: {response.text}"
+                    )
+                    last_error = f"Gemini {g_model} HTTP {response.status_code}: {response.text}"
+            except Exception as err:
+                logger.warning(f"Failed attempt with Gemini model {g_model}: {err}")
+                last_error = str(err)
+
+    # Provider 3: Fallback to OpenRouter Multi-Model Pool
+    if openrouter_key:
+        headers = {
+            "Authorization": f"Bearer {openrouter_key}",
+            "Content-Type": "application/json",
+            "HTTP-Referer": "https://github.com/code-optimizer-explainer",
+            "X-Title": "Code Optimizer & Explainer",
+        }
+        raw_models = os.getenv("LLM_MODEL_NAME", DEFAULT_MODELS)
+        model_candidates = [m.strip() for m in raw_models.split(",") if m.strip()]
+
+        for model_name in model_candidates:
+            payload = {
+                "model": model_name,
+                "messages": messages,
+                "temperature": 0.2,
+            }
+            try:
+                logger.info(f"Attempting OpenRouter LLM call with model: {model_name}")
+                with httpx.Client(timeout=30.0) as client:
+                    response = client.post(LLM_API_URL, headers=headers, json=payload)
+                    if response.status_code == 200:
+                        data = response.json()
+                        choices = data.get("choices", [])
+                        if choices and len(choices) > 0:
+                            logger.info(f"OpenRouter LLM call succeeded with model: {model_name}")
+                            return choices[0]["message"]["content"].strip()
+
+                    logger.warning(
+                        f"OpenRouter model {model_name} returned HTTP {response.status_code}: {response.text}"
+                    )
+                    last_error = f"OpenRouter model {model_name} HTTP {response.status_code}: {response.text}"
+            except Exception as err:
+                logger.warning(f"Failed attempt with OpenRouter model {model_name}: {err}")
+                last_error = str(err)
+
+    raise RuntimeError(f"All configured LLM providers failed. Last error: {last_error}")
 
 
 def explain(

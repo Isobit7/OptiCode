@@ -107,6 +107,7 @@ class UserRegisterRequest(BaseModel):
     password: str = Field(
         ..., min_length=6, description="User password (minimum 6 characters)."
     )
+    full_name: Optional[str] = Field(None, description="Optional full name of the user.")
 
 
 class UserLoginRequest(BaseModel):
@@ -114,13 +115,47 @@ class UserLoginRequest(BaseModel):
     password: str = Field(..., description="User password.")
 
 
-class AuthResponse(BaseModel):
-    access_token: str = Field(..., description="JWT access token.")
-    token_type: str = Field("bearer", description="Token type.")
-    user_id: str = Field(..., description="Authenticated user ID.")
-    email: str = Field(..., description="User email address.")
+class GoogleAuthRequest(BaseModel):
+    id_token: Optional[str] = Field(None, description="Google OAuth ID Token or Access Token.")
+    access_token: Optional[str] = Field(None, description="Google Access Token.")
+    email: Optional[str] = Field(None, description="User email provided by Google Auth.")
+    full_name: Optional[str] = Field(None, description="User full name from Google profile.")
+    avatar_url: Optional[str] = Field(None, description="User avatar image URL.")
+
+
+
+
+class SessionInfo(BaseModel):
+    session_id: str = Field(..., description="Unique database session ID.")
+    session_token: str = Field(..., description="Session token string.")
+    access_token: str = Field(..., description="Access token string.")
+    auth_provider: str = Field("email", description="Authentication provider used (email, google, phone).")
+    user_agent: Optional[str] = Field(None, description="Client browser user-agent.")
+    ip_address: Optional[str] = Field(None, description="Client IP address.")
+    cookie_data: Optional[dict] = Field(default_factory=dict, description="Session cookie parameters.")
+    created_at: Optional[str] = Field(None, description="Session creation timestamp.")
+    expires_at: Optional[str] = Field(None, description="Session expiration timestamp.")
 
 
 class UserResponse(BaseModel):
     user_id: str = Field(..., description="User ID.")
-    email: str = Field(..., description="User email address.")
+    email: Optional[str] = Field(None, description="User email address.")
+    phone_number: Optional[str] = Field(None, description="User phone number.")
+    full_name: Optional[str] = Field(None, description="User full name.")
+    avatar_url: Optional[str] = Field(None, description="User avatar URL.")
+    auth_provider: str = Field("email", description="Authentication provider (email, google, phone).")
+    created_at: Optional[str] = Field(None, description="Profile creation timestamp.")
+    last_login: Optional[str] = Field(None, description="Last login timestamp.")
+
+
+class AuthResponse(BaseModel):
+    access_token: str = Field(..., description="JWT access token.")
+    token_type: str = Field("bearer", description="Token type.")
+    user_id: str = Field(..., description="Authenticated user ID.")
+    email: Optional[str] = Field(None, description="User email address.")
+    phone_number: Optional[str] = Field(None, description="User phone number.")
+    session_token: str = Field(..., description="Session token stored in DB and cookies.")
+    auth_provider: str = Field("email", description="Auth method used.")
+    user: Optional[UserResponse] = Field(None, description="Detailed user profile model.")
+    session_info: Optional[SessionInfo] = Field(None, description="Detailed session and cookie model.")
+

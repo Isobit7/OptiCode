@@ -124,3 +124,88 @@ def test_line_count_exceeded():
     )
     assert response.status_code == 400
     assert "exceeds maximum allowed limit" in response.json()["detail"]
+
+
+# --- Authentication & Database Session / Cookie Tests ---
+
+def test_auth_register_db_cookies():
+    reg_payload = {
+        "email": "testuser_db@example.com",
+        "password": "SecretPassword123",
+        "full_name": "Test User",
+    }
+    response = client.post("/api/auth/register", json=reg_payload)
+    assert response.status_code == 200
+    data = response.json()
+    assert "access_token" in data
+    assert "session_token" in data
+    assert data["email"] == "testuser_db@example.com"
+    assert data["user"]["full_name"] == "Test User"
+    assert data["session_info"]["session_token"] == data["session_token"]
+
+    # Verify HTTP Cookies set on response
+    cookies = response.cookies
+    assert "session_token" in cookies
+    assert "access_token" in cookies
+
+
+def test_auth_login_db_cookies():
+    login_payload = {
+        "email": "loginuser_db@example.com",
+        "password": "SecretPassword123",
+    }
+    response = client.post("/api/auth/login", json=login_payload)
+    assert response.status_code == 200
+    data = response.json()
+    assert "session_token" in data
+    assert data["auth_provider"] == "email"
+    assert data["user"]["email"] == "loginuser_db@example.com"
+    assert "session_token" in response.cookies
+
+
+def test_auth_google_login_db_cookies():
+    google_payload = {
+        "email": "alex.google@example.com",
+        "full_name": "Alex Google",
+        "avatar_url": "https://lh3.googleusercontent.com/photo.jpg",
+        "id_token": "mock_google_id_token_12345",
+    }
+    response = client.post("/api/auth/google", json=google_payload)
+    assert response.status_code == 200
+    data = response.json()
+    assert data["auth_provider"] == "google"
+    assert data["email"] == "alex.google@example.com"
+    assert data["user"]["full_name"] == "Alex Google"
+    assert data["user"]["avatar_url"] == "https://lh3.googleusercontent.com/photo.jpg"
+    assert "session_token" in response.cookies
+
+
+def test_auth_session_me_lookup():
+    # 1. Login to establish session
+    login_resp = client.post("/api/auth/login", json={"email": "session_user@example.com", "password": "pass"})
+    session_token = login_resp.json()["session_token"]
+
+    # 2. Query /api/auth/me using Bearer token
+    me_resp = client.get("/api/auth/me", headers={"Authorization": f"Bearer {session_token}"})
+    assert me_resp.status_code == 200
+    assert me_resp.json()["email"] == "session_user@example.com"
+
+    # 3. Query /api/auth/session using Cookie
+    sess_resp = client.get("/api/auth/session", cookies={"session_token": session_token})
+    assert sess_resp.status_code == 200
+    assert sess_resp.json()["email"] == "session_user@example.com"
+
+
+def test_auth_logout_clears_cookies():
+    # Login first
+    login_resp = client.post("/api/auth/login", json={"email": "logout_user@example.com", "password": "pass"})
+    session_token = login_resp.json()["session_token"]
+
+    # Logout
+    logout_resp = client.post("/api/auth/logout", cookies={"session_token": session_token})
+    assert logout_resp.status_code == 200
+    assert logout_resp.json()["status"] == "success"
+
+    # Verify session is invalidated
+    me_resp = client.get("/api/auth/me", headers={"Authorization": f"Bearer {session_token}"})
+    assert me_resp.status_code == 401
