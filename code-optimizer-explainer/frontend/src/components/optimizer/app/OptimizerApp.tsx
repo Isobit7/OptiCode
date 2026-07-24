@@ -285,7 +285,7 @@ export function OptimizerApp() {
           </div>
         </header>
 
-<DashboardCards totalSessions={history.length} totalLines={totalLines} recentAction={recentAction} />
+<DashboardCards totalSessions={history.length} totalLines={totalLines} recentAction={recentAction} history={history} />
 
         {!hasActiveContent ? (
           <div className="flex-1 flex flex-col items-center justify-center px-4 sm:px-8 max-w-3xl mx-auto w-full gap-8">
