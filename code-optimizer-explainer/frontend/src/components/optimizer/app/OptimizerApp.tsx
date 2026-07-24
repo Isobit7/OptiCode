@@ -203,7 +203,9 @@ export function OptimizerApp() {
   const recentAction = history[0]?.action;
 
   return (
-    <div className="flex h-screen w-full bg-background text-foreground overflow-hidden">
+    <div className="relative flex h-screen w-full bg-background text-foreground overflow-hidden">
+        {/* Animated background gradient */}
+        <div className="absolute inset-0 pointer-events-none animate-shimmer bg-gradient-to-r from-orange-500/10 via-pink-500/10 to-orange-500/10 opacity-30" />
       <SidebarHistory
         history={Array.isArray(history) ? history : []}
         activeId={activeHistoryId}
