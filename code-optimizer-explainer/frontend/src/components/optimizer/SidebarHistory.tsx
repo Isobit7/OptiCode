@@ -353,7 +353,7 @@ export function SidebarHistory({
               if (items.length === 0 || collapsed) return null;
               return (
                 <div key={title} className="space-y-1 mt-2">
-                  <div className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 px-1 pt-1">
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)] px-1 pt-1 font-mono">
                     {title} ({items.length})
                   </div>
                   {items.map((item) => {
@@ -365,36 +365,37 @@ export function SidebarHistory({
                         key={item.id}
                         onClick={() => onSelectHistory(item)}
                         className={[
-                          "group relative flex items-center justify-between gap-2 py-1.5 px-2.5 rounded-xl border transition-all duration-200 cursor-pointer text-left backdrop-blur-md hover:translate-x-0.5 shadow-2xs",
+                          "group relative flex items-center justify-between gap-2 py-1.5 px-2.5 rounded-lg border transition-colors duration-150 cursor-pointer text-left shadow-2xs",
                           isSelected
-                            ? "bg-zinc-900/90 text-white border-zinc-700/80 shadow-sm font-semibold"
-                            : "bg-white/30 border-white/40 text-zinc-900 hover:bg-white/60 hover:border-white/70 hover:shadow-xs",
+                            ? "bg-[var(--accent-muted)] text-[var(--accent)] border-[var(--accent)] font-bold shadow-xs"
+                            : "bg-[var(--bg-surface)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:bg-[var(--bg-surface-alt)] hover:text-[var(--text-primary)] hover:border-[var(--border-default)]",
                         ].join(" ")}
                       >
                         <div className="flex items-center gap-2 min-w-0 flex-1">
                           <Icon
                             className={
-                              isSelected ? "h-3.5 w-3.5 shrink-0 text-orange-400" : "h-3.5 w-3.5 shrink-0 text-orange-600"
+                              isSelected ? "h-3.5 w-3.5 shrink-0 text-[var(--accent)]" : "h-3.5 w-3.5 shrink-0 text-[var(--text-muted)] group-hover:text-[var(--text-primary)]"
                             }
                           />
                           <div className="min-w-0 flex-1 flex items-center gap-1.5 text-xs">
-                            <span className="font-semibold text-zinc-950 dark:text-white shrink-0">
+                            <span className={isSelected ? "font-bold text-[var(--accent)] shrink-0" : "font-semibold text-[var(--text-primary)] shrink-0"}>
                               {ACTION_LABELS[item.action]}
                             </span>
-                            <span className="text-[11px] text-zinc-500 font-mono truncate flex-1 min-w-0">
+                            <span className={isSelected ? "text-[11px] text-[var(--accent)] opacity-90 font-mono truncate flex-1 min-w-0" : "text-[11px] text-[var(--text-secondary)] font-mono truncate flex-1 min-w-0"}>
                               {item.code.trim() || "Empty snippet"}
                             </span>
                           </div>
                         </div>
 
                         <div className="flex items-center gap-1 shrink-0">
-                          <span className="text-[10px] text-zinc-500 font-mono hidden sm:inline">
+                          <span className="text-[10px] text-[var(--text-muted)] font-mono hidden sm:inline">
                             {formatTime(item.timestamp)}
                           </span>
                           <button
                             type="button"
                             onClick={(e) => onToggleStar(item.id, e)}
                             title={item.starred ? "Unstar item" : "Star item"}
+                            aria-label={item.starred ? "Unstar item" : "Star item"}
                             className="p-1 transition cursor-pointer"
                           >
                             <Star
@@ -403,8 +404,8 @@ export function SidebarHistory({
                                 item.starred
                                   ? "fill-amber-400 text-amber-500"
                                   : isSelected
-                                    ? "text-white/40 hover:text-amber-300"
-                                    : "text-zinc-400 hover:text-amber-500",
+                                    ? "text-[var(--accent)] hover:text-amber-400"
+                                    : "text-[var(--text-muted)] hover:text-amber-500",
                               ].join(" ")}
                             />
                           </button>
@@ -412,10 +413,11 @@ export function SidebarHistory({
                             type="button"
                             onClick={(e) => onDeleteHistory(item.id, e)}
                             title="Delete item"
+                            aria-label="Delete item"
                             className={
                               isSelected
-                                ? "p-1 opacity-0 group-hover:opacity-100 hover:text-red-300 text-white/50 transition cursor-pointer"
-                                : "p-1 opacity-0 group-hover:opacity-100 hover:text-red-500 text-zinc-500 transition cursor-pointer"
+                                ? "p-1 opacity-0 group-hover:opacity-100 hover:text-red-400 text-[var(--accent)] transition cursor-pointer"
+                                : "p-1 opacity-0 group-hover:opacity-100 hover:text-red-500 text-[var(--text-muted)] transition cursor-pointer"
                             }
                           >
                             <Trash2 className="h-3 w-3" />

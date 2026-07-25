@@ -196,7 +196,7 @@ export function CodeInputBar({
       )}
 
       {/* Composer Card Box — Compact Max Width ~760px Pinned Bottom */}
-      <div className="relative mx-auto w-full rounded-2xl border border-[var(--border-default)] bg-[var(--bg-surface)] p-3 sm:p-3.5 shadow-sm transition-colors duration-150 focus-within:border-[var(--accent)]">
+      <div className={`relative mx-auto w-full rounded-2xl border border-[var(--border-default)] bg-[var(--bg-surface)] p-3 sm:p-3.5 shadow-sm transition-colors duration-150 focus-within:border-[var(--accent)] ${loading ? "composer-loading" : ""}`}>
         {/* Textarea Area — compact min-h 56px auto-growing */}
         <textarea
           ref={textareaRef}
