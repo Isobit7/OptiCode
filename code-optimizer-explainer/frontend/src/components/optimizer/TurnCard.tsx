@@ -35,7 +35,7 @@ function CopyButton({ text }: { text: string }) {
       }}
       className="inline-flex items-center gap-1 rounded px-2 py-0.5 text-[11px] font-mono text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-alt)] transition-colors cursor-pointer border border-[var(--border-subtle)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
     >
-      {copied ? <Check className="h-3 w-3 text-emerald-500" aria-hidden="true" /> : <Copy className="h-3 w-3" aria-hidden="true" />}
+      {copied ? <Check className="h-3 w-3 text-emerald-500 animate-check" aria-hidden="true" /> : <Copy className="h-3 w-3" aria-hidden="true" />}
       <span>{copied ? "Copied" : "Copy"}</span>
     </button>
   );
@@ -208,7 +208,7 @@ export function TurnCard({ message, onRetry }: Props) {
   const lineCount = codeLines.length;
 
   return (
-    <div className="w-full rounded-xl border border-[var(--border-default)] bg-[var(--bg-surface)] overflow-hidden shadow-xs space-y-0 transition-all duration-150">
+    <div className="w-full rounded-xl border border-[var(--border-default)] bg-[var(--bg-surface)] overflow-hidden shadow-xs space-y-0 transition-all duration-200 ease-out animate-turn-card">
       {/* 1. Compact Pasted Code Preview Bar (Top Zone) */}
       <div className="px-4 py-2.5 bg-[var(--bg-surface-alt)] border-b border-[var(--border-subtle)] flex items-center justify-between gap-3">
         <div className="flex items-center gap-2 min-w-0">
@@ -225,17 +225,19 @@ export function TurnCard({ message, onRetry }: Props) {
           <button
             type="button"
             onClick={() => setCodeExpanded(!codeExpanded)}
-            className="flex items-center gap-1 text-[11px] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
+            aria-expanded={codeExpanded}
+            aria-label={codeExpanded ? "Collapse code preview" : "View full code preview"}
+            className="flex items-center gap-1 text-[11px] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] rounded px-1"
           >
             <span>{codeExpanded ? "Collapse code" : "View code"}</span>
-            {codeExpanded ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
+            {codeExpanded ? <ChevronUp className="h-3.5 w-3.5 transition-transform duration-150" /> : <ChevronDown className="h-3.5 w-3.5 transition-transform duration-150" />}
           </button>
         </div>
       </div>
 
-      {/* Expandable Pasted Code Box */}
+      {/* Expandable Pasted Code Box Accordion */}
       {codeExpanded && (
-        <div className="p-4 bg-[var(--bg-base)] border-b border-[var(--border-subtle)] font-mono text-xs overflow-x-auto text-[var(--text-primary)] leading-relaxed">
+        <div className="p-4 bg-[var(--bg-base)] border-b border-[var(--border-subtle)] font-mono text-xs overflow-x-auto text-[var(--text-primary)] leading-relaxed animate-fade-in-down transition-all duration-200">
           <pre>{message.original}</pre>
         </div>
       )}

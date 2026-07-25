@@ -99,6 +99,7 @@ code-optimizer-explainer/
 
 | Date | Change |
 |---|---|
+| 2026-07-25 | Implemented developer-focused animation strategy (`/animate`) with `cubic-bezier(0.16, 1, 0.3, 1)` easing: added `animate-turn-card` keyframe entrance (0.22s, 8px slide + fade), `animate-check` checkmark bounce on copy, accordion expand/collapse transitions (`transition-all duration-200 ease-out`), popIn popover entrance, and active press scale feedback |
 | 2026-07-25 | Performed comprehensive final polish pass (`/polish`) using `ui-ux-pro-max` guidelines: added ARIA roles & tablist semantics (`role="tablist"`, `role="tab"`, `aria-selected`), explicit `aria-label`s on all interactive buttons, visible focus rings (`focus-visible:ring-2 focus-visible:ring-[var(--accent)]`), min touch target sizes, prefers-reduced-motion accessibility rules, and eliminated residual blur/glass classes in `SidebarHistory.tsx` |
 | 2026-07-25 | Updated light mode color tokens in `styles.css` with exact `#ededed` palette (`--bg-base: #ededed`, `--bg-surface: #e5e5e5`, `--bg-surface-alt: #dedede`, `--border-default: #d1d1d1`, `--border-subtle: #dcdcdc`, `--text-primary: #131313`, `--text-secondary: #646464`, `--text-muted: #949494`) |
 | 2026-07-25 | Updated dark mode color tokens in `styles.css` with exact `#121212` palette (`--bg-base: #121212`, `--bg-surface: #1a1a1a`, `--bg-surface-alt: #212121`, `--border-default: #2e2e2e`, `--border-subtle: #232323`, `--text-primary: #ececec`, `--text-secondary: #9b9b9b`, `--text-muted: #6b6b6b`) |
