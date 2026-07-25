@@ -95,6 +95,7 @@ code-optimizer-explainer/
 ## 9. Changelog
 *(Newest entry on top. One line per change — date + what changed + why, if non-obvious.)*
 
+| 2026-07-25 | Fixed unstyled UI issue: removed `source(none)` from `@import "tailwindcss"` and added `@source "../src"` in `styles.css` so Tailwind v4 scans all components and generates all utility CSS classes (restored full 101.8kB stylesheet) |
 | 2026-07-25 | Fixed frontend build & runtime errors: installed missing dependencies (`framer-motion`, `highlight.js`) via `npm install` and restored missing `:root {` selector wrapper in `styles.css` |
 | 2026-07-25 | Pushed all recent commits and fixes successfully to GitHub repository (`Isobit7/OptiCode.git`) on `main` branch |
 | 2026-07-25 | Brightened "Code" text in header title to match exact warm sunset palette (`#f4914a` / `from-[#f4914a] via-[#ff9e59] to-[#ffb86c]`) in PreferencesDropdown.tsx & styles.css |
