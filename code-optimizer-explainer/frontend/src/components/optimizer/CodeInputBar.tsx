@@ -13,6 +13,7 @@ interface Props {
   loading: boolean;
   activeAction: ActionId | null;
   onSelectAction: (actionId: ActionId) => void;
+  fontSize?: 12 | 14 | 16;
 }
 
 const LANGS = [
@@ -61,6 +62,7 @@ export function CodeInputBar({
   loading,
   activeAction,
   onSelectAction,
+  fontSize = 14,
 }: Props) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [showSlashMenu, setShowSlashMenu] = useState(false);
@@ -207,7 +209,8 @@ export function CodeInputBar({
           placeholder="Paste your code here or type / for AI commands..."
           rows={2}
           spellCheck={false}
-          className="block w-full min-h-[56px] max-h-[220px] resize-y bg-transparent font-mono text-[13px] sm:text-[14px] leading-relaxed outline-none text-[var(--text-primary)] placeholder:text-[var(--text-muted)] transition-colors overflow-y-auto focus:outline-none focus:ring-0 focus-visible:ring-0 border-none p-0"
+          className="block w-full min-h-[56px] max-h-[220px] resize-y bg-transparent font-mono leading-relaxed outline-none text-[var(--text-primary)] placeholder:text-[var(--text-muted)] transition-colors overflow-y-auto focus:outline-none focus:ring-0 focus-visible:ring-0 border-none p-0"
+          style={{ fontSize: `${fontSize}px` }}
         />
 
         {/* Inline Action Selector Row */}

@@ -9,6 +9,7 @@ import { SignInModal } from "./SignInModal";
 import { AnalyticsModal } from "./AnalyticsModal";
 import { KeyboardShortcutsModal } from "./KeyboardShortcutsModal";
 import { PreferencesDropdown, type ExplainDepth, type HumanizeMode } from "./PreferencesDropdown";
+import { useSettings } from "@/hooks/useSettings";
 import { runAction, fetchCurrentUser, logoutUser, fetchHistory, type ActionId, type ActionResult } from "@/api/backend";
 import { Sparkles, UserRound, ShieldCheck, Terminal, LogOut, ArrowDown } from "lucide-react";
 
@@ -31,6 +32,9 @@ export function OptimizerApp() {
   // Preference states for Explainer Depth & Humanizer Mode
   const [explainDepth, setExplainDepth] = useState<ExplainDepth>("intermediate");
   const [humanizeMode, setHumanizeMode] = useState<HumanizeMode>("de-ai");
+
+  // Global user settings (font size, copy-on-submit, etc.) — persisted in localStorage
+  const { settings, updateSetting } = useSettings();
 
   // Theme state: light or dark (SSR safe)
   const [theme, setTheme] = useState<"light" | "dark">("light");
@@ -369,6 +373,8 @@ export function OptimizerApp() {
             onExplainDepthChange={setExplainDepth}
             humanizeMode={humanizeMode}
             onHumanizeModeChange={setHumanizeMode}
+            settings={settings}
+            onSettingChange={updateSetting}
           />
 
           <div className="flex items-center gap-3" />
@@ -398,6 +404,7 @@ export function OptimizerApp() {
                   loading={loading}
                   activeAction={activeAction}
                   onSelectAction={handleSelectAction}
+                  fontSize={settings.fontSize}
                 />
               </div>
             </div>
@@ -431,6 +438,7 @@ export function OptimizerApp() {
                   loading={loading}
                   activeAction={activeAction}
                   onSelectAction={handleSelectAction}
+                  fontSize={settings.fontSize}
                 />
               </div>
             </div>
