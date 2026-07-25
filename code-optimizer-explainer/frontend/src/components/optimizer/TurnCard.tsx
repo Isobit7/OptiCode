@@ -202,6 +202,27 @@ const ACTION_LABELS: Record<ActionId, string> = {
   alternatives: "Alternatives",
 };
 
+const DEV_LOADING_MESSAGES = [
+  "Optimizing Big-O complexity...",
+  "De-spaghettifying nested loops...",
+  "Teaching AI standard language idioms...",
+  "Tidying variable names & comments...",
+  "Refactoring logic bounds...",
+];
+
+function RotatingLoadingText() {
+  const [msgIdx, setMsgIdx] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setMsgIdx((prev) => (prev + 1) % DEV_LOADING_MESSAGES.length);
+    }, 1800);
+    return () => clearInterval(interval);
+  }, []);
+
+  return <span>{DEV_LOADING_MESSAGES[msgIdx]}</span>;
+}
+
 export function TurnCard({ message, onRetry }: Props) {
   const [codeExpanded, setCodeExpanded] = useState(false);
   const codeLines = message.original ? message.original.split("\n") : [];
@@ -244,12 +265,12 @@ export function TurnCard({ message, onRetry }: Props) {
 
       {/* 2. Result Body Zone */}
       <div className="p-4 sm:p-5">
-        {/* Loading Skeleton State */}
+        {/* Loading Skeleton State with Rotating Developer Messages */}
         {message.loading && (
           <div className="space-y-3 animate-pulse">
-            <div className="flex items-center gap-2 text-xs text-[var(--text-muted)] font-mono">
+            <div className="flex items-center gap-2 text-xs text-[var(--text-secondary)] font-mono font-medium">
               <Sparkles className="h-4 w-4 text-[var(--accent)] animate-spin" />
-              <span>Analyzing code snippet...</span>
+              <RotatingLoadingText />
             </div>
             {message.action === "explain" ? (
               <div className="space-y-2 pt-2">

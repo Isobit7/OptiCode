@@ -52,6 +52,19 @@ export function OptimizerApp() {
     }
   }, [theme]);
 
+  // Developer Console Easter Egg
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      console.log(
+        "%c 🚀 OptiCode AI %c Code Optimizer & Explainer \n%c Built for developers. Type '/' in the composer to supercharge your workflow!\n%c Repository: https://github.com/Isobit7/OptiCode.git",
+        "color: #f97316; font-size: 14px; font-weight: bold; padding: 4px 0;",
+        "color: #8b93a7; font-size: 12px; font-weight: bold;",
+        "color: #565d70; font-size: 11px;",
+        "color: #6b6b6b; font-size: 10px; font-style: italic;"
+      );
+    }
+  }, []);
+
   const handleToggleTheme = (e?: React.MouseEvent) => {
     const isDark = theme === "dark";
 
