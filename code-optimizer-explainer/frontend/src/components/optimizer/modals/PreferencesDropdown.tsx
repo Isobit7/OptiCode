@@ -79,13 +79,18 @@ export function PreferencesDropdown({
 
   return (
     <div className="flex items-center gap-2">
-      {/* OptiCode brand title — Opti is white, Code is orange, separate from the trigger */}
+      {/* OptiCode brand title — split Opti (white) and Code (bright palette orange) */}
       <span
-        className="font-headings text-xl sm:text-2xl font-black tracking-tight"
-        style={{ textShadow: "0 1px 8px rgba(0,0,0,0.45), 0 2px 16px rgba(0,0,0,0.25)" }}
+        className="font-headings text-xl sm:text-2xl font-black tracking-tight drop-shadow-md"
+        style={{ textShadow: "0 1px 8px rgba(0,0,0,0.35)" }}
       >
         <span className="text-white">Opti</span>
-        <span className="text-orange-500">Code</span>
+        <span
+          className="bg-gradient-to-r from-[#f4914a] via-[#ff9e59] to-[#ffb86c] bg-clip-text text-transparent"
+          style={{ color: "#f4914a" }}
+        >
+          Code
+        </span>
       </span>
 
       {/* Separate small preferences trigger pill */}

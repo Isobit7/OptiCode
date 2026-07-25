@@ -95,6 +95,17 @@ code-optimizer-explainer/
 ## 9. Changelog
 *(Newest entry on top. One line per change — date + what changed + why, if non-obvious.)*
 
+| 2026-07-25 | Brightened "Code" text in header title to match exact warm sunset palette (`#f4914a` / `from-[#f4914a] via-[#ff9e59] to-[#ffb86c]`) in PreferencesDropdown.tsx & styles.css |
+| 2026-07-25 | Verified active background execution of FastAPI backend (`http://127.0.0.1:8000`) & React Vite frontend (`http://localhost:8080/`) with HMR update for PreferencesDropdown.tsx |
+| 2026-07-25 | Configured split OptiCode header title ("Opti" in white, "Code" in orange `#f97316`) with `--color-orange-500` in `@theme inline` & fallback inline color in PreferencesDropdown.tsx & styles.css |
+| 2026-07-25 | Restarted React Vite frontend dev server (`http://localhost:8080/`) |
+| 2026-07-25 | Launched live FastAPI backend server (`http://127.0.0.1:8000`) & React Vite frontend dev server (`http://localhost:8080/`) |
+| 2026-07-25 | Executed Pytest backend test suite (`python -m pytest`) with 14/14 tests passing cleanly (100% pass rate) |
+| 2026-07-25 | Removed legacy database state (.swarm/, ruvector.db) and temporary python caches (__pycache__, .pytest_cache) |
+| 2026-07-25 | Removed legacy AI configs (.claude/, .claude-flow/), duplicate root docs (DESIGN.md, RULES.md), and boilerplate/cache readmes (.pytest_cache/README.md, src/routes/README.md) |
+| 2026-07-25 | Executed full test suite (14/14 passed), verified React Vite frontend production build, and launched live FastAPI backend server (http://127.0.0.1:8000) & Vite frontend dev server (http://localhost:8080) |
+| 2026-07-25 | Fixed `@tailwindcss/vite` CSS parsing error `Missing opening {` by restoring missing `:root {` selector wrapper around theme variables in styles.css |
+| 2026-07-25 | Ran backend test suite (14/14 tests passed) and verified active execution of FastAPI backend server (http://127.0.0.1:8000) and React Vite frontend dev server (http://localhost:8081) |
 | 2026-07-24 | Redesigned header title into a ChatGPT-style `OptiCode ▾` model selector dropdown listing Explainer Models (Standard, Beginner, Pro Architect) and Humanizer Modes (De-AI, Idiomatic, Simplified) as rich option rows with checkmarks (`✓`) in PreferencesDropdown.tsx & OptimizerApp.tsx |
 | 2026-07-24 | Added glassmorphic `PreferencesDropdown` button next to `OptiCode` header title allowing dynamic selection of Explainer Depth (Beginner, Intermediate, Advanced) and Humanizer Style (De-AI Natural, Idiomatic Clean, Simplified) passed directly to backend requests in PreferencesDropdown.tsx, backend.ts, & OptimizerApp.tsx |
 | 2026-07-24 | Positioned `History` and `Saved` navigation bar buttons directly in the sidebar footer right above the `Settings` bar button in SidebarHistory.tsx |

@@ -86,6 +86,8 @@
 }
 
 @theme inline {
+  --color-orange-500: #f4914a;
+  --color-orange-400: #ff9e59;
   --radius-sm: 0.375rem;
   --radius-md: 0.5rem;
   --radius-lg: 0.75rem;
@@ -93,7 +95,6 @@
   --radius-2xl: 1.25rem;
   --radius-3xl: 1.5rem;
   --radius-4xl: 2rem;
-
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -138,12 +139,84 @@
   --pink-300: #f472b6;
   --pink-400: #e879b9;
 
+<<<<<<< HEAD
   --background: oklch(0.985 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
+=======
+  /* Accent */
+  --accent-warm: #f4914a;
+  --accent-warm-hover: #f6a064;
+  --accent-deep: #e8590c;
+
+  --app-gradient: radial-gradient(
+    ellipse at 50% 120%,
+    #e8590c 0%,
+    #f4914a 35%,
+    #efa8c0 60%,
+    #d9b8d9 80%,
+    #a8c5e0 100%
+  );
+  --shadow-float: 0 24px 80px -20px rgba(0, 0, 0, 0.35), 0 12px 32px -12px rgba(0, 0, 0, 0.25);
+  --glow-focus: 0 0 0 1px rgba(244, 145, 74, 0.45), 0 0 24px rgba(244, 145, 74, 0.22);
+}
+
+/* Multi-point Radial Mesh Gradient Background */
+.bg-mesh-radial {
+  background: 
+    radial-gradient(at 10% 10%, rgba(254, 215, 170, 0.45) 0px, transparent 50%),
+    radial-gradient(at 90% 15%, rgba(251, 113, 133, 0.35) 0px, transparent 50%),
+    radial-gradient(at 50% 85%, rgba(253, 186, 116, 0.4) 0px, transparent 50%),
+    radial-gradient(at 80% 85%, rgba(244, 114, 182, 0.3) 0px, transparent 50%),
+    linear-gradient(135deg, #fce4ec 0%, #fbe9e7 40%, #fff3e0 70%, #f3e5f5 100%);
+}
+
+.dark .bg-mesh-radial {
+  background: 
+    radial-gradient(at 20% 10%, rgba(249, 115, 22, 0.18) 0px, transparent 50%),
+    radial-gradient(at 80% 20%, rgba(225, 29, 72, 0.15) 0px, transparent 50%),
+    radial-gradient(at 50% 90%, rgba(217, 70, 239, 0.12) 0px, transparent 50%),
+    linear-gradient(135deg, #090a0f 0%, #0d1017 50%, #11131a 100%);
+}
+
+/* Subtle SVG Grain Noise Overlay Texture */
+.bg-noise-overlay {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.035'/%3E%3C/svg%3E");
+}
+
+/* Warm-Toned Palette Native Shadows */
+.shadow-warm-sm {
+  box-shadow: 0 4px 14px rgba(255, 120, 80, 0.08);
+}
+.dark .shadow-warm-sm {
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+}
+
+.shadow-warm-md {
+  box-shadow: 0 8px 30px rgba(255, 120, 80, 0.14);
+}
+.dark .shadow-warm-md {
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+}
+
+.shadow-warm-lg {
+  box-shadow: 0 14px 45px rgba(255, 110, 60, 0.18);
+}
+.dark .shadow-warm-lg {
+  box-shadow: 0 14px 45px rgba(0, 0, 0, 0.8);
+}
+
+:root {
+  --background: oklch(0.65 0.08 247);
+  --foreground: oklch(0.984 0.003 247.858);
+  --card: oklch(0.22 0.02 264);
+  --card-foreground: oklch(0.984 0.003 247.858);
+  --popover: oklch(0.22 0.02 264);
+  --popover-foreground: oklch(0.984 0.003 247.858);
+>>>>>>> c7c1020 (feat: align OptiCode title styling with warm sunset palette and update MEMORY.md)
   --primary: oklch(0.65 0.18 40);
   --primary-foreground: oklch(1 0 0);
   --secondary: oklch(0.92 0 0);
