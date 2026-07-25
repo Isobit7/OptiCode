@@ -95,6 +95,7 @@ code-optimizer-explainer/
 ## 9. Changelog
 *(Newest entry on top. One line per change — date + what changed + why, if non-obvious.)*
 
+| 2026-07-25 | Updated dark mode color tokens in `styles.css` with exact `#121212` palette (`--bg-base: #121212`, `--bg-surface: #1a1a1a`, `--bg-surface-alt: #212121`, `--border-default: #2e2e2e`, `--border-subtle: #232323`, `--text-primary: #ececec`, `--text-secondary: #9b9b9b`, `--text-muted: #6b6b6b`) |
 | 2026-07-25 | Implemented full `OptiCode — UI/UX Build Spec` architecture: ChatGPT/Claude/Cursor thread pattern (`<Thread>` + `<TurnCard>`), 760px centered scrolling column, pinned bottom composer (`CodeInputBar`) with gradient fade mask, compact collapsible code preview header, custom `<DiffLine>` renderer for Shorten & SEO, action-specific loading skeletons, in-card error retry states, and disabled submit state |
 | 2026-07-25 | Completely overhauled OptiCode UI per `DESIGN.md` spec: eliminated generic AI SaaS tells (mesh gradient backgrounds, glowing orbs, glassmorphism overload), established solid color tokens (`#0d1017` dark / `#f7f8fa` light), converted action pills to borderless segmented tabs, styled `RUN ACTION ↑` as the single filled orange button with `Ctrl+Enter` badge, and enlarged editor textarea to `min-h-[180px]` |
 | 2026-07-25 | Verified GitHub repository (`Isobit7/OptiCode.git`) is completely up-to-date on `main` branch with clean working tree |

@@ -192,15 +192,15 @@
 }
 
 .dark {
-  --bg-base: #0d1017;
-  --bg-surface: #121620;
-  --bg-surface-alt: #171c28;
-  --border-default: #232838;
-  --border-subtle: #1a1f2b;
+  --bg-base: #121212;
+  --bg-surface: #1a1a1a;
+  --bg-surface-alt: #212121;
+  --border-default: #2e2e2e;
+  --border-subtle: #232323;
 
-  --text-primary: #e8eaf0;
-  --text-secondary: #8b93a7;
-  --text-muted: #565d70;
+  --text-primary: #ececec;
+  --text-secondary: #9b9b9b;
+  --text-muted: #6b6b6b;
 
   --accent: #f97316;
   --accent-hover: #ea6a0c;
