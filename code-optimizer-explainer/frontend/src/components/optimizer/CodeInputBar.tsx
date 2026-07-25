@@ -207,7 +207,7 @@ export function CodeInputBar({
           placeholder="Paste your code here or type / for AI commands..."
           rows={2}
           spellCheck={false}
-          className="block w-full min-h-[56px] max-h-[220px] resize-y bg-transparent font-mono text-[13px] sm:text-[14px] leading-relaxed outline-none text-[var(--text-primary)] placeholder:text-[var(--text-muted)] transition-colors overflow-y-auto focus-visible:ring-1 focus-visible:ring-[var(--accent)] rounded"
+          className="block w-full min-h-[56px] max-h-[220px] resize-y bg-transparent font-mono text-[13px] sm:text-[14px] leading-relaxed outline-none text-[var(--text-primary)] placeholder:text-[var(--text-muted)] transition-colors overflow-y-auto focus:outline-none focus:ring-0 focus-visible:ring-0 border-none p-0"
         />
 
         {/* Inline Action Selector Row */}

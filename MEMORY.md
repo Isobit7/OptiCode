@@ -95,6 +95,7 @@ code-optimizer-explainer/
 ## 9. Changelog
 *(Newest entry on top. One line per change — date + what changed + why, if non-obvious.)*
 
+| 2026-07-25 | Fixed `CodeInputBar.tsx` double focus ring bug: removed inner `<textarea>` orange focus outline (`focus:outline-none focus:ring-0 focus-visible:ring-0 border-none p-0`) so only a single sleek outer card border highlights when active |
 | 2026-07-25 | Executed interface hardening (`/harden`): added `role="dialog"`, `aria-modal="true"`, and labeled headers to `AnalyticsModal.tsx` & `KeyboardShortcutsModal.tsx`, implemented Escape key dismiss listeners, and added overflow resilience to `ActionPills.tsx` |
 | 2026-07-25 | Implemented OptiCode Dashboard Enhancements: added `AnalyticsModal.tsx` for usage/Big-O analytics and JSON export, `KeyboardShortcutsModal.tsx` power-user cheatsheet, Side-by-Side Split View toggle in `TurnCard.tsx`, and Big-O efficiency rating badges |
 | 2026-07-25 | Reduced `CodeInputBar.tsx` height to compact search box per user reference (`min-h-[56px]`, `p-3`, compact action pills & controls row) |
