@@ -30,7 +30,12 @@ export function KeyboardShortcutsModal({ isOpen, onClose }: Props) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fade-in">
-      <div className="relative w-full max-w-md rounded-2xl border border-[var(--border-default)] bg-[var(--bg-surface)] p-6 shadow-2xl space-y-5 text-[var(--text-primary)] animate-pop-in">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="shortcuts-modal-title"
+        className="relative w-full max-w-md rounded-2xl border border-[var(--border-default)] bg-[var(--bg-surface)] p-6 shadow-2xl space-y-5 text-[var(--text-primary)] animate-pop-in"
+      >
         {/* Header */}
         <div className="flex items-center justify-between border-b border-[var(--border-subtle)] pb-3">
           <div className="flex items-center gap-2.5">
@@ -38,7 +43,9 @@ export function KeyboardShortcutsModal({ isOpen, onClose }: Props) {
               <Keyboard className="h-5 w-5" />
             </div>
             <div>
-              <h2 className="text-base font-bold font-headings">Keyboard Shortcuts</h2>
+              <h2 id="shortcuts-modal-title" className="text-base font-bold font-headings">
+                Keyboard Shortcuts
+              </h2>
               <p className="text-xs text-[var(--text-secondary)]">Power-user efficiency cheatsheet</p>
             </div>
           </div>

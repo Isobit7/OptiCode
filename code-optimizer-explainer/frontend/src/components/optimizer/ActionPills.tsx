@@ -29,7 +29,7 @@ export function ActionPills({ active, loading, onSelect, compact = true }: Props
     <div
       role="tablist"
       aria-label="Code action selector"
-      className="flex flex-wrap items-center gap-1 rounded-lg bg-[var(--bg-surface-alt)] p-1 border border-[var(--border-subtle)]"
+      className="flex flex-wrap items-center gap-1 rounded-lg bg-[var(--bg-surface-alt)] p-1 border border-[var(--border-subtle)] max-w-full overflow-x-auto no-scrollbar"
     >
       {ACTIONS.map(({ id, label, icon: Icon, description }) => {
         const isActive = active === id;

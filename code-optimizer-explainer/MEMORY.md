@@ -99,6 +99,7 @@ code-optimizer-explainer/
 
 | Date | Change |
 |---|---|
+| 2026-07-25 | Executed interface hardening (`/harden`): added `role="dialog"`, `aria-modal="true"`, and labeled headers to `AnalyticsModal.tsx` & `KeyboardShortcutsModal.tsx`, implemented Escape key dismiss listeners, and added overflow resilience to `ActionPills.tsx` |
 | 2026-07-25 | Implemented OptiCode Dashboard Enhancements: added `AnalyticsModal.tsx` for usage/Big-O analytics and JSON export, `KeyboardShortcutsModal.tsx` power-user cheatsheet, Side-by-Side Split View toggle in `TurnCard.tsx`, and Big-O efficiency rating badges |
 | 2026-07-25 | Reduced `CodeInputBar.tsx` height to compact search box per user reference (`min-h-[56px]`, `p-3`, compact action pills & controls row) |
 | 2026-07-25 | Installed `lenis` package and integrated Lenis momentum smooth scrolling in `OptimizerApp.tsx` (`duration: 1.2`, exponential ease-out curve, GPU RAF loop, prefers-reduced-motion safe) |

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { X, BarChart3, Code2, Zap, Download, Sparkles, Check } from "lucide-react";
 import type { HistoryItem } from "./SidebarHistory";
 
@@ -10,6 +10,16 @@ interface Props {
 
 export function AnalyticsModal({ isOpen, onClose, history }: Props) {
   const [downloaded, setDownloaded] = useState(false);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && isOpen) {
+        onClose();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 
@@ -41,7 +51,12 @@ export function AnalyticsModal({ isOpen, onClose, history }: Props) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fade-in">
-      <div className="relative w-full max-w-lg rounded-2xl border border-[var(--border-default)] bg-[var(--bg-surface)] p-6 shadow-2xl space-y-6 text-[var(--text-primary)] animate-pop-in">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="analytics-modal-title"
+        className="relative w-full max-w-lg rounded-2xl border border-[var(--border-default)] bg-[var(--bg-surface)] p-6 shadow-2xl space-y-6 text-[var(--text-primary)] animate-pop-in"
+      >
         {/* Header */}
         <div className="flex items-center justify-between border-b border-[var(--border-subtle)] pb-4">
           <div className="flex items-center gap-2.5">
@@ -49,7 +64,9 @@ export function AnalyticsModal({ isOpen, onClose, history }: Props) {
               <BarChart3 className="h-5 w-5" />
             </div>
             <div>
-              <h2 className="text-base font-bold font-headings">Usage & Efficiency Insights</h2>
+              <h2 id="analytics-modal-title" className="text-base font-bold font-headings">
+                Usage & Efficiency Insights
+              </h2>
               <p className="text-xs text-[var(--text-secondary)]">Overview of your code transformations</p>
             </div>
           </div>
