@@ -153,22 +153,22 @@
 :root {
   --radius: 0.5rem;
 
-  --bg-base: #f7f8fa;
-  --bg-surface: #ffffff;
-  --bg-surface-alt: #f1f2f5;
-  --border-default: #e2e4e9;
-  --border-subtle: #edeef1;
+  --bg-base: #ededed;
+  --bg-surface: #e5e5e5;
+  --bg-surface-alt: #dedede;
+  --border-default: #d1d1d1;
+  --border-subtle: #dcdcdc;
 
-  --text-primary: #1a1d24;
-  --text-secondary: #5b6172;
-  --text-muted: #9298a6;
+  --text-primary: #131313;
+  --text-secondary: #646464;
+  --text-muted: #949494;
 
   --accent: #f97316;
   --accent-hover: #ea6a0c;
-  --accent-muted: rgba(249, 115, 22, 0.12);
+  --accent-muted: rgba(249, 115, 22, 0.2);
 
-  --success: #16a34a;
-  --danger: #dc2626;
+  --success: #22c55e;
+  --danger: #ef4444;
 
   --background: var(--bg-base);
   --foreground: var(--text-primary);
