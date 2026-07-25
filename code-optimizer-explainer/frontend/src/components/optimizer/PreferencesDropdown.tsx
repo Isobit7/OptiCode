@@ -102,102 +102,102 @@ export function PreferencesDropdown({
           />
         </button>
 
-        {/* ChatGPT-Style Model Selection Popover */}
+        {/* Model Selection Popover */}
         {isOpen && (
-        <div className="absolute left-0 mt-2 w-76 sm:w-84 rounded-2xl bg-zinc-950/95 dark:bg-[#18191c]/95 text-white border border-white/20 shadow-2xl backdrop-blur-2xl p-2 z-50 animate-pop-in space-y-3">
-          {/* Explainer Models Section */}
-          <div className="space-y-1">
-            <div className="px-2.5 pt-1.5 pb-1 text-[10px] font-mono font-bold uppercase tracking-wider text-zinc-400 flex items-center justify-between">
-              <span>Explainer Models</span>
-            </div>
-            {EXPLAIN_MODELS.map((model) => {
-              const Icon = model.icon;
-              const isSelected = explainDepth === model.id;
+          <div className="absolute left-0 mt-2 w-76 sm:w-84 rounded-xl bg-[var(--bg-surface)] text-[var(--text-primary)] border border-[var(--border-default)] shadow-xl p-2 z-50 animate-pop-in space-y-3">
+            {/* Explainer Models Section */}
+            <div className="space-y-1">
+              <div className="px-2.5 pt-1.5 pb-1 text-[10px] font-mono font-bold uppercase tracking-wider text-[var(--text-muted)] flex items-center justify-between">
+                <span>Explainer Models</span>
+              </div>
+              {EXPLAIN_MODELS.map((model) => {
+                const Icon = model.icon;
+                const isSelected = explainDepth === model.id;
 
-              return (
-                <button
-                  key={model.id}
-                  type="button"
-                  onClick={() => {
-                    onExplainDepthChange(model.id);
-                  }}
-                  className={[
-                    "w-full flex items-start justify-between gap-3 p-2.5 rounded-xl transition-all duration-200 text-left cursor-pointer border",
-                    isSelected
-                      ? "bg-white/12 text-white border-orange-500/50 shadow-warm-sm"
-                      : "bg-transparent text-zinc-300 border-transparent hover:bg-white/8 hover:text-white",
-                  ].join(" ")}
-                >
-                  <div className="flex items-start gap-2.5 min-w-0 flex-1">
-                    <div
-                      className={[
-                        "p-1.5 rounded-lg shrink-0 mt-0.5",
-                        isSelected ? "bg-orange-500/20 text-orange-400" : "bg-white/10 text-zinc-400",
-                      ].join(" ")}
-                    >
-                      <Icon className="h-4 w-4" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-xs font-bold">{model.name}</span>
-                        <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-white/10 text-zinc-300">
-                          {model.tag}
-                        </span>
+                return (
+                  <button
+                    key={model.id}
+                    type="button"
+                    onClick={() => {
+                      onExplainDepthChange(model.id);
+                    }}
+                    className={[
+                      "w-full flex items-start justify-between gap-3 p-2.5 rounded-lg transition-colors duration-150 text-left cursor-pointer border",
+                      isSelected
+                        ? "bg-[var(--accent-muted)] text-[var(--accent)] border-[var(--accent)] font-semibold"
+                        : "bg-transparent text-[var(--text-secondary)] border-transparent hover:bg-[var(--bg-surface-alt)] hover:text-[var(--text-primary)]",
+                    ].join(" ")}
+                  >
+                    <div className="flex items-start gap-2.5 min-w-0 flex-1">
+                      <div
+                        className={[
+                          "p-1.5 rounded-md shrink-0 mt-0.5",
+                          isSelected ? "bg-[var(--accent)] text-white" : "bg-[var(--bg-surface-alt)] text-[var(--text-muted)]",
+                        ].join(" ")}
+                      >
+                        <Icon className="h-4 w-4" aria-hidden="true" />
                       </div>
-                      <p className="text-[11px] text-zinc-400 leading-snug mt-0.5">{model.desc}</p>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-xs font-bold">{model.name}</span>
+                          <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-[var(--bg-surface-alt)] text-[var(--text-muted)] border border-[var(--border-subtle)]">
+                            {model.tag}
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-[var(--text-secondary)] leading-snug mt-0.5">{model.desc}</p>
+                      </div>
                     </div>
-                  </div>
 
-                  {isSelected && <Check className="h-4 w-4 text-orange-400 shrink-0 mt-1" />}
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Humanizer Style Section */}
-          <div className="space-y-1 pt-2 border-t border-white/10">
-            <div className="px-2.5 pt-1 pb-1 text-[10px] font-mono font-bold uppercase tracking-wider text-zinc-400">
-              <span>Humanizer Modes</span>
+                    {isSelected && <Check className="h-4 w-4 text-[var(--accent)] shrink-0 mt-1" aria-hidden="true" />}
+                  </button>
+                );
+              })}
             </div>
-            {HUMANIZE_MODES.map((mode) => {
-              const Icon = mode.icon;
-              const isSelected = humanizeMode === mode.id;
 
-              return (
-                <button
-                  key={mode.id}
-                  type="button"
-                  onClick={() => {
-                    onHumanizeModeChange(mode.id);
-                  }}
-                  className={[
-                    "w-full flex items-start justify-between gap-3 p-2.5 rounded-xl transition-all duration-200 text-left cursor-pointer border",
-                    isSelected
-                      ? "bg-white/12 text-white border-amber-500/50 shadow-warm-sm"
-                      : "bg-transparent text-zinc-300 border-transparent hover:bg-white/8 hover:text-white",
-                  ].join(" ")}
-                >
-                  <div className="flex items-start gap-2.5 min-w-0 flex-1">
-                    <div
-                      className={[
-                        "p-1.5 rounded-lg shrink-0 mt-0.5",
-                        isSelected ? "bg-amber-500/20 text-amber-400" : "bg-white/10 text-zinc-400",
-                      ].join(" ")}
-                    >
-                      <Icon className="h-4 w-4" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <span className="text-xs font-bold">{mode.name}</span>
-                      <p className="text-[11px] text-zinc-400 leading-snug mt-0.5">{mode.desc}</p>
-                    </div>
-                  </div>
+            {/* Humanizer Style Section */}
+            <div className="space-y-1 pt-2 border-t border-[var(--border-subtle)]">
+              <div className="px-2.5 pt-1 pb-1 text-[10px] font-mono font-bold uppercase tracking-wider text-[var(--text-muted)]">
+                <span>Humanizer Modes</span>
+              </div>
+              {HUMANIZE_MODES.map((mode) => {
+                const Icon = mode.icon;
+                const isSelected = humanizeMode === mode.id;
 
-                  {isSelected && <Check className="h-4 w-4 text-amber-400 shrink-0 mt-1" />}
-                </button>
-              );
-            })}
+                return (
+                  <button
+                    key={mode.id}
+                    type="button"
+                    onClick={() => {
+                      onHumanizeModeChange(mode.id);
+                    }}
+                    className={[
+                      "w-full flex items-start justify-between gap-3 p-2.5 rounded-lg transition-colors duration-150 text-left cursor-pointer border",
+                      isSelected
+                        ? "bg-[var(--accent-muted)] text-[var(--accent)] border-[var(--accent)] font-semibold"
+                        : "bg-transparent text-[var(--text-secondary)] border-transparent hover:bg-[var(--bg-surface-alt)] hover:text-[var(--text-primary)]",
+                    ].join(" ")}
+                  >
+                    <div className="flex items-start gap-2.5 min-w-0 flex-1">
+                      <div
+                        className={[
+                          "p-1.5 rounded-md shrink-0 mt-0.5",
+                          isSelected ? "bg-[var(--accent)] text-white" : "bg-[var(--bg-surface-alt)] text-[var(--text-muted)]",
+                        ].join(" ")}
+                      >
+                        <Icon className="h-4 w-4" aria-hidden="true" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <span className="text-xs font-bold">{mode.name}</span>
+                        <p className="text-[11px] text-[var(--text-secondary)] leading-snug mt-0.5">{mode.desc}</p>
+                      </div>
+                    </div>
+
+                    {isSelected && <Check className="h-4 w-4 text-[var(--accent)] shrink-0 mt-1" aria-hidden="true" />}
+                  </button>
+                );
+              })}
+            </div>
           </div>
-        </div>
         )}
       </div>
     </div>
