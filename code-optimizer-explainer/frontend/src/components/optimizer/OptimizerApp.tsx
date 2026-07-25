@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState, useRef } from "react";
+import Lenis from "lenis";
 import { CodeInputBar } from "./CodeInputBar";
 import { Thread } from "./Thread";
 import { ActionPills } from "./ActionPills";
@@ -62,6 +63,30 @@ export function OptimizerApp() {
         "color: #565d70; font-size: 11px;",
         "color: #6b6b6b; font-size: 10px; font-style: italic;"
       );
+    }
+  }, []);
+
+  // Lenis Smooth Scroll Initialization
+  useEffect(() => {
+    if (typeof window !== "undefined" && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      const lenis = new Lenis({
+        duration: 1.2,
+        easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+        smoothWheel: true,
+      });
+
+      let animationFrameId: number;
+      function raf(time: number) {
+        lenis.raf(time);
+        animationFrameId = requestAnimationFrame(raf);
+      }
+
+      animationFrameId = requestAnimationFrame(raf);
+
+      return () => {
+        cancelAnimationFrame(animationFrameId);
+        lenis.destroy();
+      };
     }
   }, []);
 

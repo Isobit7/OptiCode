@@ -95,6 +95,7 @@ code-optimizer-explainer/
 ## 9. Changelog
 *(Newest entry on top. One line per change — date + what changed + why, if non-obvious.)*
 
+| 2026-07-25 | Installed `lenis` package and integrated Lenis momentum smooth scrolling in `OptimizerApp.tsx` (`duration: 1.2`, exponential ease-out curve, GPU RAF loop, prefers-reduced-motion safe) |
 | 2026-07-25 | Applied strategic semantic action badges (`/colorize`): added action-specific subtle badge color tints (Indigo for Explain, Amber for Humanize, Mint/Emerald for Prettify & SEO, Coral/Rose for Shorten, Violet for Alternatives) while keeping the main app background & primary CTA `#f97316` intact per `DESIGN.md` |
 | 2026-07-25 | Integrated Developer Delight Suite (`/delight`): rotating humorous developer loading messages ("Optimizing Big-O...", "De-spaghettifying loops...", "Teaching AI idioms..."), browser DevTools console ASCII easter egg banner, copy sparkle flash feedback, and power-user shortcut hints |
 | 2026-07-25 | Executed visual amplification (`/bolder`): elevated typography contrast with oversized Satoshi 900 black headline (`text-3xl sm:text-4xl lg:text-5xl font-black`), amplified primary `RUN ACTION ↑` focal CTA button (`font-black tracking-widest hover:scale-[1.02] active:scale-[0.96]`), while strictly maintaining `DESIGN.md` flat principles (zero mesh gradients, zero glassmorphism) |
