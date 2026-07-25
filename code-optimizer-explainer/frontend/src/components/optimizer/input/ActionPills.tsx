@@ -24,23 +24,23 @@ interface Props {
 
 export function ActionPills({ active, loading, onSelect }: Props) {
   return (
-    <div className="flex items-center gap-0.5">
+    <div className="flex flex-wrap items-center justify-center sm:justify-start gap-1.5 py-1">
       {ACTIONS.map(({ id, label, icon: Icon }) => {
         const isActive = active === id;
         return (
           <button
             key={id}
             type="button"
-            title={label}
             onClick={() => onSelect(id)}
             disabled={loading}
-            className={`p-1.5 rounded-lg transition-all cursor-pointer ${
+            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer border ${
               isActive
-                ? "bg-primary text-primary-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground hover:bg-accent"
-            } disabled:opacity-40 disabled:cursor-not-allowed`}
+                ? "bg-orange-500/90 text-white border-orange-400 shadow-md scale-105"
+                : "bg-white/50 dark:bg-white/10 text-zinc-800 dark:text-zinc-200 border-black/10 dark:border-white/20 hover:bg-white/70 dark:hover:bg-white/20"
+            } disabled:opacity-40 disabled:cursor-not-allowed active:scale-95`}
           >
-            <Icon className="h-3.5 w-3.5" strokeWidth={isActive ? 2.5 : 1.5} />
+            <Icon className="h-3.5 w-3.5" strokeWidth={2} />
+            <span>{label}</span>
           </button>
         );
       })}

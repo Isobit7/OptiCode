@@ -149,25 +149,30 @@ export function CodeInputBar({
         </div>
       )}
 
-      <div className="rounded-xl border gradient-primary shadow-sm transition-shadow focus-within:shadow-md focus-within:border-primary/50">
+      <div className="rounded-3xl border border-white/60 dark:border-zinc-800 bg-white/75 dark:bg-zinc-900/85 backdrop-blur-2xl shadow-2xl p-4 sm:p-5">
+        {/* Top Embedded Action Pills Row */}
+        <div className="mb-3 border-b border-black/10 dark:border-white/10 pb-3">
+          <ActionPills active={activeAction} loading={loading} onSelect={onSelectAction} />
+        </div>
+
         <textarea
           ref={textareaRef}
           value={code}
           onChange={(e) => handleCodeChange(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="Paste your code here, or type / for commands..."
-          rows={3}
+          placeholder="Paste your code here or type / for AI commands... ✦"
+          rows={4}
           spellCheck={false}
-          className="block w-full resize-none bg-transparent font-mono text-sm leading-relaxed outline-none text-foreground placeholder:text-muted-foreground px-4 pt-4 max-h-48 overflow-y-auto"
+          className="block w-full resize-none bg-transparent font-mono text-sm leading-relaxed outline-none text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-500 dark:placeholder:text-zinc-400 px-1 max-h-48 overflow-y-auto"
         />
 
-        <div className="px-4 pb-3 flex items-center justify-between gap-2 border-t border-primary/30 mt-3 pt-3">
-          <div className="flex items-center gap-1.5 text-muted-foreground">
+        <div className="px-1 pt-3 flex flex-wrap items-center justify-between gap-3 border-t border-black/10 dark:border-white/10 mt-2">
+          <div className="flex flex-wrap items-center gap-2 text-zinc-600 dark:text-zinc-400">
             <button
               type="button"
               onClick={handlePaste}
-              title="Paste"
-              className="p-1.5 rounded-lg hover:bg-primary/10 transition-colors hover:text-foreground"
+              title="Paste from Clipboard"
+              className="p-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
             >
               <ClipboardPaste className="h-4 w-4" strokeWidth={1.5} />
             </button>
@@ -176,52 +181,50 @@ export function CodeInputBar({
               type="button"
               onClick={() => onChange("")}
               title="Clear"
-              className="p-1.5 rounded-lg hover:bg-primary/10 transition-colors hover:text-foreground"
+              className="p-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
             >
               <Eraser className="h-4 w-4" strokeWidth={1.5} />
             </button>
 
-            <div className="h-4 w-px bg-border mx-1" />
+            <div className="h-4 w-px bg-black/15 dark:bg-white/15 mx-0.5" />
 
-            <label className="flex items-center gap-1.5 text-xs cursor-pointer">
-              <Languages className="h-3.5 w-3.5" strokeWidth={1.5} />
+            <span className="text-xs font-mono text-zinc-600 dark:text-zinc-400">
+              {code.length} chars
+            </span>
+
+            <div className="h-4 w-px bg-black/15 dark:bg-white/15 mx-0.5" />
+
+            <label className="flex items-center gap-1.5 text-xs cursor-pointer font-medium">
+              <Languages className="h-3.5 w-3.5 text-zinc-500" strokeWidth={1.5} />
               <select
                 value={language}
                 onChange={(e) => onLanguageChange(e.target.value)}
-                className="bg-transparent px-1 py-0.5 text-xs outline-none text-foreground cursor-pointer rounded"
+                className="bg-transparent px-1 py-0.5 text-xs outline-none text-zinc-800 dark:text-zinc-200 cursor-pointer rounded font-medium"
               >
                 {LANGS.map((l) => (
-                  <option key={l} value={l}>
-                    {l === "auto" ? "Auto" : l}
+                  <option key={l} value={l} className="bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100">
+                    {l === "auto" ? "Auto-detect" : l}
                   </option>
                 ))}
               </select>
             </label>
-
-            {code.length > 0 && (
-              <span className="text-[10px] text-muted-foreground ml-1">
-                {code.length}
-              </span>
-            )}
           </div>
-
-          <ActionPills active={activeAction} loading={loading} onSelect={onSelectAction} />
 
           <button
             type="button"
             onClick={onSubmit}
             disabled={loading || !code.trim()}
-            className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium bg-primary text-primary-foreground hover:opacity-90 transition-opacity disabled:opacity-30 disabled:cursor-not-allowed"
+            className="inline-flex items-center gap-1.5 rounded-xl px-5 py-2 text-xs font-bold uppercase tracking-wider bg-orange-500 hover:bg-orange-600 text-white shadow-lg transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed active:scale-95 ml-auto"
           >
             {loading ? (
               <span className="flex items-center gap-1.5">
-                <span className="h-3 w-3 rounded-full border-2 border-current border-t-transparent animate-spin" />
+                <span className="h-3.5 w-3.5 rounded-full border-2 border-current border-t-transparent animate-spin" />
                 Processing
               </span>
             ) : (
               <>
-                <ArrowUp className="h-3.5 w-3.5" strokeWidth={2} />
-                Run
+                <span>RUN ACTION</span>
+                <ArrowUp className="h-3.5 w-3.5" strokeWidth={2.5} />
               </>
             )}
           </button>
