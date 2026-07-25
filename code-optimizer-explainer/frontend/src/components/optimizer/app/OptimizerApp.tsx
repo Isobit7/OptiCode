@@ -6,6 +6,7 @@ import { SidebarHistory, type HistoryItem } from "../sidebar/SidebarHistory";
 import { SignInModal } from "../modals/SignInModal";
 import { PreferencesDropdown, type ExplainDepth, type HumanizeMode } from "../modals/PreferencesDropdown";
 import { SettingsModal } from "../modals/SettingsModal";
+import { useSettings } from "@/hooks/useSettings";
 import { runAction, fetchCurrentUser, logoutUser, fetchHistory, type ActionId, type ActionResult } from "@/api/backend";
 import { Sun, Moon, PanelLeft, LogOut, UserRound, Settings } from "lucide-react";
 
@@ -26,6 +27,7 @@ export function OptimizerApp() {
   const [explainDepth, setExplainDepth] = useState<ExplainDepth>("intermediate");
   const [humanizeMode, setHumanizeMode] = useState<HumanizeMode>("de-ai");
   const [theme, setTheme] = useState<"light" | "dark">("light");
+  const { settings, updateSetting } = useSettings();
 
   useEffect(() => {
     try {
@@ -358,6 +360,8 @@ className="p-2 rounded hover:bg-primary/5 focus-visible:ring-2 focus-visible:rin
           currentUser={currentUser}
           onSignIn={() => setIsSignInOpen(true)}
           onSignOut={handleLogout}
+          settings={settings}
+          onSettingChange={updateSetting}
         />
     </div>
   );
