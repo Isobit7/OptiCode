@@ -139,14 +139,6 @@
   --pink-300: #f472b6;
   --pink-400: #e879b9;
 
-<<<<<<< HEAD
-  --background: oklch(0.985 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-=======
   /* Accent */
   --accent-warm: #f4914a;
   --accent-warm-hover: #f6a064;
@@ -210,13 +202,6 @@
 }
 
 :root {
-  --background: oklch(0.65 0.08 247);
-  --foreground: oklch(0.984 0.003 247.858);
-  --card: oklch(0.22 0.02 264);
-  --card-foreground: oklch(0.984 0.003 247.858);
-  --popover: oklch(0.22 0.02 264);
-  --popover-foreground: oklch(0.984 0.003 247.858);
->>>>>>> c7c1020 (feat: align OptiCode title styling with warm sunset palette and update MEMORY.md)
   --primary: oklch(0.65 0.18 40);
   --primary-foreground: oklch(1 0 0);
   --secondary: oklch(0.92 0 0);
