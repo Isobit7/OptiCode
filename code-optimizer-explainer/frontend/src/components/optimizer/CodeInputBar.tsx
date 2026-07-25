@@ -186,47 +186,35 @@ export function CodeInputBar({
         </div>
       )}
 
-      {/* Focus glow ring */}
-      <div
-        className="absolute -inset-0.5 rounded-[28px] opacity-0 transition-opacity duration-500 group-focus-within:opacity-100 animate-glow-pulse"
-        style={{
-          background:
-            "linear-gradient(135deg, rgba(244,145,74,0.45) 0%, rgba(232,89,12,0.25) 50%, rgba(239,168,192,0.3) 100%)",
-          filter: "blur(10px)",
-        }}
-      />
-
-      {/* BeeBot Integrated Container Box */}
-      <div
-        className="relative mx-auto w-full max-w-4xl rounded-3xl border p-4 transition-all duration-300 focus-within:shadow-warm-lg focus-within:border-orange-500/40 sm:p-5 bg-white/75 dark:bg-[#121215]/95 border-white/80 dark:border-white/15 shadow-warm-lg backdrop-blur-2xl"
-      >
+      {/* Code Editor Container Box — Flat solid surface per DESIGN.md */}
+      <div className="relative mx-auto w-full max-w-4xl rounded-xl border border-[var(--border-default)] bg-[var(--bg-surface)] p-4 sm:p-5 shadow-sm transition-colors duration-150 focus-within:border-[var(--accent)]">
         <textarea
           ref={textareaRef}
           value={code}
           onChange={(e) => handleCodeChange(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="Paste your code here or type / for AI commands... ✦˚"
-          rows={3}
+          placeholder="Paste your code here or type / for AI commands..."
+          rows={6}
           spellCheck={false}
-          className="block w-full resize-none bg-transparent font-mono text-[14px] leading-relaxed outline-none text-[#1C1C22] dark:text-[#FAFAFA] placeholder:text-[#6B6B75] dark:placeholder:text-zinc-500 transition-colors max-h-48 overflow-y-auto"
+          className="block w-full min-h-[180px] resize-y bg-transparent font-mono text-[14px] leading-relaxed outline-none text-[var(--text-primary)] placeholder:text-[var(--text-muted)] transition-colors overflow-y-auto"
         />
 
-        {/* BeeBot Feature Chips Attached Directly Inside Input Container */}
-        <div className="mt-3 pt-3 border-t border-zinc-100 dark:border-white/10 flex items-center justify-between gap-2 flex-wrap">
+        {/* Action Chips Row */}
+        <div className="mt-3 pt-3 border-t border-[var(--border-subtle)] flex items-center justify-between gap-2 flex-wrap">
           <ActionPills active={activeAction} loading={loading} onSelect={onSelectAction} compact />
         </div>
 
-        {/* BeeBot Controls Footer Bar */}
-        <div className="mt-3 flex items-center justify-between gap-3 border-t border-zinc-100 dark:border-white/10 pt-3">
-          <div className="flex items-center gap-2 sm:gap-3 text-[#6B6B75] dark:text-zinc-400">
+        {/* Controls Footer Bar */}
+        <div className="mt-3 flex items-center justify-between gap-3 border-t border-[var(--border-subtle)] pt-3 flex-wrap">
+          <div className="flex items-center gap-2 sm:gap-3 text-[var(--text-secondary)]">
             <div className="flex items-center gap-1">
               <button
                 type="button"
                 onClick={handlePaste}
                 title="Paste from clipboard"
-                className="rounded-full p-1.5 transition-all duration-200 hover:bg-[#1C1C22]/5 dark:hover:bg-white/10 hover:text-[#1C1C22] dark:hover:text-white hover:scale-110 active:scale-95 cursor-pointer"
+                className="rounded-md p-1.5 bg-[var(--bg-surface-alt)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
               >
-                <ClipboardPaste className="h-4 w-4" strokeWidth={1.75} />
+                <ClipboardPaste className="h-4 w-4" strokeWidth={2} />
               </button>
 
               <VoiceInputButton onSpeechResult={handleSpeechResult} />
@@ -235,35 +223,33 @@ export function CodeInputBar({
                 type="button"
                 onClick={() => onChange("")}
                 title="Clear"
-                className="rounded-full p-1.5 transition-all duration-200 hover:bg-[#1C1C22]/5 dark:hover:bg-white/10 hover:text-[#1C1C22] dark:hover:text-white hover:scale-110 active:scale-95 cursor-pointer"
+                className="rounded-md p-1.5 bg-[var(--bg-surface-alt)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
               >
-                <Eraser className="h-4 w-4" strokeWidth={1.75} />
+                <Eraser className="h-4 w-4" strokeWidth={2} />
               </button>
             </div>
 
-            <div className="h-4 w-px bg-[#1C1C22]/15 dark:bg-white/15" aria-hidden />
+            <div className="h-4 w-px bg-[var(--border-subtle)]" aria-hidden />
 
-            <div className="flex items-center gap-1.5">
-              <Code2 className="h-4 w-4" strokeWidth={1.75} />
-              <div className="hidden text-xs sm:block">
-                {code.length} char{code.length === 1 ? "" : "s"}
-              </div>
+            <div className="flex items-center gap-1.5 text-xs text-[var(--text-muted)] font-mono">
+              <Code2 className="h-4 w-4" strokeWidth={2} />
+              <span>{code.length} chars</span>
             </div>
 
-            <div className="h-4 w-px bg-[#1C1C22]/15 dark:bg-white/15" aria-hidden />
+            <div className="h-4 w-px bg-[var(--border-subtle)]" aria-hidden />
 
-            <label className="flex items-center gap-1.5 text-xs cursor-pointer">
-              <Languages className="h-4 w-4" strokeWidth={1.75} />
+            <label className="flex items-center gap-1.5 text-xs cursor-pointer text-[var(--text-secondary)]">
+              <Languages className="h-4 w-4" strokeWidth={2} />
               <select
                 value={language}
                 onChange={(e) => onLanguageChange(e.target.value)}
-                className="rounded-md bg-transparent px-1 py-0.5 text-xs outline-none cursor-pointer transition-colors text-[#1C1C22] dark:text-zinc-200"
+                className="rounded-md bg-transparent px-1 py-0.5 text-xs outline-none cursor-pointer font-medium text-[var(--text-primary)]"
               >
                 {LANGS.map((l) => (
                   <option
                     key={l}
                     value={l}
-                    className="bg-white dark:bg-[#121824] text-[#1C1C22] dark:text-zinc-100"
+                    className="bg-[var(--bg-surface)] text-[var(--text-primary)]"
                   >
                     {l === "auto" ? "Auto-detect" : l}
                   </option>
@@ -272,18 +258,23 @@ export function CodeInputBar({
             </label>
           </div>
 
-          {/* Primary Action Button with Dynamic Label */}
-          <button
-            type="button"
-            onClick={onSubmit}
-            disabled={loading || !code.trim()}
-            className="group relative inline-flex items-center gap-2 overflow-hidden rounded-full py-2 px-5 font-bold text-xs transition-all duration-300 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40 shadow-lg cursor-pointer bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 text-white hover:brightness-110"
-          >
-            <span className="relative z-10 uppercase tracking-wider font-extrabold">
-              {loading ? "PROCESSING..." : actionButtonText}
+          {/* Primary Action Button + Keyboard Shortcut Badge */}
+          <div className="flex items-center gap-2">
+            <span className="hidden sm:inline-block text-[11px] font-mono text-[var(--text-muted)] bg-[var(--bg-surface-alt)] px-2 py-1 rounded border border-[var(--border-subtle)]">
+              Ctrl+Enter
             </span>
-            <ArrowUp className="relative z-10 h-3.5 w-3.5 transition-transform duration-300 group-hover:-translate-y-0.5" strokeWidth={2.5} />
-          </button>
+            <button
+              type="button"
+              onClick={onSubmit}
+              disabled={loading || !code.trim()}
+              className="inline-flex items-center gap-1.5 rounded-full py-2 px-5 font-bold text-xs transition-all duration-150 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40 shadow-sm cursor-pointer bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white"
+            >
+              <span className="uppercase tracking-wider font-extrabold">
+                {loading ? "PROCESSING..." : actionButtonText}
+              </span>
+              <ArrowUp className="h-3.5 w-3.5" strokeWidth={2.5} />
+            </button>
+          </div>
         </div>
       </div>
     </div>

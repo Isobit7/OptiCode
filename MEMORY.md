@@ -95,6 +95,7 @@ code-optimizer-explainer/
 ## 9. Changelog
 *(Newest entry on top. One line per change — date + what changed + why, if non-obvious.)*
 
+| 2026-07-25 | Completely overhauled OptiCode UI per `DESIGN.md` spec: eliminated generic AI SaaS tells (mesh gradient backgrounds, glowing orbs, glassmorphism overload), established solid color tokens (`#0d1017` dark / `#f7f8fa` light), converted action pills to borderless segmented tabs, styled `RUN ACTION ↑` as the single filled orange button with `Ctrl+Enter` badge, and enlarged editor textarea to `min-h-[180px]` |
 | 2026-07-25 | Verified GitHub repository (`Isobit7/OptiCode.git`) is completely up-to-date on `main` branch with clean working tree |
 | 2026-07-25 | Restored exact commit `cdc037b` frontend codebase matching reference video `VID_20260725_WA0000.mp4`: stacked `History`/`Saved`/`Settings` sidebar pills, `+ New Session` button, translucent glass input card with top ActionPills row, filled orange `RUN ACTION ↑` button, and warm sunset mesh gradient |
 | 2026-07-25 | Verified 100% exact visual match against reference screenshot via automated browser subagent: expanded default sidebar, unified white `OptiCode` header logo, single-line headline (`Paste your code — let's clean it up`), `SEO Optimize` pill label, embedded top action pills row, and filled orange `RUN ACTION ↑` button |

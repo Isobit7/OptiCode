@@ -295,24 +295,8 @@ export function OptimizerApp() {
 
   return (
     <div
-      className="relative flex h-screen w-full max-h-screen overflow-hidden transition-colors duration-500"
-      style={{ background: "var(--app-gradient)" }}
+      className="relative flex h-screen w-full max-h-screen overflow-hidden bg-[var(--bg-base)] text-[var(--text-primary)] transition-colors duration-200"
     >
-      {/* Ambient Background Multi-Point Light Spheres */}
-      <div className="pointer-events-none absolute inset-0 overflow-hidden z-0">
-        {/* Top-Center Warm Sunset Beam */}
-        <div className="absolute -top-40 left-1/2 -translate-x-1/2 h-[520px] w-[900px] rounded-full bg-gradient-to-b from-orange-500/25 via-amber-500/15 to-transparent blur-[140px] dark:from-orange-500/30 dark:via-purple-600/20 dark:blur-[160px]" />
-
-        {/* Top-Right Orange Glow Sphere */}
-        <div className="absolute -top-32 -right-32 h-[500px] w-[500px] rounded-full bg-orange-500/20 blur-[130px] dark:bg-orange-600/25 dark:blur-[150px] animate-pulse" />
-
-        {/* Left-Center Cosmic Violet Aura Orb */}
-        <div className="absolute top-1/3 -left-36 h-[500px] w-[500px] rounded-full bg-pink-500/15 blur-[120px] dark:bg-purple-600/25 dark:blur-[150px] animate-float" />
-
-        {/* Bottom-Right Indigo Ambient Glow */}
-        <div className="absolute -bottom-40 right-10 h-[550px] w-[550px] rounded-full bg-indigo-500/15 blur-[140px] dark:bg-indigo-700/25 dark:blur-[160px]" />
-      </div>
-
       <SidebarHistory
         history={Array.isArray(history) ? history : []}
         activeId={activeHistoryId}
@@ -331,10 +315,10 @@ export function OptimizerApp() {
         onSignOut={handleLogout}
       />
 
-      <div className="flex-1 flex flex-col h-full min-w-0 overflow-hidden">
+      <div className="flex-1 flex flex-col h-full min-w-0 overflow-hidden bg-[var(--bg-base)]">
         {/* Top Header Bar */}
-        <header className="relative flex w-full items-center justify-between px-4 py-3.5 sm:px-6 lg:px-8">
-          {/* Left Title: ChatGPT-Style OptiCode Model Dropdown */}
+        <header className="relative flex w-full items-center justify-between px-4 py-3 sm:px-6 lg:px-8 border-b border-[var(--border-subtle)] bg-[var(--bg-surface)]">
+          {/* Left Title: OptiCode Model Dropdown */}
           <PreferencesDropdown
             explainDepth={explainDepth}
             onExplainDepthChange={setExplainDepth}
@@ -342,19 +326,18 @@ export function OptimizerApp() {
             onHumanizeModeChange={setHumanizeMode}
           />
 
-          {/* Right Header Navigation — account moved to sidebar Settings */}
           <div className="flex items-center gap-3" />
         </header>
 
-        {/* BeeBot Layout Workspace */}
+        {/* Layout Workspace */}
         {!(submittedCode || result || loading) ? (
-          /* BeeBot Greeting & Input View */
-          <div className="flex-1 flex flex-col items-center justify-center px-4 sm:px-8 py-4 max-w-4xl mx-auto w-full overflow-y-auto no-scrollbar h-full min-h-0">
-            <section className="text-center mb-6 space-y-2.5">
-              <h1 className="font-headings text-3xl sm:text-5xl font-bold tracking-tight text-[var(--text-on-dark-primary)]">
+          /* Greeting & Input View */
+          <div className="flex-1 flex flex-col items-center justify-center px-4 sm:px-8 py-6 max-w-4xl mx-auto w-full overflow-y-auto no-scrollbar h-full min-h-0">
+            <section className="text-center mb-6 space-y-2">
+              <h1 className="font-headings text-3xl sm:text-4xl font-bold tracking-tight text-[var(--text-primary)]">
                 {currentUser ? `Welcome back, ${currentUser.email?.split("@")[0] || currentUser.full_name || "Developer"}` : "Paste your code — let's clean it up"}
               </h1>
-              <p className="text-sm sm:text-base text-[var(--text-on-dark-primary)]/80 max-w-xl mx-auto">
+              <p className="text-sm sm:text-base text-[var(--text-secondary)] max-w-xl mx-auto">
                 Transform, explain, prettify, or optimize any snippet instantly with AI.
               </p>
             </section>
@@ -373,7 +356,7 @@ export function OptimizerApp() {
             </div>
           </div>
         ) : (
-          /* Active Response View (BeeBot Output + Attached Bottom Bar) */
+          /* Active Response View */
           <div className="flex-1 flex flex-col justify-between min-h-0 h-full overflow-y-auto relative">
             <main className="flex-1 px-4 sm:px-8 pt-4 pb-36 max-w-4xl mx-auto w-full">
               <ResultsPanel messages={messages} original={submittedCode} result={result} loading={loading} error={error} />
@@ -386,15 +369,15 @@ export function OptimizerApp() {
                 type="button"
                 onClick={() => messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })}
                 title="Scroll to latest response"
-                className="absolute bottom-28 right-8 z-40 inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-orange-500 to-amber-500 text-white px-3.5 py-1.5 text-xs font-semibold shadow-warm-lg hover:scale-105 hover:-translate-y-0.5 active:scale-95 transition-all duration-200 cursor-pointer animate-pop-in border border-white/30 backdrop-blur-md"
+                className="absolute bottom-28 right-8 z-40 inline-flex items-center gap-1.5 rounded-full bg-[var(--accent)] text-white px-3.5 py-1.5 text-xs font-semibold shadow-sm hover:bg-[var(--accent-hover)] transition-all duration-150 cursor-pointer"
               >
                 <ArrowDown className="h-3.5 w-3.5" />
                 <span>Latest</span>
               </button>
             )}
 
-            {/* Sticky Bottom Input Bar with Embedded Feature Chips */}
-            <div className="sticky bottom-0 z-30 w-full bg-gradient-to-t from-[var(--app-gradient)] via-white/20 to-transparent dark:from-[#0c0c0e]/95 dark:via-[#0c0c0e]/60 dark:to-transparent backdrop-blur-md py-4 px-4 sm:px-8 transition-colors duration-300">
+            {/* Sticky Bottom Input Bar */}
+            <div className="sticky bottom-0 z-30 w-full bg-[var(--bg-base)] border-t border-[var(--border-subtle)] py-4 px-4 sm:px-8 transition-colors duration-150">
               <div className="max-w-4xl mx-auto">
                 <CodeInputBar
                   code={code}

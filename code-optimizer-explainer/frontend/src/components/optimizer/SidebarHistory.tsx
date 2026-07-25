@@ -428,171 +428,101 @@ export function SidebarHistory({
         )}
       </div>
 
-      {/* Footer Navigation Bar Section (History, Saved, & Settings) */}
+      {/* Footer Navigation Section per DESIGN.md */}
       {!collapsed ? (
-        <div className="p-2.5 border-t border-white/20 dark:border-white/10 bg-white/15 dark:bg-black/20 backdrop-blur-md space-y-1.5">
-          {/* History Bar */}
-          <button
-            type="button"
-            onClick={() => setActiveTab("all")}
-            className={[
-              "w-full flex items-center justify-between p-2 rounded-xl transition-all duration-200 cursor-pointer border backdrop-blur-md text-xs font-semibold shadow-2xs",
-              activeTab === "all"
-                ? "bg-white/80 dark:bg-white/15 text-zinc-950 dark:text-white border-white/90 dark:border-white/20 shadow-warm-sm"
-                : "bg-white/30 dark:bg-white/5 text-zinc-800 dark:text-zinc-200 border-white/40 dark:border-white/10 hover:bg-white/50 dark:hover:bg-white/10",
-            ].join(" ")}
-          >
-            <div className="flex items-center gap-2">
-              <Clock className="h-4 w-4 text-orange-500" />
-              <span>History</span>
-            </div>
-            <span className="px-2 py-0.5 rounded-full text-[10px] font-mono bg-orange-500/15 text-orange-600 dark:text-orange-300 font-bold border border-orange-500/20">
-              {safeHistory.length}
-            </span>
-          </button>
-
-          {/* Saved Bar */}
-          <button
-            type="button"
-            onClick={() => setActiveTab("starred")}
-            className={[
-              "w-full flex items-center justify-between p-2 rounded-xl transition-all duration-200 cursor-pointer border backdrop-blur-md text-xs font-semibold shadow-2xs",
-              activeTab === "starred"
-                ? "bg-white/80 dark:bg-white/15 text-zinc-950 dark:text-white border-white/90 dark:border-white/20 shadow-warm-sm"
-                : "bg-white/30 dark:bg-white/5 text-zinc-800 dark:text-zinc-200 border-white/40 dark:border-white/10 hover:bg-white/50 dark:hover:bg-white/10",
-            ].join(" ")}
-          >
-            <div className="flex items-center gap-2">
-              <Star className="h-4 w-4 fill-amber-400 text-amber-500" />
-              <span>Saved</span>
-            </div>
-            <span className="px-2 py-0.5 rounded-full text-[10px] font-mono bg-amber-500/15 text-amber-600 dark:text-amber-300 font-bold border border-amber-500/20">
-              {starredItemsCount}
-            </span>
-          </button>
-
-          {/* Settings Bar Button */}
-          <button
-            type="button"
-            onClick={() => setIsSettingsOpen(!isSettingsOpen)}
-            className="flex w-full items-center justify-between p-2 rounded-xl bg-white/50 dark:bg-white/10 backdrop-blur-md border border-white/70 dark:border-white/15 text-xs font-semibold text-zinc-900 dark:text-zinc-100 hover:bg-white/80 dark:hover:bg-white/20 transition cursor-pointer shadow-2xs group"
-          >
-            <div className="flex items-center gap-2">
-              <Settings className="h-4 w-4 text-orange-500 group-hover:rotate-90 transition-transform duration-300" />
-              <span>Settings</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <span className="text-[10px] text-zinc-500 font-mono">
-                {isSettingsOpen ? "Hide" : "Open"}
-              </span>
-              <ChevronDown className={`h-3.5 w-3.5 transition-transform duration-300 ${isSettingsOpen ? "rotate-180 text-orange-500" : "text-zinc-400"}`} />
-            </div>
-          </button>
-
-          {/* Expandable Settings Drawer */}
-          {isSettingsOpen && (
-            <div className="space-y-2 pt-1 animate-pop-in border-t border-white/10">
-
-              {/* Account Section inside Settings */}
-              <div className="flex items-center justify-between p-2 rounded-xl bg-white/40 dark:bg-white/10 backdrop-blur-md border border-white/40 dark:border-white/10 text-xs font-medium">
-                <div className="flex items-center gap-1.5 text-zinc-700 dark:text-zinc-300">
-                  <UserRound className="h-3.5 w-3.5 text-orange-500" />
-                  <span className="font-semibold">
-                    {currentUser ? (currentUser.email?.split("@")[0] || currentUser.full_name || "User") : "Account"}
-                  </span>
-                </div>
-                {currentUser ? (
-                  <button
-                    type="button"
-                    onClick={onSignOut}
-                    className="flex items-center gap-1 rounded-lg bg-red-500/15 px-2 py-1 border border-red-500/25 text-red-600 dark:text-red-400 hover:bg-red-500/25 transition cursor-pointer"
-                  >
-                    <LogOut className="h-3 w-3" />
-                    <span className="text-[10px] font-semibold">Sign out</span>
-                  </button>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={onSignIn}
-                    className="flex items-center gap-1 rounded-lg bg-orange-500/15 px-2 py-1 border border-orange-500/25 text-orange-600 dark:text-orange-400 hover:bg-orange-500/25 transition cursor-pointer"
-                  >
-                    <span className="text-[10px] font-semibold">Sign in</span>
-                  </button>
-                )}
+        <div className="p-3 border-t border-[var(--border-default)] bg-[var(--bg-surface)] space-y-1">
+          <div className="flex items-center justify-between gap-1">
+            {/* History Tab */}
+            <button
+              type="button"
+              onClick={() => setActiveTab("all")}
+              className={[
+                "flex-1 flex items-center justify-between px-3 py-1.5 rounded-md transition-colors text-xs font-medium cursor-pointer",
+                activeTab === "all"
+                  ? "bg-[var(--accent-muted)] text-[var(--accent)] font-semibold"
+                  : "text-[var(--text-secondary)] hover:bg-[var(--bg-surface-alt)] hover:text-[var(--text-primary)]",
+              ].join(" ")}
+            >
+              <div className="flex items-center gap-1.5">
+                <Clock className="h-3.5 w-3.5" />
+                <span>History</span>
               </div>
+              <span className="text-[10px] font-mono text-[var(--text-muted)]">{safeHistory.length}</span>
+            </button>
 
-              {/* Theme Selector inside Settings */}
-              <div className="flex items-center justify-between p-2 rounded-xl bg-white/40 dark:bg-white/10 backdrop-blur-md border border-white/40 dark:border-white/10 text-xs font-medium">
-                <span className="text-zinc-700 dark:text-zinc-300 font-semibold">Theme</span>
+            {/* Saved Tab */}
+            <button
+              type="button"
+              onClick={() => setActiveTab("starred")}
+              className={[
+                "flex-1 flex items-center justify-between px-3 py-1.5 rounded-md transition-colors text-xs font-medium cursor-pointer",
+                activeTab === "starred"
+                  ? "bg-[var(--accent-muted)] text-[var(--accent)] font-semibold"
+                  : "text-[var(--text-secondary)] hover:bg-[var(--bg-surface-alt)] hover:text-[var(--text-primary)]",
+              ].join(" ")}
+            >
+              <div className="flex items-center gap-1.5">
+                <Star className="h-3.5 w-3.5" />
+                <span>Saved</span>
+              </div>
+              <span className="text-[10px] font-mono text-[var(--text-muted)]">{starredItemsCount}</span>
+            </button>
+
+            {/* Single Icon Trigger for Settings per DESIGN.md */}
+            <button
+              type="button"
+              onClick={() => setIsSettingsOpen(!isSettingsOpen)}
+              title="Settings"
+              className="p-1.5 rounded-md text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-alt)] transition-colors cursor-pointer"
+            >
+              <Settings className="h-4 w-4" />
+            </button>
+          </div>
+
+          {/* Settings Drawer */}
+          {isSettingsOpen && (
+            <div className="space-y-1.5 pt-2 border-t border-[var(--border-subtle)] mt-2">
+              <div className="flex items-center justify-between p-2 rounded-md bg-[var(--bg-surface-alt)] text-xs">
+                <span className="text-[var(--text-secondary)]">Theme</span>
                 <button
                   type="button"
                   onClick={(e) => onToggleTheme(e)}
-                  className="flex items-center gap-1.5 rounded-lg bg-black/10 dark:bg-black/40 px-2 py-1 border border-black/5 dark:border-white/10 hover:scale-105 transition cursor-pointer"
+                  className="p-1 rounded text-[var(--text-primary)] hover:bg-[var(--bg-surface)] transition-colors cursor-pointer"
                 >
-                  {theme === "dark" ? (
-                    <>
-                      <Moon className="h-3.5 w-3.5 text-amber-400" />
-                      <span className="text-[11px] font-mono font-medium text-amber-400">Dark</span>
-                    </>
-                  ) : (
-                    <>
-                      <Sun className="h-3.5 w-3.5 text-amber-600" />
-                      <span className="text-[11px] font-mono font-medium text-amber-600">Light</span>
-                    </>
-                  )}
+                  {theme === "dark" ? <Sun className="h-3.5 w-3.5" /> : <Moon className="h-3.5 w-3.5" />}
                 </button>
               </div>
 
-              {/* Quick Stats */}
-              <div className="flex items-center justify-between text-[10px] text-zinc-800 dark:text-zinc-200 bg-white/40 dark:bg-white/10 backdrop-blur-md p-2 rounded-xl border border-white/40 dark:border-white/10 font-medium">
-                <div className="flex items-center gap-1.5">
-                  <BarChart3 className="h-3.5 w-3.5 text-zinc-900 dark:text-zinc-100" />
-                  <span>{history.length} Runs</span>
-                </div>
-                <div className="font-mono text-zinc-700 dark:text-zinc-300">{totalLines} lines</div>
-              </div>
-
-              {/* Export & Clear Actions */}
-              <div className="flex items-center justify-between gap-1.5 pt-0.5">
-                {history.length > 0 && (
-                  <button
-                    type="button"
-                    onClick={exportHistoryJSON}
-                    title="Export history to JSON file"
-                    className="flex-1 flex items-center justify-center gap-1 text-[10px] font-semibold text-zinc-900 dark:text-zinc-100 bg-white/50 dark:bg-white/10 backdrop-blur-md border border-white/70 dark:border-white/15 hover:bg-white/80 dark:hover:bg-white/20 py-1 px-2 rounded-lg transition cursor-pointer shadow-2xs"
-                  >
-                    <Download className="h-3 w-3" />
-                    <span>Export</span>
-                  </button>
-                )}
-
-                {history.length > 0 && (
-                  <button
-                    type="button"
-                    onClick={onClearAll}
-                    className="flex-1 flex items-center justify-center gap-1 text-[10px] font-semibold text-red-600 dark:text-red-400 bg-white/50 dark:bg-white/10 backdrop-blur-md border border-white/70 dark:border-white/15 hover:bg-red-500 hover:text-white py-1 px-2 rounded-lg transition cursor-pointer shadow-2xs"
-                  >
-                    <Trash2 className="h-3 w-3" />
-                    <span>Clear</span>
-                  </button>
-                )}
-              </div>
+              {currentUser ? (
+                <button
+                  type="button"
+                  onClick={onSignOut}
+                  className="w-full flex items-center justify-between p-2 rounded-md bg-red-500/10 text-red-500 text-xs font-medium hover:bg-red-500/20 transition cursor-pointer"
+                >
+                  <span>Sign out ({currentUser.email?.split("@")[0] || "User"})</span>
+                  <LogOut className="h-3.5 w-3.5" />
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={onSignIn}
+                  className="w-full flex items-center justify-center p-2 rounded-md bg-[var(--bg-surface-alt)] text-[var(--text-primary)] text-xs font-medium hover:bg-[var(--border-default)] transition cursor-pointer"
+                >
+                  <span>Sign in</span>
+                </button>
+              )}
             </div>
           )}
         </div>
       ) : (
-        <div className="mt-auto p-2.5 flex flex-col items-center gap-2 border-t border-white/20 dark:border-white/10 bg-white/15 dark:bg-black/20 backdrop-blur-md">
+        <div className="p-2 border-t border-[var(--border-default)] bg-[var(--bg-surface)] flex flex-col items-center gap-2">
           <button
             type="button"
-            onClick={(e) => onToggleTheme(e)}
-            title={theme === "dark" ? "Switch to Light Theme" : "Switch to Dark Theme"}
-            className="grid h-9 w-9 place-items-center rounded-xl bg-white/50 dark:bg-white/10 border border-white/70 dark:border-white/15 text-zinc-800 dark:text-zinc-200 hover:bg-white/80 dark:hover:bg-white/20 transition cursor-pointer shadow-2xs group"
+            onClick={onToggleTheme}
+            title="Toggle theme"
+            className="p-2 rounded-md hover:bg-[var(--bg-surface-alt)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
           >
-            {theme === "dark" ? (
-              <Moon className="h-4 w-4 text-amber-400 group-hover:rotate-12 transition-transform duration-300" />
-            ) : (
-              <Sun className="h-4 w-4 text-amber-600 group-hover:rotate-45 transition-transform duration-300" />
-            )}
+            {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
           </button>
         </div>
       )}

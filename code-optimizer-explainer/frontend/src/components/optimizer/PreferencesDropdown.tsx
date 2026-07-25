@@ -78,26 +78,23 @@ export function PreferencesDropdown({
   const activeModel = EXPLAIN_MODELS.find((m) => m.id === explainDepth) || EXPLAIN_MODELS[0];
 
   return (
-    <div className="flex items-center gap-2">
-      {/* OptiCode brand title — stays white, separate from the trigger */}
-      <span
-        className="font-headings text-xl sm:text-2xl font-black tracking-tight text-white"
-        style={{ textShadow: "0 1px 8px rgba(0,0,0,0.45), 0 2px 16px rgba(0,0,0,0.25)" }}
-      >
+    <div className="flex items-center gap-3">
+      {/* OptiCode brand title — plain text per DESIGN.md */}
+      <span className="font-headings text-lg font-bold tracking-tight text-[var(--text-primary)] select-none">
         OptiCode
       </span>
 
-      {/* Separate small preferences trigger pill */}
+      {/* Header model selector — Plain text + chevron per DESIGN.md */}
       <div className="relative inline-block text-left" ref={dropdownRef}>
         <button
           type="button"
           onClick={() => setIsOpen(!isOpen)}
           title="Select AI Model & Preferences"
-          className="inline-flex items-center gap-1 rounded-lg bg-white/20 hover:bg-white/35 border border-white/40 hover:border-white/60 backdrop-blur-md px-2.5 py-1 text-xs font-semibold text-white transition-all duration-200 cursor-pointer active:scale-95"
+          className="inline-flex items-center gap-1 px-1.5 py-1 text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
         >
-          <span className="hidden sm:inline opacity-90">{activeModel.name.replace("OptiCode ", "")}</span>
+          <span>{activeModel.name.replace("OptiCode ", "")}</span>
           <ChevronDown
-            className={`h-3.5 w-3.5 text-white/70 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
+            className={`h-3.5 w-3.5 text-[var(--text-muted)] transition-transform duration-150 ${isOpen ? "rotate-180" : ""}`}
           />
         </button>
 
