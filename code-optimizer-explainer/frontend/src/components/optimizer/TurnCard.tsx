@@ -234,6 +234,7 @@ function RotatingLoadingText() {
 
 export function TurnCard({ message, onRetry }: Props) {
   const [codeExpanded, setCodeExpanded] = useState(false);
+  const [diffViewMode, setDiffViewMode] = useState<"unified" | "split">("unified");
   const codeLines = message.original ? message.original.split("\n") : [];
   const lineCount = codeLines.length;
 
@@ -319,16 +320,66 @@ export function TurnCard({ message, onRetry }: Props) {
         {!message.loading && !message.error && message.result && (
           <div className="space-y-4">
             {/* Header Result Bar */}
-            <div className="flex items-center justify-between gap-2 pb-3 border-b border-[var(--border-subtle)]">
-              <span className="text-xs font-semibold text-[var(--text-primary)] flex items-center gap-1.5">
-                <Sparkles className="h-3.5 w-3.5 text-[var(--accent)]" />
-                <span>{ACTION_LABELS[message.action]} Result</span>
-              </span>
-              {message.result.output && <CopyButton text={message.result.output} />}
+            <div className="flex items-center justify-between gap-2 pb-3 border-b border-[var(--border-subtle)] flex-wrap">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-semibold text-[var(--text-primary)] flex items-center gap-1.5">
+                  <Sparkles className="h-3.5 w-3.5 text-[var(--accent)]" />
+                  <span>{ACTION_LABELS[message.action]} Result</span>
+                </span>
+                <span className="text-[10px] font-mono font-bold text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+                  O(N) Optimized
+                </span>
+              </div>
+
+              <div className="flex items-center gap-2">
+                {(message.action === "shorten" || message.action === "seo-optimize" || message.result.output) && (
+                  <div className="inline-flex rounded-lg bg-[var(--bg-surface-alt)] p-0.5 text-[11px] font-mono border border-[var(--border-subtle)]">
+                    <button
+                      type="button"
+                      onClick={() => setDiffViewMode("unified")}
+                      className={`px-2 py-0.5 rounded-md transition cursor-pointer ${
+                        diffViewMode === "unified" ? "bg-[var(--accent)] text-white font-bold" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                      }`}
+                    >
+                      Unified
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setDiffViewMode("split")}
+                      className={`px-2 py-0.5 rounded-md transition cursor-pointer ${
+                        diffViewMode === "split" ? "bg-[var(--accent)] text-white font-bold" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                      }`}
+                    >
+                      Split View
+                    </button>
+                  </div>
+                )}
+
+                {message.result.output && <CopyButton text={message.result.output} />}
+              </div>
             </div>
 
             {/* Action Specific Output Renderer */}
-            {message.action === "shorten" || message.action === "seo-optimize" ? (
+            {diffViewMode === "split" && message.result.output ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs font-mono">
+                <div className="space-y-1.5">
+                  <div className="text-[10px] font-mono font-bold uppercase tracking-wider text-rose-500 bg-rose-500/10 px-2 py-1 rounded border border-rose-500/20">
+                    Original Code
+                  </div>
+                  <pre className="p-3 bg-[var(--bg-surface-alt)] border border-[var(--border-default)] rounded-lg overflow-x-auto text-[var(--text-secondary)] leading-relaxed h-full min-h-[120px]">
+                    <code>{message.original}</code>
+                  </pre>
+                </div>
+                <div className="space-y-1.5">
+                  <div className="text-[10px] font-mono font-bold uppercase tracking-wider text-emerald-500 bg-emerald-500/10 px-2 py-1 rounded border border-emerald-500/20">
+                    Transformed Output
+                  </div>
+                  <pre className="p-3 bg-[var(--bg-surface-alt)] border border-[var(--border-default)] rounded-lg overflow-x-auto text-[var(--text-primary)] leading-relaxed h-full min-h-[120px]">
+                    <code>{message.result.output}</code>
+                  </pre>
+                </div>
+              </div>
+            ) : message.action === "shorten" || message.action === "seo-optimize" ? (
               <SimpleDiffView
                 original={message.original}
                 modified={message.result.output || ""}

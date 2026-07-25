@@ -23,6 +23,7 @@ import {
   Moon,
   ChevronDown,
   LogOut,
+  Keyboard,
 } from "lucide-react";
 import type { ActionId, ActionResult } from "@/api/backend";
 
@@ -174,6 +175,8 @@ interface Props {
   currentUser?: { email?: string; full_name?: string } | null;
   onSignIn?: () => void;
   onSignOut?: () => void;
+  onOpenAnalytics?: () => void;
+  onOpenShortcuts?: () => void;
 }
 
 export function SidebarHistory({
@@ -192,6 +195,8 @@ export function SidebarHistory({
   currentUser,
   onSignIn,
   onSignOut,
+  onOpenAnalytics,
+  onOpenShortcuts,
 }: Props) {
   const [activeTab, setActiveTab] = useState<"all" | "starred" | "templates">("all");
   const [searchQuery, setSearchQuery] = useState("");
@@ -486,6 +491,34 @@ export function SidebarHistory({
           {/* Settings Drawer */}
           {isSettingsOpen && (
             <div className="space-y-1.5 pt-2 border-t border-[var(--border-subtle)] mt-2">
+              {onOpenAnalytics && (
+                <button
+                  type="button"
+                  onClick={onOpenAnalytics}
+                  className="w-full flex items-center justify-between p-2 rounded-md bg-[var(--bg-surface-alt)] text-[var(--text-primary)] text-xs font-medium hover:bg-[var(--border-default)] transition cursor-pointer"
+                >
+                  <span className="flex items-center gap-2">
+                    <BarChart3 className="h-3.5 w-3.5 text-[var(--accent)]" />
+                    <span>Usage Insights</span>
+                  </span>
+                  <span className="text-[10px] font-mono text-[var(--text-muted)]">Stats</span>
+                </button>
+              )}
+
+              {onOpenShortcuts && (
+                <button
+                  type="button"
+                  onClick={onOpenShortcuts}
+                  className="w-full flex items-center justify-between p-2 rounded-md bg-[var(--bg-surface-alt)] text-[var(--text-primary)] text-xs font-medium hover:bg-[var(--border-default)] transition cursor-pointer"
+                >
+                  <span className="flex items-center gap-2">
+                    <Keyboard className="h-3.5 w-3.5 text-[var(--accent)]" />
+                    <span>Keyboard Shortcuts</span>
+                  </span>
+                  <span className="text-[10px] font-mono text-[var(--text-muted)]">?</span>
+                </button>
+              )}
+
               <div className="flex items-center justify-between p-2 rounded-md bg-[var(--bg-surface-alt)] text-xs">
                 <span className="text-[var(--text-secondary)]">Theme</span>
                 <button

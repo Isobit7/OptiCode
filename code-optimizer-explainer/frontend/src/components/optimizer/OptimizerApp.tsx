@@ -6,6 +6,8 @@ import { ActionPills } from "./ActionPills";
 import { ResultsPanel, type ChatMessage } from "./ResultsPanel";
 import { SidebarHistory, type HistoryItem } from "./SidebarHistory";
 import { SignInModal } from "./SignInModal";
+import { AnalyticsModal } from "./AnalyticsModal";
+import { KeyboardShortcutsModal } from "./KeyboardShortcutsModal";
 import { PreferencesDropdown, type ExplainDepth, type HumanizeMode } from "./PreferencesDropdown";
 import { runAction, fetchCurrentUser, logoutUser, fetchHistory, type ActionId, type ActionResult } from "@/api/backend";
 import { Sparkles, UserRound, ShieldCheck, Terminal, LogOut, ArrowDown } from "lucide-react";
@@ -21,6 +23,8 @@ export function OptimizerApp() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSignInOpen, setIsSignInOpen] = useState(false);
+  const [isAnalyticsOpen, setIsAnalyticsOpen] = useState(false);
+  const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -352,6 +356,8 @@ export function OptimizerApp() {
         currentUser={currentUser}
         onSignIn={() => setIsSignInOpen(true)}
         onSignOut={handleLogout}
+        onOpenAnalytics={() => setIsAnalyticsOpen(true)}
+        onOpenShortcuts={() => setIsShortcutsOpen(true)}
       />
 
       <div className="flex-1 flex flex-col h-full min-w-0 overflow-hidden bg-[var(--bg-base)]">
@@ -436,6 +442,17 @@ export function OptimizerApp() {
         isOpen={isSignInOpen}
         onClose={() => setIsSignInOpen(false)}
         onSuccess={checkUserSession}
+      />
+
+      <AnalyticsModal
+        isOpen={isAnalyticsOpen}
+        onClose={() => setIsAnalyticsOpen(false)}
+        history={Array.isArray(history) ? history : []}
+      />
+
+      <KeyboardShortcutsModal
+        isOpen={isShortcutsOpen}
+        onClose={() => setIsShortcutsOpen(false)}
       />
     </div>
   );
