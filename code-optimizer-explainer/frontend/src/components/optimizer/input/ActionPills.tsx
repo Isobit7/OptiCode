@@ -12,7 +12,7 @@ export const ACTIONS: ActionItem[] = [
   { id: "humanize", label: "Humanize", icon: UserRound },
   { id: "prettify", label: "Prettify", icon: Sparkles },
   { id: "shorten", label: "Shorten", icon: Minimize2 },
-  { id: "seo-optimize", label: "SEO", icon: Search },
+  { id: "seo-optimize", label: "SEO Optimize", icon: Search },
   { id: "alternatives", label: "Alternatives", icon: Shuffle },
 ];
 

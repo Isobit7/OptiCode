@@ -77,7 +77,7 @@ export function OptimizerApp() {
   };
 
   const [activeHistoryId, setActiveHistoryId] = useState<string | null>(null);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   useEffect(() => {
     try {
@@ -296,11 +296,11 @@ className="p-2 rounded hover:bg-primary/5 focus-visible:ring-2 focus-visible:rin
 
         {!hasActiveContent ? (
           <div className="flex-1 flex flex-col items-center justify-center px-4 sm:px-8 max-w-3xl mx-auto w-full gap-8">
-            <div className="text-center space-y-3">
-              <h1 className="text-4xl sm:text-5xl font-black tracking-tight text-white drop-shadow-lg max-w-2xl mx-auto leading-tight">
+            <div className="text-center space-y-3 max-w-4xl mx-auto">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight text-white drop-shadow-lg leading-tight sm:whitespace-nowrap">
                 Paste your code — let's clean it up
               </h1>
-              <p className="text-sm sm:text-base font-medium text-white/85 max-w-lg mx-auto drop-shadow-xs">
+              <p className="text-sm sm:text-base font-medium text-white/90 max-w-xl mx-auto drop-shadow-xs">
                 Transform, explain, prettify, or optimize any snippet instantly with AI.
               </p>
             </div>
