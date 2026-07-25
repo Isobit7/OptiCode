@@ -195,9 +195,9 @@ export function CodeInputBar({
         </div>
       )}
 
-      {/* Composer Card Box — Max Width ~760px Pinned Bottom */}
-      <div className="relative mx-auto w-full rounded-xl border border-[var(--border-default)] bg-[var(--bg-surface)] p-4 sm:p-5 shadow-sm transition-colors duration-150 focus-within:border-[var(--accent)]">
-        {/* Textarea Area — auto grows min 120px */}
+      {/* Composer Card Box — Compact Max Width ~760px Pinned Bottom */}
+      <div className="relative mx-auto w-full rounded-2xl border border-[var(--border-default)] bg-[var(--bg-surface)] p-3 sm:p-3.5 shadow-sm transition-colors duration-150 focus-within:border-[var(--accent)]">
+        {/* Textarea Area — compact min-h 56px auto-growing */}
         <textarea
           ref={textareaRef}
           value={code}
@@ -205,18 +205,18 @@ export function CodeInputBar({
           onKeyDown={handleKeyDown}
           aria-label="Code input box"
           placeholder="Paste your code here or type / for AI commands..."
-          rows={4}
+          rows={2}
           spellCheck={false}
-          className="block w-full min-h-[120px] max-h-[300px] resize-y bg-transparent font-mono text-[14px] leading-relaxed outline-none text-[var(--text-primary)] placeholder:text-[var(--text-muted)] transition-colors overflow-y-auto focus-visible:ring-1 focus-visible:ring-[var(--accent)] rounded"
+          className="block w-full min-h-[56px] max-h-[220px] resize-y bg-transparent font-mono text-[13px] sm:text-[14px] leading-relaxed outline-none text-[var(--text-primary)] placeholder:text-[var(--text-muted)] transition-colors overflow-y-auto focus-visible:ring-1 focus-visible:ring-[var(--accent)] rounded"
         />
 
         {/* Inline Action Selector Row */}
-        <div className="mt-3 pt-3 border-t border-[var(--border-subtle)] flex items-center justify-between gap-2 flex-wrap">
+        <div className="mt-2 pt-2 border-t border-[var(--border-subtle)] flex items-center justify-between gap-2 flex-wrap">
           <ActionPills active={activeAction} loading={loading} onSelect={onSelectAction} compact />
         </div>
 
         {/* Composer Controls Footer Bar */}
-        <div className="mt-3 flex items-center justify-between gap-3 border-t border-[var(--border-subtle)] pt-3 flex-wrap">
+        <div className="mt-2 flex items-center justify-between gap-2 border-t border-[var(--border-subtle)] pt-2 flex-wrap">
           <div className="flex items-center gap-2 sm:gap-3 text-[var(--text-secondary)]">
             <div className="flex items-center gap-1">
               <button
@@ -224,9 +224,9 @@ export function CodeInputBar({
                 onClick={handlePaste}
                 title="Paste from clipboard"
                 aria-label="Paste code from clipboard"
-                className="rounded-md p-2 bg-[var(--bg-surface-alt)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] min-h-[32px] min-w-[32px] flex items-center justify-center"
+                className="rounded-md p-1.5 bg-[var(--bg-surface-alt)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] min-h-[28px] min-w-[28px] flex items-center justify-center"
               >
-                <ClipboardPaste className="h-4 w-4" strokeWidth={2} aria-hidden="true" />
+                <ClipboardPaste className="h-3.5 w-3.5" strokeWidth={2} aria-hidden="true" />
               </button>
 
               <VoiceInputButton onSpeechResult={handleSpeechResult} />
@@ -236,28 +236,28 @@ export function CodeInputBar({
                 onClick={() => onChange("")}
                 title="Clear code"
                 aria-label="Clear code input"
-                className="rounded-md p-2 bg-[var(--bg-surface-alt)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] min-h-[32px] min-w-[32px] flex items-center justify-center"
+                className="rounded-md p-1.5 bg-[var(--bg-surface-alt)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] min-h-[28px] min-w-[28px] flex items-center justify-center"
               >
-                <Eraser className="h-4 w-4" strokeWidth={2} aria-hidden="true" />
+                <Eraser className="h-3.5 w-3.5" strokeWidth={2} aria-hidden="true" />
               </button>
             </div>
 
-            <div className="h-4 w-px bg-[var(--border-subtle)]" aria-hidden="true" />
+            <div className="h-3.5 w-px bg-[var(--border-subtle)]" aria-hidden="true" />
 
-            <div className="flex items-center gap-1.5 text-xs text-[var(--text-muted)] font-mono">
-              <Code2 className="h-4 w-4" strokeWidth={2} aria-hidden="true" />
+            <div className="flex items-center gap-1 text-[11px] text-[var(--text-muted)] font-mono">
+              <Code2 className="h-3.5 w-3.5" strokeWidth={2} aria-hidden="true" />
               <span>{code.length} chars</span>
             </div>
 
-            <div className="h-4 w-px bg-[var(--border-subtle)]" aria-hidden="true" />
+            <div className="h-3.5 w-px bg-[var(--border-subtle)]" aria-hidden="true" />
 
-            <label className="flex items-center gap-1.5 text-xs cursor-pointer text-[var(--text-secondary)]">
-              <Languages className="h-4 w-4" strokeWidth={2} aria-hidden="true" />
+            <label className="flex items-center gap-1 text-[11px] cursor-pointer text-[var(--text-secondary)]">
+              <Languages className="h-3.5 w-3.5" strokeWidth={2} aria-hidden="true" />
               <select
                 value={language}
                 onChange={(e) => onLanguageChange(e.target.value)}
                 aria-label="Target programming language"
-                className="rounded-md bg-transparent px-1.5 py-1 text-xs outline-none cursor-pointer font-medium text-[var(--text-primary)] focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
+                className="rounded-md bg-transparent px-1 py-0.5 text-[11px] outline-none cursor-pointer font-medium text-[var(--text-primary)] focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
               >
                 {LANGS.map((l) => (
                   <option
@@ -274,7 +274,7 @@ export function CodeInputBar({
 
           {/* Primary Action Button + Cmd/Ctrl+Enter Badge */}
           <div className="flex items-center gap-2">
-            <span className="hidden sm:inline-block text-[11px] font-mono text-[var(--text-muted)] bg-[var(--bg-surface-alt)] px-2 py-1 rounded border border-[var(--border-subtle)]">
+            <span className="hidden sm:inline-block text-[10px] font-mono text-[var(--text-muted)] bg-[var(--bg-surface-alt)] px-1.5 py-0.5 rounded border border-[var(--border-subtle)]">
               Ctrl+Enter
             </span>
             <button
@@ -284,17 +284,17 @@ export function CodeInputBar({
               aria-disabled={isFormDisabled}
               aria-label={loading ? "Processing code" : actionButtonText}
               className={[
-                "inline-flex items-center gap-2 rounded-full py-2.5 px-6 font-black text-xs transition-all duration-150 shadow-md cursor-pointer select-none",
+                "inline-flex items-center gap-1.5 rounded-full py-1.5 px-4 font-bold text-xs transition-all duration-150 shadow-sm cursor-pointer select-none",
                 "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2",
                 isFormDisabled
                   ? "bg-[var(--bg-surface-alt)] text-[var(--text-muted)] border border-[var(--border-subtle)] cursor-not-allowed opacity-40 shadow-none"
                   : "bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white hover:scale-[1.02] active:scale-[0.96]",
               ].join(" ")}
             >
-              <span className="uppercase tracking-widest font-black">
+              <span className="uppercase tracking-wider font-extrabold text-[11px]">
                 {loading ? "PROCESSING..." : actionButtonText}
               </span>
-              <ArrowUp className="h-4 w-4" strokeWidth={3} aria-hidden="true" />
+              <ArrowUp className="h-3.5 w-3.5" strokeWidth={2.5} aria-hidden="true" />
             </button>
           </div>
         </div>
