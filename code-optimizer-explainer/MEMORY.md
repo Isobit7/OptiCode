@@ -99,6 +99,7 @@ code-optimizer-explainer/
 
 | Date | Change |
 |---|---|
+| 2026-07-25 | Applied strategic semantic action badges (`/colorize`): added action-specific subtle badge color tints (Indigo for Explain, Amber for Humanize, Mint/Emerald for Prettify & SEO, Coral/Rose for Shorten, Violet for Alternatives) while keeping the main app background & primary CTA `#f97316` intact per `DESIGN.md` |
 | 2026-07-25 | Integrated Developer Delight Suite (`/delight`): rotating humorous developer loading messages ("Optimizing Big-O...", "De-spaghettifying loops...", "Teaching AI idioms..."), browser DevTools console ASCII easter egg banner, copy sparkle flash feedback, and power-user shortcut hints |
 | 2026-07-25 | Executed visual amplification (`/bolder`): elevated typography contrast with oversized Satoshi 900 black headline (`text-3xl sm:text-4xl lg:text-5xl font-black`), amplified primary `RUN ACTION ↑` focal CTA button (`font-black tracking-widest hover:scale-[1.02] active:scale-[0.96]`), while strictly maintaining `DESIGN.md` flat principles (zero mesh gradients, zero glassmorphism) |
 | 2026-07-25 | Fixed `PreferencesDropdown.tsx` popover theme colors: replaced hardcoded dark `bg-zinc-950` classes with dynamic CSS design tokens (`var(--bg-surface)`, `var(--border-default)`, `var(--text-primary)`, `var(--text-secondary)`, `var(--accent-muted)`), ensuring 100% seamless palette matching in both light (`#ededed`) and dark (`#121212`) modes |

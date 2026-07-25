@@ -202,6 +202,15 @@ const ACTION_LABELS: Record<ActionId, string> = {
   alternatives: "Alternatives",
 };
 
+const ACTION_BADGE_STYLES: Record<ActionId, string> = {
+  explain: "text-indigo-600 dark:text-indigo-400 bg-indigo-500/10 border-indigo-500/20",
+  humanize: "text-amber-600 dark:text-amber-400 bg-amber-500/10 border-amber-500/20",
+  prettify: "text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
+  shorten: "text-rose-600 dark:text-rose-400 bg-rose-500/10 border-rose-500/20",
+  "seo-optimize": "text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
+  alternatives: "text-purple-600 dark:text-purple-400 bg-purple-500/10 border-purple-500/20",
+};
+
 const DEV_LOADING_MESSAGES = [
   "Optimizing Big-O complexity...",
   "De-spaghettifying nested loops...",
@@ -233,7 +242,7 @@ export function TurnCard({ message, onRetry }: Props) {
       {/* 1. Compact Pasted Code Preview Bar (Top Zone) */}
       <div className="px-4 py-2.5 bg-[var(--bg-surface-alt)] border-b border-[var(--border-subtle)] flex items-center justify-between gap-3">
         <div className="flex items-center gap-2 min-w-0">
-          <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-[var(--accent)] bg-[var(--accent-muted)] px-2 py-0.5 rounded">
+          <span className={`text-[11px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded border ${ACTION_BADGE_STYLES[message.action] || "text-[var(--accent)] bg-[var(--accent-muted)] border-[var(--accent)]"}`}>
             {ACTION_LABELS[message.action] ?? message.action}
           </span>
           <span className="text-xs text-[var(--text-secondary)] font-mono truncate">
