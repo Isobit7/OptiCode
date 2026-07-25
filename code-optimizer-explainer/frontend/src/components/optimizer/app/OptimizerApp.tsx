@@ -199,10 +199,21 @@ export function OptimizerApp() {
   const hasActiveContent = !!(submittedCode || result || loading || messages.length > 0);
 
   return (
-    <div className="relative flex h-screen w-full overflow-hidden">
-      {/* Gradient background for whole app */}
-      <div className="absolute inset-0 pointer-events-none animate-shimmer bg-gradient-to-r from-orange-500/15 via-pink-500/10 to-orange-500/15 opacity-30" />
-        {/* Animated background gradient */}
+    <div
+      className="relative flex h-screen w-full max-h-screen overflow-hidden transition-colors duration-500"
+      style={{ background: "var(--app-gradient)" }}
+    >
+      {/* Ambient Background Multi-Point Light Spheres (Orange & Pink Sunset Glow) */}
+      <div className="pointer-events-none absolute inset-0 overflow-hidden z-0">
+        {/* Top-Center Warm Sunset Beam */}
+        <div className="absolute -top-40 left-1/2 -translate-x-1/2 h-[520px] w-[900px] rounded-full bg-gradient-to-b from-orange-500/35 via-pink-500/25 to-transparent blur-[140px] dark:from-orange-500/30 dark:via-purple-600/20 dark:blur-[160px]" />
+        {/* Top-Right Vibrant Orange Glow Sphere */}
+        <div className="absolute -top-32 -right-32 h-[500px] w-[500px] rounded-full bg-orange-500/30 blur-[130px] dark:bg-orange-600/25 dark:blur-[150px] animate-pulse" />
+        {/* Left-Center Radiant Pink/Rose Orb */}
+        <div className="absolute top-1/3 -left-36 h-[500px] w-[500px] rounded-full bg-pink-500/30 blur-[120px] dark:bg-purple-600/25 dark:blur-[150px] animate-float" />
+        {/* Bottom-Right Deep Amber Warm Ambient Glow */}
+        <div className="absolute -bottom-40 right-10 h-[550px] w-[550px] rounded-full bg-amber-500/25 blur-[140px] dark:bg-indigo-700/25 dark:blur-[160px]" />
+      </div>
 
       <SidebarHistory
         history={Array.isArray(history) ? history : []}

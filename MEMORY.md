@@ -95,6 +95,7 @@ code-optimizer-explainer/
 ## 9. Changelog
 *(Newest entry on top. One line per change — date + what changed + why, if non-obvious.)*
 
+| 2026-07-25 | Restored vibrant orange & pink sunset background gradient (`style={{ background: "var(--app-gradient)" }}`) with multi-point glowing light spheres across the entire application workspace in `OptimizerApp.tsx` |
 | 2026-07-25 | Fixed unstyled UI issue: removed `source(none)` from `@import "tailwindcss"` and added `@source "../src"` in `styles.css` so Tailwind v4 scans all components and generates all utility CSS classes (restored full 101.8kB stylesheet) |
 | 2026-07-25 | Fixed frontend build & runtime errors: installed missing dependencies (`framer-motion`, `highlight.js`) via `npm install` and restored missing `:root {` selector wrapper in `styles.css` |
 | 2026-07-25 | Pushed all recent commits and fixes successfully to GitHub repository (`Isobit7/OptiCode.git`) on `main` branch |
