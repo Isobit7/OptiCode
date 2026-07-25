@@ -335,11 +335,11 @@ export function OptimizerApp() {
           {messages.length === 0 ? (
             /* Empty State / Greeting View */
             <div className="flex-1 flex flex-col items-center justify-center px-4 sm:px-6 py-6 max-w-[760px] mx-auto w-full overflow-y-auto no-scrollbar">
-              <section className="text-center mb-6 space-y-2">
-                <h1 className="font-headings text-2xl sm:text-3xl font-bold tracking-tight text-[var(--text-primary)]">
+              <section className="text-center mb-8 space-y-3">
+                <h1 className="font-headings text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-[var(--text-primary)] leading-tight">
                   {currentUser ? `Welcome back, ${currentUser.email?.split("@")[0] || currentUser.full_name || "Developer"}` : "Paste your code — let's clean it up"}
                 </h1>
-                <p className="text-xs sm:text-sm text-[var(--text-secondary)] max-w-lg mx-auto">
+                <p className="text-sm sm:text-base text-[var(--text-secondary)] max-w-xl mx-auto font-normal">
                   Transform, explain, prettify, or optimize any snippet instantly with AI.
                 </p>
               </section>

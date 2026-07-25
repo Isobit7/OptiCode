@@ -284,17 +284,17 @@ export function CodeInputBar({
               aria-disabled={isFormDisabled}
               aria-label={loading ? "Processing code" : actionButtonText}
               className={[
-                "inline-flex items-center gap-1.5 rounded-full py-2 px-5 font-bold text-xs transition-all duration-150 shadow-sm cursor-pointer",
+                "inline-flex items-center gap-2 rounded-full py-2.5 px-6 font-black text-xs transition-all duration-150 shadow-md cursor-pointer select-none",
                 "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2",
                 isFormDisabled
-                  ? "bg-[var(--bg-surface-alt)] text-[var(--text-muted)] border border-[var(--border-subtle)] cursor-not-allowed opacity-50"
-                  : "bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white active:scale-95",
+                  ? "bg-[var(--bg-surface-alt)] text-[var(--text-muted)] border border-[var(--border-subtle)] cursor-not-allowed opacity-40 shadow-none"
+                  : "bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white hover:scale-[1.02] active:scale-[0.96]",
               ].join(" ")}
             >
-              <span className="uppercase tracking-wider font-extrabold">
+              <span className="uppercase tracking-widest font-black">
                 {loading ? "PROCESSING..." : actionButtonText}
               </span>
-              <ArrowUp className="h-3.5 w-3.5" strokeWidth={2.5} aria-hidden="true" />
+              <ArrowUp className="h-4 w-4" strokeWidth={3} aria-hidden="true" />
             </button>
           </div>
         </div>
