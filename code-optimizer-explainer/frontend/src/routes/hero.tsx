@@ -36,7 +36,7 @@ function HeroPreviewPage() {
   const accentTint: [number, number, number] = [0.976, 0.45, 0.086]; // var(--accent) #f97316
 
   return (
-    <div className="dark relative isolate h-[100dvh] w-full overflow-hidden bg-[#121212]">
+    <div className="dark relative h-[100dvh] w-full overflow-hidden bg-[#121212]">
       <Link
         to="/"
         className="fixed left-4 top-4 z-50 inline-flex items-center gap-2 rounded-md bg-background/80 px-3 py-1.5 text-xs font-medium text-[color:var(--text-secondary)] backdrop-blur border border-border shadow-sm transition hover:text-[color:var(--text-primary)] hover:bg-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-1"
@@ -45,12 +45,13 @@ function HeroPreviewPage() {
         Back to Optimizer
       </Link>
 
+      {/* Background layers — all z-[-1] so they never cover content */}
       <div
         aria-hidden
-        className="absolute inset-0 z-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[color:color-mix(in_srgb,var(--accent)_22%,transparent)] via-transparent to-[color:var(--bg-base)]"
+        className="absolute inset-0 z-[-1] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[color:color-mix(in_srgb,var(--accent)_22%,transparent)] via-transparent to-[#121212]"
       />
 
-      <div className="absolute inset-0 z-0">
+      <div className="absolute inset-0 z-[-1]">
         <LiquidChrome
           baseColor={reduced ? accentTint : baseColor}
           speed={reduced ? 0 : 0.9}
@@ -60,9 +61,9 @@ function HeroPreviewPage() {
         />
       </div>
 
-      <div className="absolute inset-0 z-0 mix-blend-overlay bg-[radial-gradient(circle_at_20%_10%,color-mix(in_srgb,var(--accent)_40%,transparent)_0%,transparent_55%),radial-gradient(circle_at_80%_80%,color-mix(in_srgb,#6366f1_40%,transparent)_0%,transparent_55%)]" />
+      <div className="absolute inset-0 z-[-1] mix-blend-overlay bg-[radial-gradient(circle_at_20%_10%,color-mix(in_srgb,var(--accent)_40%,transparent)_0%,transparent_55%),radial-gradient(circle_at_80%_80%,color-mix(in_srgb,#6366f1_40%,transparent)_0%,transparent_55%)]" />
 
-      <div className="absolute inset-0 z-0 bg-black/30 dark:bg-black/40" />
+      <div className="absolute inset-0 z-[-1] bg-black/30" />
 
       <main className="relative z-10 mx-auto flex h-full w-full max-w-6xl flex-col items-center justify-center px-6 text-center">
         <span style={{ color: "rgba(255,255,255,0.85)" }} className="mb-5 inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-black/30 px-3 py-1 text-[11px] font-medium tracking-wide backdrop-blur">
