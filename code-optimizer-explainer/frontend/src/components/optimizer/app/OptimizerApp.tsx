@@ -261,19 +261,11 @@ export function OptimizerApp() {
                 <button
                   type="button"
                   onClick={handleLogout}
-className="p-2 rounded hover:bg-primary/5 focus-visible:ring-2 focus-visible:ring-primary text-muted-foreground hover:text-foreground transition-colors"
+                  className="p-2 rounded hover:bg-primary/5 focus-visible:ring-2 focus-visible:ring-primary text-muted-foreground hover:text-foreground transition-colors"
                   title="Sign out"
                 >
                   <LogOut className="h-4 w-4" />
-</button>
-<button
-                type="button"
-                onClick={() => setIsSettingsOpen(true)}
-                className="p-2 rounded hover:bg-primary/5 focus-visible:ring-2 focus-visible:ring-primary text-muted-foreground hover:text-foreground transition-colors"
-                title="Settings"
-              >
-                <Settings className="h-4 w-4" />
-              </button>
+                </button>
               </div>
             ) : (
               <button
@@ -285,7 +277,17 @@ className="p-2 rounded hover:bg-primary/5 focus-visible:ring-2 focus-visible:rin
                 <span className="hidden sm:inline">Sign in</span>
               </button>
             )}
-<button
+            {/* Settings button — always visible */}
+            <button
+              type="button"
+              onClick={() => setIsSettingsOpen(true)}
+              className="p-2 rounded hover:bg-primary/5 focus-visible:ring-2 focus-visible:ring-primary text-muted-foreground hover:text-foreground transition-colors"
+              title="Settings"
+            >
+              <Settings className="h-4 w-4" />
+            </button>
+            {/* Theme toggle — always visible */}
+            <button
                 type="button"
                 onClick={handleToggleTheme}
                 className="p-2 rounded hover:bg-primary/5 focus-visible:ring-2 focus-visible:ring-primary text-muted-foreground hover:text-foreground transition-colors"
