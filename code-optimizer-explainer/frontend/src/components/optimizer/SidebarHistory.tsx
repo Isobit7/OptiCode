@@ -239,29 +239,30 @@ export function SidebarHistory({
   return (
     <aside
       className={[
-        "sticky top-0 h-screen flex flex-col transition-all duration-300 ease-in-out border-r border-white/50 dark:border-white/10 text-zinc-900 dark:text-[#FAFAFA] shadow-warm-md z-30 shrink-0",
-        "bg-white/45 dark:bg-[#0C0C0E]/90 backdrop-blur-2xl backdrop-saturate-150",
+        "sticky top-0 h-screen flex flex-col transition-all duration-300 ease-in-out border-r border-[var(--border-default)] text-[var(--text-primary)] shadow-xs z-30 shrink-0",
+        "bg-[var(--bg-surface)]",
         collapsed ? "w-14" : "w-56 sm:w-64",
       ].join(" ")}
     >
       {/* Top Header */}
-      <div className="flex items-center justify-between p-2.5 border-b border-white/30 dark:border-white/10 bg-white/20 dark:bg-[#121215]/80 backdrop-blur-md">
+      <div className="flex items-center justify-between p-2.5 border-b border-[var(--border-subtle)] bg-[var(--bg-surface)]">
         {!collapsed ? (
           <div className="flex items-center">
             <img
               src="/logo.png"
-              alt="Logo"
-              className="h-7 w-7 rounded-lg object-cover shadow-xs border border-white/30"
+              alt="OptiCode Logo"
+              className="h-7 w-7 rounded-md object-cover shadow-xs border border-[var(--border-subtle)]"
             />
           </div>
         ) : (
           <button
             type="button"
             onClick={onToggleCollapse}
-            title="Expand Dashboard"
-            className="grid h-9 w-9 mx-auto place-items-center rounded-lg bg-white/40 dark:bg-white/10 text-zinc-900 dark:text-zinc-100 shadow-xs border border-white/40 dark:border-white/15 hover:scale-105 transition cursor-pointer"
+            title="Expand sidebar"
+            aria-label="Expand sidebar"
+            className="grid h-9 w-9 mx-auto place-items-center rounded-md bg-[var(--bg-surface-alt)] text-[var(--text-primary)] shadow-xs border border-[var(--border-subtle)] hover:bg-[var(--bg-base)] transition cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
           >
-            <PanelLeftOpen className="h-4.5 w-4.5" />
+            <PanelLeftOpen className="h-4 w-4" aria-hidden="true" />
           </button>
         )}
 
@@ -270,9 +271,10 @@ export function SidebarHistory({
             type="button"
             onClick={onToggleCollapse}
             title="Collapse sidebar"
-            className="p-1.5 rounded-lg text-zinc-700 dark:text-zinc-300 hover:text-zinc-950 dark:hover:text-white hover:bg-white/30 dark:hover:bg-white/10 transition cursor-pointer"
+            aria-label="Collapse sidebar"
+            className="p-1.5 rounded-md text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-alt)] transition cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
           >
-            <PanelLeftClose className="h-4 w-4" />
+            <PanelLeftClose className="h-4 w-4" aria-hidden="true" />
           </button>
         )}
       </div>
@@ -283,12 +285,13 @@ export function SidebarHistory({
           type="button"
           onClick={onNewSession}
           title="New Optimization Session"
+          aria-label="Start new optimization session"
           className={[
-            "w-full flex items-center justify-center gap-1.5 rounded-lg bg-zinc-900/90 text-white hover:bg-zinc-950 font-medium py-2 px-2.5 transition-all duration-200 shadow-warm-sm cursor-pointer hover:-translate-y-0.5 active:scale-95 border border-white/20 backdrop-blur-md",
+            "w-full flex items-center justify-center gap-1.5 rounded-md bg-[var(--bg-surface-alt)] text-[var(--text-primary)] hover:bg-[var(--border-default)] font-medium py-2 px-2.5 transition-colors duration-150 shadow-xs cursor-pointer border border-[var(--border-default)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]",
             collapsed ? "aspect-square p-0" : "",
           ].join(" ")}
         >
-          <Plus className="h-4 w-4 shrink-0 stroke-[2.5]" />
+          <Plus className="h-4 w-4 shrink-0 stroke-[2.5]" aria-hidden="true" />
           {!collapsed && <span className="text-xs font-semibold">New Session</span>}
         </button>
       </div>
@@ -297,13 +300,14 @@ export function SidebarHistory({
       {!collapsed && (
         <div className="px-2.5 pb-2">
           <div className="relative flex items-center">
-            <Search className="absolute left-2.5 h-3 w-3 text-zinc-500" />
+            <Search className="absolute left-2.5 h-3.5 w-3.5 text-[var(--text-muted)]" aria-hidden="true" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder={activeTab === "starred" ? "Search starred items..." : "Search history..."}
-              className="w-full bg-white/25 border border-white/40 backdrop-blur-md rounded-xl pl-7 pr-2.5 py-1 text-[11px] text-zinc-950 placeholder:text-zinc-500 outline-none focus:border-white focus:bg-white/50 shadow-2xs transition"
+              aria-label={activeTab === "starred" ? "Search saved items" : "Search history"}
+              placeholder={activeTab === "starred" ? "Search saved items..." : "Search history..."}
+              className="w-full bg-[var(--bg-surface-alt)] border border-[var(--border-default)] rounded-md pl-7 pr-2.5 py-1 text-xs text-[var(--text-primary)] placeholder:text-[var(--text-muted)] outline-none focus:border-[var(--accent)] focus-visible:ring-1 focus-visible:ring-[var(--accent)] transition-colors"
             />
           </div>
         </div>

@@ -26,18 +26,26 @@ interface Props {
 
 export function ActionPills({ active, loading, onSelect, compact = true }: Props) {
   return (
-    <div className="flex flex-wrap items-center gap-1 rounded-lg bg-[var(--bg-surface-alt)] p-1 border border-[var(--border-subtle)]">
+    <div
+      role="tablist"
+      aria-label="Code action selector"
+      className="flex flex-wrap items-center gap-1 rounded-lg bg-[var(--bg-surface-alt)] p-1 border border-[var(--border-subtle)]"
+    >
       {ACTIONS.map(({ id, label, icon: Icon, description }) => {
         const isActive = active === id;
         return (
           <button
             key={id}
             type="button"
+            role="tab"
+            aria-selected={isActive}
+            aria-label={label}
             title={description}
             onClick={() => onSelect(id)}
             disabled={loading}
             className={[
               "group inline-flex items-center gap-1.5 rounded-md text-xs transition-colors duration-150 cursor-pointer select-none",
+              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]",
               compact ? "px-2.5 py-1 text-[12px]" : "px-3 py-1.5 text-xs",
               "disabled:cursor-not-allowed disabled:opacity-40",
               isActive
@@ -46,10 +54,11 @@ export function ActionPills({ active, loading, onSelect, compact = true }: Props
             ].join(" ")}
           >
             <Icon
-              className={`h-3.5 w-3.5 ${
+              className={`h-4 w-4 ${
                 isActive ? "text-[var(--accent)]" : "text-[var(--text-muted)] group-hover:text-[var(--text-secondary)]"
               }`}
               strokeWidth={2}
+              aria-hidden="true"
             />
             <span>{label}</span>
           </button>

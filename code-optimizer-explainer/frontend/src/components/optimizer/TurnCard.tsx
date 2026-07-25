@@ -23,6 +23,7 @@ function CopyButton({ text }: { text: string }) {
   return (
     <button
       type="button"
+      aria-label={copied ? "Code copied to clipboard" : "Copy code to clipboard"}
       onClick={async () => {
         try {
           await navigator.clipboard.writeText(text);
@@ -32,9 +33,9 @@ function CopyButton({ text }: { text: string }) {
           // Ignore
         }
       }}
-      className="inline-flex items-center gap-1 rounded px-2 py-0.5 text-[11px] font-mono text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-alt)] transition-colors cursor-pointer border border-[var(--border-subtle)]"
+      className="inline-flex items-center gap-1 rounded px-2 py-0.5 text-[11px] font-mono text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-alt)] transition-colors cursor-pointer border border-[var(--border-subtle)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
     >
-      {copied ? <Check className="h-3 w-3 text-emerald-500" /> : <Copy className="h-3 w-3" />}
+      {copied ? <Check className="h-3 w-3 text-emerald-500" aria-hidden="true" /> : <Copy className="h-3 w-3" aria-hidden="true" />}
       <span>{copied ? "Copied" : "Copy"}</span>
     </button>
   );
