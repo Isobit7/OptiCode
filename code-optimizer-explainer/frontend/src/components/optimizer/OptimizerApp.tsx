@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState, useRef } from "react";
 import { CodeInputBar } from "./CodeInputBar";
+import { Thread } from "./Thread";
 import { ActionPills } from "./ActionPills";
 import { ResultsPanel, type ChatMessage } from "./ResultsPanel";
 import { SidebarHistory, type HistoryItem } from "./SidebarHistory";
@@ -329,56 +330,21 @@ export function OptimizerApp() {
           <div className="flex items-center gap-3" />
         </header>
 
-        {/* Layout Workspace */}
-        {!(submittedCode || result || loading) ? (
-          /* Greeting & Input View */
-          <div className="flex-1 flex flex-col items-center justify-center px-4 sm:px-8 py-6 max-w-4xl mx-auto w-full overflow-y-auto no-scrollbar h-full min-h-0">
-            <section className="text-center mb-6 space-y-2">
-              <h1 className="font-headings text-3xl sm:text-4xl font-bold tracking-tight text-[var(--text-primary)]">
-                {currentUser ? `Welcome back, ${currentUser.email?.split("@")[0] || currentUser.full_name || "Developer"}` : "Paste your code — let's clean it up"}
-              </h1>
-              <p className="text-sm sm:text-base text-[var(--text-secondary)] max-w-xl mx-auto">
-                Transform, explain, prettify, or optimize any snippet instantly with AI.
-              </p>
-            </section>
+        {/* Layout Workspace — ChatGPT / Claude / Cursor Pattern */}
+        <div className="flex-1 flex flex-col min-h-0 overflow-hidden relative">
+          {messages.length === 0 ? (
+            /* Empty State / Greeting View */
+            <div className="flex-1 flex flex-col items-center justify-center px-4 sm:px-6 py-6 max-w-[760px] mx-auto w-full overflow-y-auto no-scrollbar">
+              <section className="text-center mb-6 space-y-2">
+                <h1 className="font-headings text-2xl sm:text-3xl font-bold tracking-tight text-[var(--text-primary)]">
+                  {currentUser ? `Welcome back, ${currentUser.email?.split("@")[0] || currentUser.full_name || "Developer"}` : "Paste your code — let's clean it up"}
+                </h1>
+                <p className="text-xs sm:text-sm text-[var(--text-secondary)] max-w-lg mx-auto">
+                  Transform, explain, prettify, or optimize any snippet instantly with AI.
+                </p>
+              </section>
 
-            <div className="w-full">
-              <CodeInputBar
-                code={code}
-                onChange={setCode}
-                language={language}
-                onLanguageChange={setLanguage}
-                onSubmit={handleSubmit}
-                loading={loading}
-                activeAction={activeAction}
-                onSelectAction={handleSelectAction}
-              />
-            </div>
-          </div>
-        ) : (
-          /* Active Response View */
-          <div className="flex-1 flex flex-col justify-between min-h-0 h-full overflow-y-auto relative">
-            <main className="flex-1 px-4 sm:px-8 pt-4 pb-36 max-w-4xl mx-auto w-full">
-              <ResultsPanel messages={messages} original={submittedCode} result={result} loading={loading} error={error} />
-              <div ref={messagesEndRef} />
-            </main>
-
-            {/* Floating Scroll to Bottom Button */}
-            {messages.length > 1 && (
-              <button
-                type="button"
-                onClick={() => messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })}
-                title="Scroll to latest response"
-                className="absolute bottom-28 right-8 z-40 inline-flex items-center gap-1.5 rounded-full bg-[var(--accent)] text-white px-3.5 py-1.5 text-xs font-semibold shadow-sm hover:bg-[var(--accent-hover)] transition-all duration-150 cursor-pointer"
-              >
-                <ArrowDown className="h-3.5 w-3.5" />
-                <span>Latest</span>
-              </button>
-            )}
-
-            {/* Sticky Bottom Input Bar */}
-            <div className="sticky bottom-0 z-30 w-full bg-[var(--bg-base)] border-t border-[var(--border-subtle)] py-4 px-4 sm:px-8 transition-colors duration-150">
-              <div className="max-w-4xl mx-auto">
+              <div className="w-full">
                 <CodeInputBar
                   code={code}
                   onChange={setCode}
@@ -391,8 +357,41 @@ export function OptimizerApp() {
                 />
               </div>
             </div>
-          </div>
-        )}
+          ) : (
+            /* Thread View (Scrolling Centered Column + Pinned Bottom Composer) */
+            <div className="flex-1 flex flex-col min-h-0 overflow-hidden relative">
+              {/* Scrolling Centered Thread Column (max-width ~760px) */}
+              <div className="flex-1 overflow-y-auto pb-32">
+                <Thread
+                  messages={messages.map((m) => ({
+                    id: m.id,
+                    original: m.original,
+                    action: activeAction || "explain",
+                    language,
+                    result: m.result,
+                    loading: m.loading,
+                    error: m.error,
+                  }))}
+                  onRetry={(msg) => run(msg.action)}
+                />
+              </div>
+
+              {/* Pinned Bottom Composer with Fade Mask */}
+              <div className="sticky bottom-0 z-30 w-full bg-gradient-to-t from-[var(--bg-base)] via-[var(--bg-base)] to-transparent pt-6 pb-4 px-4 sm:px-6 border-t border-[var(--border-subtle)]">
+                <CodeInputBar
+                  code={code}
+                  onChange={setCode}
+                  language={language}
+                  onLanguageChange={setLanguage}
+                  onSubmit={handleSubmit}
+                  loading={loading}
+                  activeAction={activeAction}
+                  onSelectAction={handleSelectAction}
+                />
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
       <SignInModal

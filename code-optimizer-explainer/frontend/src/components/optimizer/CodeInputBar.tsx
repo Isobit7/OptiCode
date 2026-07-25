@@ -67,7 +67,9 @@ export function CodeInputBar({
   const [slashQuery, setSlashQuery] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(0);
 
-  // Check if input ends with a slash command trigger
+  // Check if input is HTML to highlight/enable SEO chip
+  const isHTMLSnippet = /<[a-z][\s\S]*>/i.test(code);
+
   const handleCodeChange = (text: string) => {
     onChange(text);
 
@@ -120,6 +122,11 @@ export function CodeInputBar({
       } else if (e.key === "Escape") {
         setShowSlashMenu(false);
       }
+    } else if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+      e.preventDefault();
+      if (code.trim() && !loading) {
+        onSubmit();
+      }
     }
   };
 
@@ -142,15 +149,17 @@ export function CodeInputBar({
     ? ACTION_BUTTON_LABELS[activeAction]
     : "RUN ACTION";
 
+  const isFormDisabled = loading || !code.trim();
+
   return (
-    <div className="group relative mx-auto w-full max-w-4xl animate-fade-in-up">
+    <div className="relative mx-auto w-full max-w-[760px] animate-fade-in-up">
       {/* Slash Commands Floating Popover Menu */}
       {showSlashMenu && filteredCommands.length > 0 && (
-        <div className="absolute -top-64 left-0 z-50 w-full max-w-md overflow-hidden rounded-2xl border border-zinc-800 bg-[#0d1017]/95 p-2 text-white shadow-2xl backdrop-blur-2xl animate-pop-in">
-          <div className="flex items-center gap-2 border-b border-zinc-800/80 px-3 py-2 text-xs font-bold text-amber-400">
+        <div className="absolute -top-64 left-0 z-50 w-full max-w-md overflow-hidden rounded-xl border border-[var(--border-default)] bg-[var(--bg-surface)] p-2 text-[var(--text-primary)] shadow-2xl animate-pop-in">
+          <div className="flex items-center gap-2 border-b border-[var(--border-subtle)] px-3 py-2 text-xs font-bold text-[var(--accent)]">
             <Command className="h-3.5 w-3.5" />
             <span>SLASH COMMANDS</span>
-            <span className="ml-auto text-[10px] font-normal text-zinc-500">Press ↑ ↓ Enter to select</span>
+            <span className="ml-auto text-[10px] font-normal text-[var(--text-muted)]">Press ↑ ↓ Enter to select</span>
           </div>
 
           <div className="max-h-48 overflow-y-auto py-1">
@@ -163,19 +172,19 @@ export function CodeInputBar({
                   type="button"
                   onClick={() => executeSlashCommand(cmd)}
                   onMouseEnter={() => setSelectedIndex(idx)}
-                  className={`flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left transition cursor-pointer ${
-                    isSelected ? "bg-amber-500 text-zinc-950 font-semibold" : "hover:bg-zinc-800/60 text-zinc-200"
+                  className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left transition cursor-pointer ${
+                    isSelected ? "bg-[var(--accent-muted)] text-[var(--accent)] font-semibold" : "hover:bg-[var(--bg-surface-alt)] text-[var(--text-secondary)]"
                   }`}
                 >
-                  <div className={`grid h-7 w-7 shrink-0 place-items-center rounded-lg ${isSelected ? "bg-zinc-950 text-amber-400" : "bg-zinc-800 text-orange-400"}`}>
+                  <div className={`grid h-7 w-7 shrink-0 place-items-center rounded-md ${isSelected ? "bg-[var(--accent)] text-white" : "bg-[var(--bg-surface-alt)] text-[var(--text-secondary)]"}`}>
                     <Icon className="h-4 w-4" />
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
                       <span className="text-xs font-bold">{cmd.label}</span>
-                      <span className={`font-mono text-[10px] ${isSelected ? "text-zinc-900" : "text-amber-400"}`}>{cmd.cmd}</span>
+                      <span className="font-mono text-[10px] text-[var(--accent)]">{cmd.cmd}</span>
                     </div>
-                    <p className={`truncate text-[11px] ${isSelected ? "text-zinc-800" : "text-zinc-400"}`}>
+                    <p className="truncate text-[11px] text-[var(--text-muted)]">
                       {cmd.description}
                     </p>
                   </div>
@@ -186,25 +195,26 @@ export function CodeInputBar({
         </div>
       )}
 
-      {/* Code Editor Container Box — Flat solid surface per DESIGN.md */}
-      <div className="relative mx-auto w-full max-w-4xl rounded-xl border border-[var(--border-default)] bg-[var(--bg-surface)] p-4 sm:p-5 shadow-sm transition-colors duration-150 focus-within:border-[var(--accent)]">
+      {/* Composer Card Box — Max Width ~760px Pinned Bottom */}
+      <div className="relative mx-auto w-full rounded-xl border border-[var(--border-default)] bg-[var(--bg-surface)] p-4 sm:p-5 shadow-sm transition-colors duration-150 focus-within:border-[var(--accent)]">
+        {/* Textarea Area — auto grows min 120px */}
         <textarea
           ref={textareaRef}
           value={code}
           onChange={(e) => handleCodeChange(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="Paste your code here or type / for AI commands..."
-          rows={6}
+          rows={4}
           spellCheck={false}
-          className="block w-full min-h-[180px] resize-y bg-transparent font-mono text-[14px] leading-relaxed outline-none text-[var(--text-primary)] placeholder:text-[var(--text-muted)] transition-colors overflow-y-auto"
+          className="block w-full min-h-[120px] max-h-[300px] resize-y bg-transparent font-mono text-[14px] leading-relaxed outline-none text-[var(--text-primary)] placeholder:text-[var(--text-muted)] transition-colors overflow-y-auto"
         />
 
-        {/* Action Chips Row */}
+        {/* Inline Action Selector Row */}
         <div className="mt-3 pt-3 border-t border-[var(--border-subtle)] flex items-center justify-between gap-2 flex-wrap">
           <ActionPills active={activeAction} loading={loading} onSelect={onSelectAction} compact />
         </div>
 
-        {/* Controls Footer Bar */}
+        {/* Composer Controls Footer Bar */}
         <div className="mt-3 flex items-center justify-between gap-3 border-t border-[var(--border-subtle)] pt-3 flex-wrap">
           <div className="flex items-center gap-2 sm:gap-3 text-[var(--text-secondary)]">
             <div className="flex items-center gap-1">
@@ -258,7 +268,7 @@ export function CodeInputBar({
             </label>
           </div>
 
-          {/* Primary Action Button + Keyboard Shortcut Badge */}
+          {/* Primary Action Button + Cmd/Ctrl+Enter Badge */}
           <div className="flex items-center gap-2">
             <span className="hidden sm:inline-block text-[11px] font-mono text-[var(--text-muted)] bg-[var(--bg-surface-alt)] px-2 py-1 rounded border border-[var(--border-subtle)]">
               Ctrl+Enter
@@ -266,8 +276,13 @@ export function CodeInputBar({
             <button
               type="button"
               onClick={onSubmit}
-              disabled={loading || !code.trim()}
-              className="inline-flex items-center gap-1.5 rounded-full py-2 px-5 font-bold text-xs transition-all duration-150 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40 shadow-sm cursor-pointer bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white"
+              disabled={isFormDisabled}
+              className={[
+                "inline-flex items-center gap-1.5 rounded-full py-2 px-5 font-bold text-xs transition-all duration-150 shadow-sm cursor-pointer",
+                isFormDisabled
+                  ? "bg-[var(--bg-surface-alt)] text-[var(--text-muted)] border border-[var(--border-subtle)] cursor-not-allowed opacity-50"
+                  : "bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white active:scale-95",
+              ].join(" ")}
             >
               <span className="uppercase tracking-wider font-extrabold">
                 {loading ? "PROCESSING..." : actionButtonText}
