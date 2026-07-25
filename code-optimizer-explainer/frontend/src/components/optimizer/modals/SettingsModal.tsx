@@ -51,7 +51,7 @@ function PillGroup<T extends string | number>({
           key={String(opt.value)}
           type="button"
           onClick={() => onChange(opt.value)}
-          className={`flex-1 px-2 py-1 text-[11px] font-semibold rounded-md transition-colors duration-150 cursor-pointer ${
+          className={`flex-1 px-2 py-1 text-[11px] font-semibold rounded-md transition-colors duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-1 ${
             value === opt.value
               ? "bg-[var(--accent)] text-white shadow-xs"
               : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
@@ -120,7 +120,7 @@ export function SettingsModal({
             type="button"
             onClick={onClose}
             aria-label="Close settings"
-            className="p-1.5 rounded-lg hover:bg-[var(--bg-surface-alt)] transition-colors text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+            className="p-1.5 rounded-lg hover:bg-[var(--bg-surface-alt)] transition-colors text-[var(--text-muted)] hover:text-[var(--text-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-1"
           >
             <X className="h-4 w-4" />
           </button>
@@ -140,9 +140,9 @@ export function SettingsModal({
                 </span>
               </div>
               {currentUser ? (
-                <button onClick={onSignOut} className="text-[11px] text-[var(--accent)] font-semibold hover:underline cursor-pointer">Sign out</button>
+                <button onClick={onSignOut} className="text-[11px] text-[var(--accent)] font-semibold hover:underline cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-1 rounded px-1">Sign out</button>
               ) : (
-                <button onClick={onSignIn} className="text-[11px] text-[var(--accent)] font-semibold hover:underline cursor-pointer">Sign in</button>
+                <button onClick={onSignIn} className="text-[11px] text-[var(--accent)] font-semibold hover:underline cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-1 rounded px-1">Sign in</button>
               )}
             </div>
           </section>

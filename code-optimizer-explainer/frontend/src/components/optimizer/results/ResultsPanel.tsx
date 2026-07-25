@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import type { ActionResult } from "@/api/backend";
 import type { ReactNode } from "react";
-import { Copy } from "lucide-react";
+import { Copy, Eye, GitCompare } from "lucide-react";
+import { SimpleDiffView } from "./DiffLine";
 
 export interface ChatMessage {
   id: string;
@@ -53,7 +54,7 @@ function SafeCodeBlock({ code, language }: { code: string; language?: string }) 
         <button
           onClick={handleCopy}
           title="Copy to clipboard"
-          className="flex items-center gap-1 px-2 py-0.5 text-[10px] text-muted-foreground hover:text-foreground hover:bg-accent rounded transition"
+          className="flex items-center gap-1 px-2 py-0.5 text-[10px] text-muted-foreground hover:text-foreground hover:bg-accent rounded transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-1"
         >
           {copied ? <Copy className="h-3 w-3 text-emerald-500" /> : <Copy className="h-3 w-3" />}
           {copied ? "Copied" : "Copy"}
@@ -203,38 +204,102 @@ function MarkdownRenderer({ content }: { content: string }) {
   return <div className="space-y-1">{blocks}</div>;
 }
 
-function ResultBox({ content }: { content: string }) {
-  const [collapsed, setCollapsed] = useState(true);
+type OutputViewMode = "explanation" | "diff";
+
+function ResultBox({
+  content,
+  originalCode,
+  isProse,
+  action,
+  language,
+}: {
+  content: string;
+  originalCode?: string;
+  isProse?: boolean;
+  action?: string;
+  language?: string;
+}) {
+  const hasDiffEligible =
+    !!originalCode && !!content && !isProse && action !== "explain" && action !== "alternatives";
+  const [viewMode, setViewMode] = useState<OutputViewMode>("explanation");
+
   return (
-    <div className={`overflow-x-auto ${collapsed ? 'max-w-[300px]' : 'max-w-full'} gradient-primary rounded-lg p-2 border border-primary/30 transition-all`}>
-      <MarkdownRenderer content={content} />
-      <button
-        type="button"
-        onClick={() => setCollapsed(!collapsed)}
-        className="mt-1 text-xs text-primary hover:underline"
-      >
-        {collapsed ? 'Expand' : 'Collapse'}
-      </button>
+    <div className="space-y-3">
+      {hasDiffEligible && (
+        <div
+          role="tablist"
+          aria-label="Output view mode"
+          className="inline-flex rounded-lg bg-muted p-0.5 text-[11px] font-medium border border-border"
+        >
+          <button
+            role="tab"
+            type="button"
+            aria-selected={viewMode === "explanation"}
+            onClick={() => setViewMode("explanation")}
+            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 ${
+              viewMode === "explanation"
+                ? "bg-background text-foreground shadow-xs"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <Eye className="h-3 w-3" aria-hidden="true" />
+            Output
+          </button>
+          <button
+            role="tab"
+            type="button"
+            aria-selected={viewMode === "diff"}
+            onClick={() => setViewMode("diff")}
+            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 ${
+              viewMode === "diff"
+                ? "bg-background text-foreground shadow-xs"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <GitCompare className="h-3 w-3" aria-hidden="true" />
+            Diff
+          </button>
+        </div>
+      )}
+
+      {viewMode === "diff" && hasDiffEligible ? (
+        <SimpleDiffView
+          original={originalCode}
+          modified={content}
+          isSEO={action === "seo-optimize"}
+        />
+      ) : isProse ? (
+        <div className="max-w-none overflow-x-auto break-words hyphens-auto rounded-lg border border-border bg-background p-3.5">
+          <MarkdownRenderer content={content} />
+        </div>
+      ) : (
+        <SafeCodeBlock code={content} language={language} />
+      )}
     </div>
   );
 }
 
 export function ResultsPanel({ messages = [], original, result, loading, error }: Props) {
-  // If there is a single result (non-chat) use it directly
   const chatMessages = messages.length ? messages : original ? [{ id: 'msg_initial', original, result, loading, error }] : [];
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 w-full">
       {chatMessages.map((msg) => (
-        <div key={msg.id} className="space-y-2">
+        <div key={msg.id} className="space-y-2 w-full">
           {msg.original && (
             <SafeCodeBlock code={msg.original} language="" />
           )}
           {msg.loading && <div className="text-sm text-muted-foreground">Loading...</div>}
           {msg.error && <div className="text-sm text-destructive">{msg.error}</div>}
-{msg.result && (
-              <ResultBox content={msg.result.output || ''} />
-            )}
+          {msg.result && (
+            <ResultBox
+              content={msg.result.output || ''}
+              originalCode={msg.original}
+              isProse={msg.result.isProse}
+              action={msg.result.action}
+              language={msg.result.detectedLanguage}
+            />
+          )}
         </div>
       ))}
     </div>

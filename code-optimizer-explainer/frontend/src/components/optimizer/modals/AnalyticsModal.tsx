@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { X, BarChart3, Code2, Zap, Download, Sparkles, Check } from "lucide-react";
-import type { HistoryItem } from "./SidebarHistory";
+import type { HistoryItem } from "../sidebar/SidebarHistory";
 
 interface Props {
   isOpen: boolean;

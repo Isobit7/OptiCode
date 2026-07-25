@@ -1,7 +1,7 @@
-import { useState, type ReactNode } from "react";
+import { useState, useEffect, type ReactNode } from "react";
 import type { ActionId, ActionResult } from "@/api/backend";
 import { Copy, Check, Sparkles, AlertCircle, ChevronDown, ChevronUp, RefreshCw } from "lucide-react";
-import { SimpleDiffView } from "./DiffLine";
+import { SimpleDiffView } from "../results/DiffLine";
 
 export interface TurnMessage {
   id: string;
@@ -306,7 +306,7 @@ export function TurnCard({ message, onRetry }: Props) {
                 <button
                   type="button"
                   onClick={() => onRetry(message)}
-                  className="mt-2 inline-flex items-center gap-1 text-[11px] font-semibold bg-red-500/20 hover:bg-red-500/30 text-red-400 px-2.5 py-1 rounded transition cursor-pointer"
+                  className="mt-2 inline-flex items-center gap-1 text-[11px] font-semibold bg-red-500/20 hover:bg-red-500/30 text-red-400 px-2.5 py-1 rounded transition cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-1"
                 >
                   <RefreshCw className="h-3 w-3" />
                   <span>Retry</span>
@@ -332,12 +332,13 @@ export function TurnCard({ message, onRetry }: Props) {
               </div>
 
               <div className="flex items-center gap-2">
-                {(message.action === "shorten" || message.action === "seo-optimize" || message.result.output) && (
+                {message.result.output && (
                   <div className="inline-flex rounded-lg bg-[var(--bg-surface-alt)] p-0.5 text-[11px] font-mono border border-[var(--border-subtle)]">
                     <button
                       type="button"
                       onClick={() => setDiffViewMode("unified")}
-                      className={`px-2 py-0.5 rounded-md transition cursor-pointer ${
+                      aria-pressed={diffViewMode === "unified"}
+                      className={`px-2 py-0.5 rounded-md transition cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-1 ${
                         diffViewMode === "unified" ? "bg-[var(--accent)] text-white font-bold" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
                       }`}
                     >
@@ -346,7 +347,8 @@ export function TurnCard({ message, onRetry }: Props) {
                     <button
                       type="button"
                       onClick={() => setDiffViewMode("split")}
-                      className={`px-2 py-0.5 rounded-md transition cursor-pointer ${
+                      aria-pressed={diffViewMode === "split"}
+                      className={`px-2 py-0.5 rounded-md transition cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-1 ${
                         diffViewMode === "split" ? "bg-[var(--accent)] text-white font-bold" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
                       }`}
                     >
@@ -379,12 +381,6 @@ export function TurnCard({ message, onRetry }: Props) {
                   </pre>
                 </div>
               </div>
-            ) : message.action === "shorten" || message.action === "seo-optimize" ? (
-              <SimpleDiffView
-                original={message.original}
-                modified={message.result.output || ""}
-                isSEO={message.action === "seo-optimize"}
-              />
             ) : message.action === "explain" ? (
               <MarkdownRenderer content={message.result.output || ""} />
             ) : message.action === "alternatives" && message.result.alternatives && message.result.alternatives.length > 0 ? (
@@ -403,11 +399,13 @@ export function TurnCard({ message, onRetry }: Props) {
                   </div>
                 ))}
               </div>
-            ) : (
-              <pre className="font-mono text-xs leading-relaxed bg-[var(--bg-surface-alt)] p-3.5 rounded-lg border border-[var(--border-default)] overflow-x-auto text-[var(--text-primary)]">
-                <code>{message.result.output}</code>
-              </pre>
-            )}
+            ) : message.result.output ? (
+              <SimpleDiffView
+                original={message.original}
+                modified={message.result.output}
+                isSEO={message.action === "seo-optimize"}
+              />
+            ) : null}
 
             {/* Suggestions & Insights */}
             {message.result.suggestions && message.result.suggestions.length > 0 && (

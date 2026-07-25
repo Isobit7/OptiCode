@@ -7,7 +7,7 @@
 /* Satoshi Font Family Definitions */
 @font-face {
   font-family: "Satoshi";
-  src: url("/fonts/satoshi/Satoshi-Light.otf") format("opentype");
+  src: url("/fonts/satoshi/Satoshi-Light.woff2") format("woff2");
   font-weight: 300;
   font-style: normal;
   font-display: swap;
@@ -15,7 +15,7 @@
 
 @font-face {
   font-family: "Satoshi";
-  src: url("/fonts/satoshi/Satoshi-LightItalic.otf") format("opentype");
+  src: url("/fonts/satoshi/Satoshi-LightItalic.woff2") format("woff2");
   font-weight: 300;
   font-style: italic;
   font-display: swap;
@@ -23,7 +23,7 @@
 
 @font-face {
   font-family: "Satoshi";
-  src: url("/fonts/satoshi/Satoshi-Regular.otf") format("opentype");
+  src: url("/fonts/satoshi/Satoshi-Regular.woff2") format("woff2");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
@@ -31,7 +31,7 @@
 
 @font-face {
   font-family: "Satoshi";
-  src: url("/fonts/satoshi/Satoshi-Italic.otf") format("opentype");
+  src: url("/fonts/satoshi/Satoshi-Italic.woff2") format("woff2");
   font-weight: 400;
   font-style: italic;
   font-display: swap;
@@ -39,7 +39,7 @@
 
 @font-face {
   font-family: "Satoshi";
-  src: url("/fonts/satoshi/Satoshi-Medium.otf") format("opentype");
+  src: url("/fonts/satoshi/Satoshi-Medium.woff2") format("woff2");
   font-weight: 500;
   font-style: normal;
   font-display: swap;
@@ -47,7 +47,7 @@
 
 @font-face {
   font-family: "Satoshi";
-  src: url("/fonts/satoshi/Satoshi-MediumItalic.otf") format("opentype");
+  src: url("/fonts/satoshi/Satoshi-MediumItalic.woff2") format("woff2");
   font-weight: 500;
   font-style: italic;
   font-display: swap;
@@ -55,7 +55,7 @@
 
 @font-face {
   font-family: "Satoshi";
-  src: url("/fonts/satoshi/Satoshi-Bold.otf") format("opentype");
+  src: url("/fonts/satoshi/Satoshi-Bold.woff2") format("woff2");
   font-weight: 700;
   font-style: normal;
   font-display: swap;
@@ -63,7 +63,7 @@
 
 @font-face {
   font-family: "Satoshi";
-  src: url("/fonts/satoshi/Satoshi-BoldItalic.otf") format("opentype");
+  src: url("/fonts/satoshi/Satoshi-BoldItalic.woff2") format("woff2");
   font-weight: 700;
   font-style: italic;
   font-display: swap;
@@ -71,7 +71,7 @@
 
 @font-face {
   font-family: "Satoshi";
-  src: url("/fonts/satoshi/Satoshi-Black.otf") format("opentype");
+  src: url("/fonts/satoshi/Satoshi-Black.woff2") format("woff2");
   font-weight: 900;
   font-style: normal;
   font-display: swap;
@@ -79,7 +79,7 @@
 
 @font-face {
   font-family: "Satoshi";
-  src: url("/fonts/satoshi/Satoshi-BlackItalic.otf") format("opentype");
+  src: url("/fonts/satoshi/Satoshi-BlackItalic.woff2") format("woff2");
   font-weight: 900;
   font-style: italic;
   font-display: swap;
@@ -160,8 +160,8 @@
   --border-subtle: #dcdcdc;
 
   --text-primary: #131313;
-  --text-secondary: #646464;
-  --text-muted: #949494;
+  --text-secondary: #4d4d4d;
+  --text-muted: #5c5c5c;
 
   --accent: #f97316;
   --accent-hover: #ea6a0c;
@@ -200,7 +200,7 @@
 
   --text-primary: #ececec;
   --text-secondary: #9b9b9b;
-  --text-muted: #6b6b6b;
+  --text-muted: #8a8a8a;
 
   --accent: #f97316;
   --accent-hover: #ea6a0c;
@@ -528,5 +528,23 @@ a {
   border-radius: calc(1rem - 1px);
   background: var(--bg-surface);
   z-index: -1;
+}
+
+/* Hero headline gradient: provide a robust fallback when background-clip:text isn't supported */
+.hero-gradient-text {
+  color: var(--text-primary);
+  -webkit-background-clip: text;
+  background-clip: text;
+  /* Exclude from the global color transition so background-clip:text renders correctly */
+  transition: none !important;
+}
+
+@supports (background-clip: text) or (-webkit-background-clip: text) {
+  .hero-gradient-text {
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    -webkit-background-clip: text;
+    background-clip: text;
+  }
 }
 

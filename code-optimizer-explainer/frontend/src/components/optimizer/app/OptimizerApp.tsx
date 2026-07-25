@@ -1,14 +1,17 @@
 import { useCallback, useEffect, useState, useRef } from "react";
+import { useMutation } from "@tanstack/react-query";
 import { CodeInputBar } from "../input/CodeInputBar";
+import { Thread } from "./Thread";
 import { ActionPills } from "../input/ActionPills";
-import { ResultsPanel, type ChatMessage } from "../results/ResultsPanel";
+import { type ChatMessage } from "../results/ResultsPanel";
 import { SidebarHistory, type HistoryItem } from "../sidebar/SidebarHistory";
 import { SignInModal } from "../modals/SignInModal";
+import { AnalyticsModal } from "../modals/AnalyticsModal";
+import { KeyboardShortcutsModal } from "../modals/KeyboardShortcutsModal";
 import { PreferencesDropdown, type ExplainDepth, type HumanizeMode } from "../modals/PreferencesDropdown";
-import { SettingsModal } from "../modals/SettingsModal";
 import { useSettings } from "@/hooks/useSettings";
 import { runAction, fetchCurrentUser, logoutUser, fetchHistory, type ActionId, type ActionResult } from "@/api/backend";
-import { Sun, Moon, PanelLeft, LogOut, UserRound, Settings } from "lucide-react";
+import { Sparkles, UserRound, ShieldCheck, Terminal, LogOut, ArrowDown } from "lucide-react";
 
 const LOCAL_STORAGE_KEY = "code_companion_history";
 
@@ -21,30 +24,156 @@ export function OptimizerApp() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSignInOpen, setIsSignInOpen] = useState(false);
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isAnalyticsOpen, setIsAnalyticsOpen] = useState(false);
+  const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Preference states for Explainer Depth & Humanizer Mode
   const [explainDepth, setExplainDepth] = useState<ExplainDepth>("intermediate");
   const [humanizeMode, setHumanizeMode] = useState<HumanizeMode>("de-ai");
-  const [theme, setTheme] = useState<"light" | "dark">("light");
+
+  // Global user settings (font size, copy-on-submit, etc.) — persisted in localStorage
   const { settings, updateSetting } = useSettings();
+
+  // Theme state: light or dark (SSR safe)
+  const [theme, setTheme] = useState<"light" | "dark">("light");
+
+  type RunActionInput = {
+    action: ActionId;
+    code: string;
+    language: string;
+    options: { explainDepth: ExplainDepth; humanizeMode: HumanizeMode };
+  };
+  const actionMutation = useMutation({
+    mutationFn: ({ action, code, language, options }: RunActionInput) =>
+      runAction(action, code, language, options),
+    retry: (failureCount, error) => {
+      const isNetwork =
+        typeof error === "object" && error !== null && "message" in error
+          ? /fetch|network|Failed/i.test((error as Error).message)
+          : false;
+      return isNetwork && failureCount < 1;
+    },
+  });
 
   useEffect(() => {
     try {
       const saved = localStorage.getItem("opticode_theme");
       if (saved === "dark") setTheme("dark");
-    } catch { /* ignore */ }
+    } catch (err) {
+      void err;
+    }
   }, []);
 
   useEffect(() => {
-    document.documentElement.classList.toggle("dark", theme === "dark");
-    try { localStorage.setItem("opticode_theme", theme); } catch { /* ignore */ }
+    if (theme === "dark") {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+    try {
+      localStorage.setItem("opticode_theme", theme);
+    } catch (err) {
+      void err;
+    }
   }, [theme]);
 
-  const handleToggleTheme = () => {
-    setTheme((prev) => (prev === "dark" ? "light" : "dark"));
+  // Developer Console Easter Egg
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      console.log(
+        "%c 🚀 OptiCode AI %c Code Optimizer & Explainer \n%c Built for developers. Type '/' in the composer to supercharge your workflow!\n%c Repository: https://github.com/Isobit7/OptiCode.git",
+        "color: #f97316; font-size: 14px; font-weight: bold; padding: 4px 0;",
+        "color: #8b93a7; font-size: 12px; font-weight: bold;",
+        "color: #565d70; font-size: 11px;",
+        "color: #6b6b6b; font-size: 10px; font-style: italic;"
+      );
+    }
+  }, []);
+
+  useEffect(() => {
+    if (typeof window !== "undefined" && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      let lenis: { raf: (t: number) => void; destroy: () => void } | null = null;
+      let animationFrameId: number;
+      let cancelled = false;
+
+      import("lenis")
+        .then(({ default: Lenis }) => {
+          if (cancelled) return;
+          lenis = new Lenis({
+            duration: 1.2,
+            easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+            smoothWheel: true,
+          });
+
+          function raf(time: number) {
+            lenis?.raf(time);
+            animationFrameId = requestAnimationFrame(raf);
+          }
+
+          animationFrameId = requestAnimationFrame(raf);
+        })
+        .catch(() => void 0);
+
+      return () => {
+        cancelled = true;
+        if (animationFrameId) cancelAnimationFrame(animationFrameId);
+        if (lenis) lenis.destroy();
+      };
+    }
+  }, []);
+
+  const handleToggleTheme = (e?: React.MouseEvent) => {
+    const isDark = theme === "dark";
+
+    if (
+      typeof document !== "undefined" &&
+      "startViewTransition" in document &&
+      !window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ) {
+      const x = e?.clientX ?? window.innerWidth / 2;
+      const y = e?.clientY ?? window.innerHeight / 2;
+
+      const endRadius = Math.hypot(
+        Math.max(x, window.innerWidth - x),
+        Math.max(y, window.innerHeight - y),
+      );
+
+      const transition = (
+        document as unknown as {
+          startViewTransition: (cb: () => void) => { ready: Promise<void> };
+        }
+      ).startViewTransition(() => {
+        setTheme(isDark ? "light" : "dark");
+      });
+
+      transition.ready
+        .then(() => {
+          const clipPath = [
+            `circle(0px at ${x}px ${y}px)`,
+            `circle(${endRadius}px at ${x}px ${y}px)`,
+          ];
+          document.documentElement.animate(
+            {
+              clipPath: isDark ? [...clipPath].reverse() : clipPath,
+            },
+            {
+              duration: 500,
+              easing: "cubic-bezier(0.4, 0, 0.2, 1)",
+              pseudoElement: isDark ? "::view-transition-old(root)" : "::view-transition-new(root)",
+            },
+          );
+        })
+        .catch((err) => {
+          void err;
+        });
+    } else {
+      setTheme((prev) => (prev === "dark" ? "light" : "dark"));
+    }
   };
 
+  // History & Sidebar state
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [currentUser, setCurrentUser] = useState<any>(null);
 
@@ -71,7 +200,9 @@ export function OptimizerApp() {
     }
   }, []);
 
-  useEffect(() => { checkUserSession(); }, [checkUserSession]);
+  useEffect(() => {
+    checkUserSession();
+  }, [checkUserSession]);
 
   const handleLogout = async () => {
     await logoutUser();
@@ -88,12 +219,18 @@ export function OptimizerApp() {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed)) setHistory(parsed);
       }
-    } catch { /* ignore */ }
+    } catch {
+      // Ignore localStorage read errors
+    }
   }, []);
 
   const saveHistory = (items: HistoryItem[]) => {
     setHistory(items);
-    try { localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(items)); } catch { /* ignore */ }
+    try {
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(items));
+    } catch {
+      // Ignore write errors
+    }
   };
 
   const scrollToBottom = () => {
@@ -107,13 +244,15 @@ export function OptimizerApp() {
       if (!code.trim() || loading) return;
       const inputSnippet = code;
       const msgId = `msg_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
-
+      
+      // Clear code input field immediately for next input
       setCode("");
       setLoading(true);
       setError(null);
       setResult(null);
       setSubmittedCode(inputSnippet);
 
+      // Append new message entry to thread
       const newMsg: ChatMessage = {
         id: msgId,
         original: inputSnippet,
@@ -125,11 +264,20 @@ export function OptimizerApp() {
       scrollToBottom();
 
       try {
-        const res = await runAction(action, inputSnippet, language, { explainDepth, humanizeMode });
+        const res = await actionMutation.mutateAsync({
+          action,
+          code: inputSnippet,
+          language,
+          options: { explainDepth, humanizeMode },
+        });
         setResult(res);
+
+        // Update message thread entry with result
         setMessages((prev) =>
           prev.map((m) => (m.id === msgId ? { ...m, result: res, loading: false } : m))
         );
+
+        // Add to history
         const newItem: HistoryItem = {
           id: `hist_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
           timestamp: Date.now(),
@@ -141,11 +289,15 @@ export function OptimizerApp() {
         setActiveHistoryId(newItem.id);
         setHistory((prev) => {
           const updated = [newItem, ...prev];
-          try { localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updated)); } catch { /* ignore */ }
+          try {
+            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updated));
+          } catch (err) {
+            void err;
+          }
           return updated;
         });
       } catch {
-        const errText = "Something went wrong. Check your connection and try again.";
+        const errText = "We couldn't reach the AI service. Check your connection and try again in a moment.";
         setError(errText);
         setMessages((prev) =>
           prev.map((m) => (m.id === msgId ? { ...m, loading: false, error: errText } : m))
@@ -155,7 +307,7 @@ export function OptimizerApp() {
         scrollToBottom();
       }
     },
-    [code, language, loading, explainDepth, humanizeMode],
+    [code, language, loading, explainDepth, humanizeMode, actionMutation],
   );
 
   const handleSelectAction = (id: ActionId) => {
@@ -189,8 +341,11 @@ export function OptimizerApp() {
 
   const handleDeleteHistory = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    saveHistory(history.filter((item) => item.id !== id));
-    if (activeHistoryId === id) setActiveHistoryId(null);
+    const updated = history.filter((item) => item.id !== id);
+    saveHistory(updated);
+    if (activeHistoryId === id) {
+      setActiveHistoryId(null);
+    }
   };
 
   const handleClearAllHistory = () => {
@@ -198,25 +353,28 @@ export function OptimizerApp() {
     setActiveHistoryId(null);
   };
 
-  const hasActiveContent = !!(submittedCode || result || loading || messages.length > 0);
+  const handleToggleStar = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const updated = history.map((item) =>
+      item.id === id ? { ...item, starred: !item.starred } : item,
+    );
+    saveHistory(updated);
+  };
+
+  const handleSelectTemplate = (templateCode: string, lang: string) => {
+    setCode(templateCode);
+    setLanguage(lang || "auto");
+    setActiveAction(null);
+    setResult(null);
+    setSubmittedCode("");
+    setActiveHistoryId(null);
+    setError(null);
+  };
 
   return (
     <div
-      className="relative flex h-screen w-full max-h-screen overflow-hidden transition-colors duration-500"
-      style={{ background: "var(--app-gradient)" }}
+      className="relative flex h-screen w-full max-h-screen overflow-hidden bg-[var(--bg-base)] text-[var(--text-primary)] transition-colors duration-200"
     >
-      {/* Ambient Background Multi-Point Light Spheres (Orange & Pink Sunset Glow) */}
-      <div className="pointer-events-none absolute inset-0 overflow-hidden z-0">
-        {/* Top-Center Warm Sunset Beam */}
-        <div className="absolute -top-40 left-1/2 -translate-x-1/2 h-[520px] w-[900px] rounded-full bg-gradient-to-b from-orange-500/35 via-pink-500/25 to-transparent blur-[140px] dark:from-orange-500/30 dark:via-purple-600/20 dark:blur-[160px]" />
-        {/* Top-Right Vibrant Orange Glow Sphere */}
-        <div className="absolute -top-32 -right-32 h-[500px] w-[500px] rounded-full bg-orange-500/30 blur-[130px] dark:bg-orange-600/25 dark:blur-[150px] animate-pulse" />
-        {/* Left-Center Radiant Pink/Rose Orb */}
-        <div className="absolute top-1/3 -left-36 h-[500px] w-[500px] rounded-full bg-pink-500/30 blur-[120px] dark:bg-purple-600/25 dark:blur-[150px] animate-float" />
-        {/* Bottom-Right Deep Amber Warm Ambient Glow */}
-        <div className="absolute -bottom-40 right-10 h-[550px] w-[550px] rounded-full bg-amber-500/25 blur-[140px] dark:bg-indigo-700/25 dark:blur-[160px]" />
-      </div>
-
       <SidebarHistory
         history={Array.isArray(history) ? history : []}
         activeId={activeHistoryId}
@@ -224,115 +382,50 @@ export function OptimizerApp() {
         onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
         onNewSession={handleNewSession}
         onSelectHistory={handleSelectHistory}
+        onToggleStar={handleToggleStar}
         onDeleteHistory={handleDeleteHistory}
         onClearAll={handleClearAllHistory}
+        onSelectTemplate={handleSelectTemplate}
         theme={theme}
         onToggleTheme={handleToggleTheme}
         currentUser={currentUser}
         onSignIn={() => setIsSignInOpen(true)}
         onSignOut={handleLogout}
+        onOpenAnalytics={() => setIsAnalyticsOpen(true)}
+        onOpenShortcuts={() => setIsShortcutsOpen(true)}
       />
 
-      <div className="flex-1 flex flex-col min-w-0">
-        <header className="flex items-center justify-between px-4 sm:px-6 h-14 border-b border-primary/30 bg-gradient-to-r from-orange-500/15 via-pink-500/10 to-orange-500/15 backdrop-blur-sm">
-          <div className="flex items-center gap-3">
-            <button
-              type="button"
-              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-              className="p-2 rounded-lg hover:bg-primary/10 transition-colors text-muted-foreground hover:text-foreground"
-              title="Toggle sidebar"
-            >
-              <PanelLeft className="h-4 w-4" />
-            </button>
-            <PreferencesDropdown
-              explainDepth={explainDepth}
-              onExplainDepthChange={setExplainDepth}
-              humanizeMode={humanizeMode}
-              onHumanizeModeChange={setHumanizeMode} />
+      <div className="flex-1 flex flex-col h-full min-w-0 overflow-hidden bg-[var(--bg-base)]">
+        {/* Top Header Bar */}
+        <header className="relative flex w-full items-center justify-between px-4 py-3 sm:px-6 lg:px-8 border-b border-[var(--border-subtle)] bg-[var(--bg-surface)]">
+          {/* Left Title: OptiCode Model Dropdown */}
+          <PreferencesDropdown
+            explainDepth={explainDepth}
+            onExplainDepthChange={setExplainDepth}
+            humanizeMode={humanizeMode}
+            onHumanizeModeChange={setHumanizeMode}
+            settings={settings}
+            onSettingChange={updateSetting}
+          />
 
-          </div>
-
-          <div className="flex items-center gap-2">
-            {currentUser ? (
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-muted-foreground hidden sm:inline">
-                  {currentUser.email?.split("@")[0] || "User"}
-                </span>
-                <button
-                  type="button"
-                  onClick={handleLogout}
-                  className="p-2 rounded hover:bg-primary/5 focus-visible:ring-2 focus-visible:ring-primary text-muted-foreground hover:text-foreground transition-colors"
-                  title="Sign out"
-                >
-                  <LogOut className="h-4 w-4" />
-                </button>
-              </div>
-            ) : (
-              <button
-                type="button"
-                onClick={() => setIsSignInOpen(true)}
-                className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg bg-primary text-primary-foreground hover:opacity-90 transition-opacity"
-              >
-                <UserRound className="h-3.5 w-3.5" />
-                <span className="hidden sm:inline">Sign in</span>
-              </button>
-            )}
-            {/* Settings button — always visible */}
-            <button
-              type="button"
-              onClick={() => setIsSettingsOpen(true)}
-              className="p-2 rounded hover:bg-primary/5 focus-visible:ring-2 focus-visible:ring-primary text-muted-foreground hover:text-foreground transition-colors"
-              title="Settings"
-            >
-              <Settings className="h-4 w-4" />
-            </button>
-            {/* Theme toggle — always visible */}
-            <button
-                type="button"
-                onClick={handleToggleTheme}
-                className="p-2 rounded hover:bg-primary/5 focus-visible:ring-2 focus-visible:ring-primary text-muted-foreground hover:text-foreground transition-colors"
-                title="Toggle theme"
-              >
-                {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-              </button>
-          </div>
+          <div className="flex items-center gap-3" />
         </header>
 
-        {!hasActiveContent ? (
-          <div className="flex-1 flex flex-col items-center justify-center px-4 sm:px-8 max-w-3xl mx-auto w-full gap-8">
-            <div className="text-center space-y-3 max-w-4xl mx-auto">
-              <h1 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight text-white drop-shadow-lg leading-tight sm:whitespace-nowrap">
-                Paste your code — let's clean it up
-              </h1>
-              <p className="text-sm sm:text-base font-medium text-white/90 max-w-xl mx-auto drop-shadow-xs">
-                Transform, explain, prettify, or optimize any snippet instantly with AI.
-              </p>
-            </div>
+        {/* Layout Workspace — ChatGPT / Claude / Cursor Pattern */}
+        <div className="flex-1 flex flex-col min-h-0 overflow-hidden relative">
+          {messages.length === 0 ? (
+            /* Empty State / Greeting View */
+            <div className="flex-1 flex flex-col items-center justify-center px-4 sm:px-6 py-6 max-w-[760px] mx-auto w-full overflow-y-auto no-scrollbar">
+              <section className="text-center mb-8 space-y-3">
+                <h1 className="font-headings text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-[var(--text-primary)] leading-tight">
+                  {currentUser ? `Welcome back, ${currentUser.email?.split("@")[0] || currentUser.full_name || "Developer"}` : "Paste your code — let's clean it up"}
+                </h1>
+                <p className="text-sm sm:text-base text-[var(--text-secondary)] max-w-xl mx-auto font-normal">
+                  Transform, explain, prettify, or optimize any snippet instantly with AI.
+                </p>
+              </section>
 
-            <div className="w-full">
-              <CodeInputBar
-                code={code}
-                onChange={setCode}
-                language={language}
-                onLanguageChange={setLanguage}
-                onSubmit={handleSubmit}
-                loading={loading}
-                activeAction={activeAction}
-                onSelectAction={handleSelectAction} />
-
-            </div>
-          </div>
-        ) : (
-          <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
-            <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-6">
-              <div className="max-w-3xl mx-auto">
-                <ResultsPanel messages={messages} original={submittedCode} result={result} loading={loading} error={error} />
-                <div ref={messagesEndRef} />
-              </div>
-            </div>
-
-            <div className="border-t border-primary/30 gradient-primary backdrop-blur-sm px-4 sm:px-6 py-4">
-              <div className="max-w-3xl mx-auto">
+              <div className="w-full">
                 <CodeInputBar
                   code={code}
                   onChange={setCode}
@@ -341,30 +434,66 @@ export function OptimizerApp() {
                   onSubmit={handleSubmit}
                   loading={loading}
                   activeAction={activeAction}
-                onSelectAction={handleSelectAction} />
-
+                  onSelectAction={handleSelectAction}
+                  fontSize={settings.fontSize}
+                />
               </div>
             </div>
-          </div>
-        )}
+          ) : (
+            /* Thread View (Scrolling Centered Column + Pinned Bottom Composer) */
+            <div className="flex-1 flex flex-col min-h-0 overflow-hidden relative">
+              {/* Scrolling Centered Thread Column (max-width ~760px) */}
+              <div className="flex-1 overflow-y-auto pb-32">
+                <Thread
+                  messages={messages.map((m) => ({
+                    id: m.id,
+                    original: m.original,
+                    action: activeAction || "explain",
+                    language,
+                    result: m.result,
+                    loading: m.loading,
+                    error: m.error,
+                  }))}
+                  onRetry={(msg) => run(msg.action)}
+                />
+              </div>
+
+              {/* Pinned Bottom Composer with Fade Mask */}
+              <div className="sticky bottom-0 z-30 w-full bg-gradient-to-t from-[var(--bg-base)] via-[var(--bg-base)] to-transparent pt-6 pb-4 px-4 sm:px-6 border-t border-[var(--border-subtle)]">
+                <CodeInputBar
+                  code={code}
+                  onChange={setCode}
+                  language={language}
+                  onLanguageChange={setLanguage}
+                  onSubmit={handleSubmit}
+                  loading={loading}
+                  activeAction={activeAction}
+                  onSelectAction={handleSelectAction}
+                  fontSize={settings.fontSize}
+                />
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
       <SignInModal
         isOpen={isSignInOpen}
         onClose={() => setIsSignInOpen(false)}
         onSuccess={checkUserSession}
-        />
-        <SettingsModal
-          isOpen={isSettingsOpen}
-          onClose={() => setIsSettingsOpen(false)}
-          theme={theme}
-          onToggleTheme={handleToggleTheme}
-          currentUser={currentUser}
-          onSignIn={() => setIsSignInOpen(true)}
-          onSignOut={handleLogout}
-          settings={settings}
-          onSettingChange={updateSetting}
-        />
+      />
+
+      <AnalyticsModal
+        isOpen={isAnalyticsOpen}
+        onClose={() => setIsAnalyticsOpen(false)}
+        history={Array.isArray(history) ? history : []}
+      />
+
+      <KeyboardShortcutsModal
+        isOpen={isShortcutsOpen}
+        onClose={() => setIsShortcutsOpen(false)}
+      />
     </div>
   );
 }
+

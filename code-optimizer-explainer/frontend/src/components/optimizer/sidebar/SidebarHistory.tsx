@@ -1,10 +1,12 @@
 import { useState } from "react";
 import {
+  Plus,
   Search,
   Trash2,
   PanelLeftClose,
   PanelLeftOpen,
   History,
+  Code2,
   Clock,
   Sparkles,
   BookOpen,
@@ -12,13 +14,16 @@ import {
   Minimize2,
   Shuffle,
   Star,
+  Download,
+  FileCode2,
+  BarChart3,
+  Flame,
   Settings,
   Sun,
   Moon,
   ChevronDown,
   LogOut,
-  Download,
-  BarChart3,
+  Keyboard,
 } from "lucide-react";
 import type { ActionId, ActionResult } from "@/api/backend";
 
@@ -81,17 +86,17 @@ export function useFetchData<T>(url: string) {
 import numpy as np
 
 def clean_and_summarize(df: pd.DataFrame) -> dict:
-  """Cleans missing values and returns aggregated data metrics."""
-  df_clean = df.dropna(subset=['id', 'value']).copy()
-  df_clean['value'] = pd.to_numeric(df_clean['value'], errors='coerce')
-  
-  summary = {
-    'total_rows': len(df_clean),
-    'mean_value': df_clean['value'].mean(),
-    'median_value': df_clean['value'].median(),
-    'std_dev': df_clean['value'].std(),
-  }
-  return summary`,
+    """Cleans missing values and returns aggregated data metrics."""
+    df_clean = df.dropna(subset=['id', 'value']).copy()
+    df_clean['value'] = pd.to_numeric(df_clean['value'], errors='coerce')
+    
+    summary = {
+        'total_rows': len(df_clean),
+        'mean_value': df_clean['value'].mean(),
+        'median_value': df_clean['value'].median(),
+        'std_dev': df_clean['value'].std(),
+    }
+    return summary`,
   },
   {
     title: "Express API Middleware",
@@ -161,13 +166,17 @@ interface Props {
   onToggleCollapse: () => void;
   onNewSession: () => void;
   onSelectHistory: (item: HistoryItem) => void;
+  onToggleStar: (id: string, e: React.MouseEvent) => void;
   onDeleteHistory: (id: string, e: React.MouseEvent) => void;
   onClearAll: () => void;
+  onSelectTemplate: (code: string, language: string) => void;
   theme: "light" | "dark";
   onToggleTheme: (e?: React.MouseEvent) => void;
   currentUser?: { email?: string; full_name?: string } | null;
   onSignIn?: () => void;
   onSignOut?: () => void;
+  onOpenAnalytics?: () => void;
+  onOpenShortcuts?: () => void;
 }
 
 export function SidebarHistory({
@@ -177,21 +186,28 @@ export function SidebarHistory({
   onToggleCollapse,
   onNewSession,
   onSelectHistory,
+  onToggleStar,
   onDeleteHistory,
   onClearAll,
+  onSelectTemplate,
   theme,
   onToggleTheme,
   currentUser,
   onSignIn,
   onSignOut,
+  onOpenAnalytics,
+  onOpenShortcuts,
 }: Props) {
-  const [activeTab, setActiveTab] = useState<"all" | "templates">("all");
+  const [activeTab, setActiveTab] = useState<"all" | "starred" | "templates">("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   const safeHistory = Array.isArray(history) ? history : [];
+  const starredItemsCount = safeHistory.filter((i) => i?.starred).length;
+
   const filteredHistory = safeHistory.filter((item) => {
     if (!item) return false;
+    if (activeTab === "starred" && !item.starred) return false;
     if (!searchQuery.trim()) return true;
     const query = searchQuery.toLowerCase();
     return (
@@ -213,7 +229,8 @@ export function SidebarHistory({
   };
 
   const exportHistoryJSON = () => {
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(safeHistory, null, 2));
+    const dataStr =
+      "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(safeHistory, null, 2));
     const downloadAnchor = document.createElement("a");
     downloadAnchor.setAttribute("href", dataStr);
     downloadAnchor.setAttribute("download", `code_companion_history_${Date.now()}.json`);
@@ -224,263 +241,330 @@ export function SidebarHistory({
 
   const totalLines = safeHistory.reduce((acc, item) => acc + (item?.code ? item.code.split("\n").length : 0), 0);
 
-  const todayTs = new Date().setHours(0, 0, 0, 0);
-  const sevenDaysTs = todayTs - 7 * 86400 * 1000;
-  const todayItems = filteredHistory.filter((i) => i.timestamp >= todayTs);
-  const weekItems = filteredHistory.filter((i) => i.timestamp < todayTs && i.timestamp >= sevenDaysTs);
-  const olderItems = filteredHistory.filter((i) => i.timestamp < sevenDaysTs);
-
-  const renderGroup = (title: string, items: HistoryItem[]) => {
-    if (items.length === 0 || collapsed) return null;
-    return (
-      <div key={title} className="space-y-1 mt-2">
-        <div className="text-[10px] font-medium text-muted-foreground/60 uppercase tracking-wider px-1 pt-1">
-          {title} ({items.length})
-        </div>
-        {items.map((item) => {
-          const Icon = ACTION_ICONS[item.action] || BookOpen;
-          const isSelected = activeId === item.id;
-          return (
-            <div
-              key={item.id}
-              onClick={() => onSelectHistory(item)}
-              className={[
-                "relative flex items-center justify-between gap-2 py-1.5 px-2.5 rounded-lg border transition-all duration-200 cursor-pointer text-left backdrop-blur-md hover:translate-x-0.5 shadow-xs",
-                isSelected
-                  ? "bg-accent/20 text-accent border-accent/40 font-medium"
-                  : "bg-transparent hover:gradient-primary hover:text-foreground/80",
-              ].join(" ")}
-            >
-              <div className="flex items-center gap-2 min-w-0 flex-1">
-                <Icon className={`h-3.5 w-3.5 shrink-0 ${isSelected ? "text-accent" : "text-muted-foreground"}`} />
-                <div className="min-w-0 flex-1 flex items-center gap-1.5 text-xs">
-                  <span className="font-medium text-foreground/90 shrink-0">{ACTION_LABELS[item.action]}</span>
-                  <span className="text-[10px] text-muted-foreground/70 font-mono truncate flex-1 min-w-0">{item.code.trim() || ""}</span>
-                </div>
-              </div>
-              <div className="flex items-center gap-1 shrink-0">
-                <span className="text-[9px] text-muted-foreground/50 font-mono hidden sm:inline">{formatTime(item.timestamp)}</span>
-                <button
-                  type="button"
-                  onClick={(e) => onDeleteHistory(item.id, e)}
-                  title="Delete"
-                  className="p-1 transition-all hover:bg-destructive/10 hover:text-destructive"
-                >
-                  <Trash2 className="h-3 w-3" />
-                </button>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    );
-  };
-
-  if (collapsed) {
-    return (
-      <aside className="w-14 h-full shrink-0 border-r border-primary/30 gradient-primary backdrop-blur-md flex flex-col items-center py-3 gap-2">
-        <button
-          type="button"
-          onClick={onToggleCollapse}
-          title="Expand sidebar"
-          className="p-2 rounded-lg hover:bg-accent transition-colors text-muted-foreground hover:text-foreground"
-        >
-          <PanelLeftOpen className="h-4 w-4" />
-        </button>
-        <button
-          type="button"
-          onClick={onNewSession}
-          title="New session"
-          className="p-2 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
-        >
-          <Sparkles className="h-4 w-4" />
-        </button>
-        <div className="mt-auto flex flex-col items-center gap-2">
+  return (
+    <aside
+      className={[
+        "sticky top-0 h-screen flex flex-col transition-all duration-300 ease-in-out border-r border-[var(--border-default)] text-[var(--text-primary)] shadow-xs z-30 shrink-0",
+        "bg-[var(--bg-surface)]",
+        collapsed ? "w-14" : "w-56 sm:w-64",
+      ].join(" ")}
+    >
+      {/* Top Header */}
+      <div className="flex items-center justify-between p-2.5 border-b border-[var(--border-subtle)] bg-[var(--bg-surface)]">
+        {!collapsed ? (
+          <div className="flex items-center">
+            <img
+              src="/logo.png"
+              alt="OptiCode Logo"
+              className="h-7 w-7 rounded-md object-cover shadow-xs border border-[var(--border-subtle)]"
+            />
+          </div>
+        ) : (
           <button
             type="button"
-            onClick={onToggleTheme}
-            title="Toggle theme"
-            className="p-2 rounded-lg hover:bg-accent transition-colors text-muted-foreground hover:text-foreground"
+            onClick={onToggleCollapse}
+            title="Expand sidebar"
+            aria-label="Expand sidebar"
+            className="grid h-9 w-9 mx-auto place-items-center rounded-md bg-[var(--bg-surface-alt)] text-[var(--text-primary)] shadow-xs border border-[var(--border-subtle)] hover:bg-[var(--bg-base)] transition cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
           >
-            {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            <PanelLeftOpen className="h-4 w-4" aria-hidden="true" />
           </button>
-        </div>
-      </aside>
-    );
-  }
+        )}
 
-  return (
-    <aside className="w-72 h-full shrink-0 border-r border-primary/30 gradient-primary backdrop-blur-md flex flex-col overflow-hidden">
-      <div className="p-4 border-b border-primary/30">
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2">
-            <div className="h-7 w-7 rounded-lg bg-primary/10 flex items-center justify-center">
-              <Sparkles className="h-4 w-4 text-primary" />
-            </div>
-            <span className="text-sm font-semibold text-foreground">OptiCode</span>
-          </div>
+        {!collapsed && (
           <button
             type="button"
             onClick={onToggleCollapse}
             title="Collapse sidebar"
-            className="p-1.5 rounded-lg hover:bg-accent transition-colors text-muted-foreground hover:text-foreground"
+            aria-label="Collapse sidebar"
+            className="p-1.5 rounded-md text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-alt)] transition cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
           >
-            <PanelLeftClose className="h-4 w-4" />
+            <PanelLeftClose className="h-4 w-4" aria-hidden="true" />
           </button>
-        </div>
-
-        <div className="flex items-center gap-2 mb-3">
-          <div className="relative flex-1">
-            <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground/50 pointer-events-none" />
-            <input
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search history…"
-              className="w-full pl-7 pr-2 py-1.5 text-xs rounded-lg gradient-primary border border-primary/30 focus:outline-none focus:ring-1 focus:ring-ring placeholder:text-muted-foreground/50"
-            />
-          </div>
-          <button
-            type="button"
-            onClick={onNewSession}
-            title="New session"
-            className="p-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
-          >
-            <Sparkles className="h-3.5 w-3.5" />
-          </button>
-        </div>
-
-        <div className="flex items-center gap-1 p-0.5 gradient-primary rounded-lg">
-          <button
-            onClick={() => setActiveTab("all")}
-            className={`flex-1 text-xs px-3 py-1.5 rounded-md transition-colors ${
-              activeTab === "all" ? "gradient-primary text-foreground" : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            History
-          </button>
-          <button
-            onClick={() => setActiveTab("templates")}
-            className={`flex-1 text-xs px-3 py-1.5 rounded-md transition-colors ${
-              activeTab === "templates" ? "gradient-primary text-foreground" : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            Templates
-          </button>
-        </div>
+        )}
       </div>
 
-      <div className="flex-1 overflow-y-auto px-2 pb-2">
-        {activeTab === "all" ? (
-          <div className="space-y-1">
-            <div className="flex items-center justify-between px-1 pt-1">
-              <span className="text-[10px] font-medium text-muted-foreground/60 uppercase tracking-wider">
-                {filteredHistory.length} sessions · {totalLines} lines
-              </span>
-              {safeHistory.length > 0 && (
+      {/* New Session Button */}
+      <div className="p-2.5">
+        <button
+          type="button"
+          onClick={onNewSession}
+          title="New Optimization Session"
+          aria-label="Start new optimization session"
+          className={[
+            "w-full flex items-center justify-center gap-1.5 rounded-md bg-[var(--bg-surface-alt)] text-[var(--text-primary)] hover:bg-[var(--border-default)] font-medium py-2 px-2.5 transition-colors duration-150 shadow-xs cursor-pointer border border-[var(--border-default)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]",
+            collapsed ? "aspect-square p-0" : "",
+          ].join(" ")}
+        >
+          <Plus className="h-4 w-4 shrink-0 stroke-[2.5]" aria-hidden="true" />
+          {!collapsed && <span className="text-xs font-semibold">New Session</span>}
+        </button>
+      </div>
+
+      {/* Search Input (visible when expanded) */}
+      {!collapsed && (
+        <div className="px-2.5 pb-2">
+          <div className="relative flex items-center">
+            <Search className="absolute left-2.5 h-3.5 w-3.5 text-[var(--text-muted)]" aria-hidden="true" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              aria-label={activeTab === "starred" ? "Search saved items" : "Search history"}
+              placeholder={activeTab === "starred" ? "Search saved items..." : "Search history..."}
+              className="w-full bg-[var(--bg-surface-alt)] border border-[var(--border-default)] rounded-md pl-7 pr-2.5 py-1 text-xs text-[var(--text-primary)] placeholder:text-[var(--text-muted)] outline-none focus:border-[var(--accent)] focus-visible:ring-1 focus-visible:ring-[var(--accent)] transition-colors"
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Main Scrollable Content */}
+      <div className="flex-1 overflow-y-auto px-2 py-1 space-y-1.5 scrollbar-thin">
+        {filteredHistory.length === 0 ? (
+          !collapsed && (
+            <div className="text-center py-12 px-4 text-xs text-zinc-600 space-y-2.5">
+              {activeTab === "starred" ? (
+                <>
+                  <Star className="h-8 w-8 mx-auto fill-amber-400/30 text-amber-500 animate-pulse" />
+                  <p className="font-medium text-zinc-700 dark:text-zinc-300">No starred items yet</p>
+                  <p className="text-[11px] text-zinc-500">Click the star icon on any code result to pin it to this tab!</p>
+                </>
+              ) : (
+                <>
+                  <Flame className="h-8 w-8 mx-auto text-zinc-500" />
+                  <p className="font-medium text-zinc-700 dark:text-zinc-300">
+                    {searchQuery ? "No matching history found" : "No history yet"}
+                  </p>
+                  <p className="text-[11px] text-zinc-500">Run an optimization to record your session here!</p>
+                </>
+              )}
+            </div>
+          )
+        ) : (
+          (() => {
+            const todayTs = new Date().setHours(0, 0, 0, 0);
+            const sevenDaysTs = todayTs - 7 * 86400 * 1000;
+
+            const todayItems = filteredHistory.filter((i) => i.timestamp >= todayTs);
+            const weekItems = filteredHistory.filter((i) => i.timestamp < todayTs && i.timestamp >= sevenDaysTs);
+            const olderItems = filteredHistory.filter((i) => i.timestamp < sevenDaysTs);
+
+            const renderGroup = (title: string, items: HistoryItem[]) => {
+              if (items.length === 0 || collapsed) return null;
+              return (
+                <div key={title} className="space-y-1 mt-2">
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)] px-1 pt-1 font-mono">
+                    {title} ({items.length})
+                  </div>
+                  {items.map((item) => {
+                    const Icon = ACTION_ICONS[item.action] || Code2;
+                    const isSelected = activeId === item.id;
+
+                    return (
+                      <div
+                        key={item.id}
+                        onClick={() => onSelectHistory(item)}
+                        className={[
+                          "group relative flex items-center justify-between gap-2 py-1.5 px-2.5 rounded-lg border transition-colors duration-150 cursor-pointer text-left shadow-2xs",
+                          isSelected
+                            ? "bg-[var(--accent-muted)] text-[var(--accent)] border-[var(--accent)] font-bold shadow-xs"
+                            : "bg-[var(--bg-surface)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:bg-[var(--bg-surface-alt)] hover:text-[var(--text-primary)] hover:border-[var(--border-default)]",
+                        ].join(" ")}
+                      >
+                        <div className="flex items-center gap-2 min-w-0 flex-1">
+                          <Icon
+                            className={
+                              isSelected ? "h-3.5 w-3.5 shrink-0 text-[var(--accent)]" : "h-3.5 w-3.5 shrink-0 text-[var(--text-muted)] group-hover:text-[var(--text-primary)]"
+                            }
+                          />
+                          <div className="min-w-0 flex-1 flex items-center gap-1.5 text-xs">
+                            <span className={isSelected ? "font-bold text-[var(--accent)] shrink-0" : "font-semibold text-[var(--text-primary)] shrink-0"}>
+                              {ACTION_LABELS[item.action]}
+                            </span>
+                            <span className={isSelected ? "text-[11px] text-[var(--accent)] opacity-90 font-mono truncate flex-1 min-w-0" : "text-[11px] text-[var(--text-secondary)] font-mono truncate flex-1 min-w-0"}>
+                              {item.code.trim() || "Empty snippet"}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-1 shrink-0">
+                          <span className="text-[10px] text-[var(--text-muted)] font-mono hidden sm:inline">
+                            {formatTime(item.timestamp)}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={(e) => onToggleStar(item.id, e)}
+                            title={item.starred ? "Unstar item" : "Star item"}
+                            aria-label={item.starred ? "Unstar item" : "Star item"}
+                            className="p-1 transition cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-1 rounded"
+                          >
+                            <Star
+                              className={[
+                                "h-3 w-3 transition",
+                                item.starred
+                                  ? "fill-amber-400 text-amber-500"
+                                  : isSelected
+                                    ? "text-[var(--accent)] hover:text-amber-400"
+                                    : "text-[var(--text-muted)] hover:text-amber-500",
+                              ].join(" ")}
+                            />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={(e) => onDeleteHistory(item.id, e)}
+                            title="Delete item"
+                            aria-label="Delete item"
+                            className={
+                              isSelected
+                                ? "p-1 opacity-0 group-hover:opacity-100 hover:text-red-400 text-[var(--accent)] transition cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-1 rounded"
+                                : "p-1 opacity-0 group-hover:opacity-100 hover:text-red-500 text-[var(--text-muted)] transition cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-1 rounded"
+                            }
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              );
+            };
+
+            return [
+              renderGroup("Today", todayItems),
+              renderGroup("Last 7 Days", weekItems),
+              renderGroup("Older", olderItems),
+            ];
+          })()
+        )}
+      </div>
+
+      {/* Footer Navigation Section per DESIGN.md */}
+      {!collapsed ? (
+        <div className="p-3 border-t border-[var(--border-default)] bg-[var(--bg-surface)] space-y-1">
+          <div className="flex items-center justify-between gap-1">
+            {/* History Tab */}
+            <button
+              type="button"
+              onClick={() => setActiveTab("all")}
+              className={[
+                "flex-1 flex items-center justify-between px-3 py-1.5 rounded-md transition-colors text-xs font-medium cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-1",
+                activeTab === "all"
+                  ? "bg-[var(--accent-muted)] text-[var(--accent)] font-semibold"
+                  : "text-[var(--text-secondary)] hover:bg-[var(--bg-surface-alt)] hover:text-[var(--text-primary)]",
+              ].join(" ")}
+            >
+              <div className="flex items-center gap-1.5">
+                <Clock className="h-3.5 w-3.5" />
+                <span>History</span>
+              </div>
+              <span className="text-[10px] font-mono text-[var(--text-muted)]">{safeHistory.length}</span>
+            </button>
+
+            {/* Saved Tab */}
+            <button
+              type="button"
+              onClick={() => setActiveTab("starred")}
+              className={[
+                "flex-1 flex items-center justify-between px-3 py-1.5 rounded-md transition-colors text-xs font-medium cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-1",
+                activeTab === "starred"
+                  ? "bg-[var(--accent-muted)] text-[var(--accent)] font-semibold"
+                  : "text-[var(--text-secondary)] hover:bg-[var(--bg-surface-alt)] hover:text-[var(--text-primary)]",
+              ].join(" ")}
+            >
+              <div className="flex items-center gap-1.5">
+                <Star className="h-3.5 w-3.5" />
+                <span>Saved</span>
+              </div>
+              <span className="text-[10px] font-mono text-[var(--text-muted)]">{starredItemsCount}</span>
+            </button>
+
+            {/* Single Icon Trigger for Settings per DESIGN.md */}
+            <button
+              type="button"
+              onClick={() => setIsSettingsOpen(!isSettingsOpen)}
+              title="Settings"
+              className="p-1.5 rounded-md text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-alt)] transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-1"
+            >
+              <Settings className="h-4 w-4" />
+            </button>
+          </div>
+
+          {/* Settings Drawer */}
+          {isSettingsOpen && (
+            <div className="space-y-1.5 pt-2 border-t border-[var(--border-subtle)] mt-2">
+              {onOpenAnalytics && (
                 <button
                   type="button"
-                  onClick={exportHistoryJSON}
-                  title="Export history"
-                  className="p-1 rounded hover:bg-accent text-muted-foreground hover:text-foreground"
+                  onClick={onOpenAnalytics}
+                  className="w-full flex items-center justify-between p-2 rounded-md bg-[var(--bg-surface-alt)] text-[var(--text-primary)] text-xs font-medium hover:bg-[var(--border-default)] transition cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-1"
                 >
-                  <Download className="h-3 w-3" />
+                  <span className="flex items-center gap-2">
+                    <BarChart3 className="h-3.5 w-3.5 text-[var(--accent)]" />
+                    <span>Usage Insights</span>
+                  </span>
+                  <span className="text-[10px] font-mono text-[var(--text-muted)]">Stats</span>
+                </button>
+              )}
+
+              {onOpenShortcuts && (
+                <button
+                  type="button"
+                  onClick={onOpenShortcuts}
+                  className="w-full flex items-center justify-between p-2 rounded-md bg-[var(--bg-surface-alt)] text-[var(--text-primary)] text-xs font-medium hover:bg-[var(--border-default)] transition cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-1"
+                >
+                  <span className="flex items-center gap-2">
+                    <Keyboard className="h-3.5 w-3.5 text-[var(--accent)]" />
+                    <span>Keyboard Shortcuts</span>
+                  </span>
+                  <span className="text-[10px] font-mono text-[var(--text-muted)]">?</span>
+                </button>
+              )}
+
+              <div className="flex items-center justify-between p-2 rounded-md bg-[var(--bg-surface-alt)] text-xs">
+                <span className="text-[var(--text-secondary)]">Theme</span>
+                <button
+                  type="button"
+                  onClick={(e) => onToggleTheme(e)}
+                  className="p-1 rounded text-[var(--text-primary)] hover:bg-[var(--bg-surface)] transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-1"
+                >
+                  {theme === "dark" ? <Sun className="h-3.5 w-3.5" /> : <Moon className="h-3.5 w-3.5" />}
+                </button>
+              </div>
+
+              {currentUser ? (
+                <button
+                  type="button"
+                  onClick={onSignOut}
+                  className="w-full flex items-center justify-between p-2 rounded-md bg-red-500/10 text-red-500 text-xs font-medium hover:bg-red-500/20 transition cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-1"
+                >
+                  <span>Sign out ({currentUser.email?.split("@")[0] || "User"})</span>
+                  <LogOut className="h-3.5 w-3.5" />
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={onSignIn}
+                  className="w-full flex items-center justify-center p-2 rounded-md bg-[var(--bg-surface-alt)] text-[var(--text-primary)] text-xs font-medium hover:bg-[var(--border-default)] transition cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-1"
+                >
+                  <span>Sign in</span>
                 </button>
               )}
             </div>
-            {safeHistory.length === 0 ? (
-              <div className="text-center py-10 px-3">
-                <History className="h-8 w-8 text-muted-foreground/30 mx-auto mb-2" />
-                <p className="text-xs text-muted-foreground/60">No history yet</p>
-              </div>
-            ) : (
-              <>
-                {renderGroup("Today", todayItems)}
-                {renderGroup("This week", weekItems)}
-                {renderGroup("Older", olderItems)}
-              </>
-            )}
-          </div>
-        ) : (
-          <div className="space-y-2 pt-2">
-            {TEMPLATES.map((tpl, idx) => (
-              <div
-                key={idx}
-                onClick={() =>
-                  onSelectHistory({
-                    id: `tpl_${Date.now()}_${idx}`,
-                    timestamp: Date.now(),
-                    action: "explain",
-                    code: tpl.code,
-                    language: tpl.language,
-                    result: { action: "explain", output: "" },
-                  } as HistoryItem)
-                }
-                className="p-3 rounded-lg border border-primary/30 gradient-primary hover:gradient-primary transition-colors cursor-pointer"
-              >
-                <div className="flex items-center gap-2 mb-1">
-                  <Star className="h-3 w-3 text-primary" />
-                  <span className="text-xs font-medium text-foreground">{tpl.title}</span>
-                </div>
-                <p className="text-[10px] text-muted-foreground/70 line-clamp-2">{tpl.description}</p>
-                <div className="mt-1.5 inline-block px-1.5 py-0.5 text-[9px] font-mono rounded gradient-primary text-muted-foreground">
-                  {tpl.language}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      <div className="border-t border-primary/30 p-3 space-y-2">
-        <div className="flex items-center justify-between text-xs">
-          <div className="flex items-center gap-1.5 text-muted-foreground">
-            <BarChart3 className="h-3.5 w-3.5" />
-            <span>{safeHistory.length} sessions</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <button
-              type="button"
-              onClick={onToggleTheme}
-              title="Toggle theme"
-              className="p-1.5 rounded-lg hover:bg-accent transition-colors text-muted-foreground hover:text-foreground"
-            >
-              {theme === "dark" ? <Sun className="h-3.5 w-3.5" /> : <Moon className="h-3.5 w-3.5" />}
-            </button>
-            {safeHistory.length > 0 && (
-              <button
-                type="button"
-                onClick={onClearAll}
-                title="Clear all"
-                className="p-1.5 rounded-lg hover:bg-destructive/10 hover:text-destructive transition-colors text-muted-foreground"
-              >
-                <Trash2 className="h-3.5 w-3.5" />
-              </button>
-            )}
-          </div>
+          )}
         </div>
-        {currentUser ? (
-          <div className="flex items-center justify-between px-1">
-            <span className="text-xs text-muted-foreground truncate">{currentUser.email?.split("@")[0] || currentUser.full_name || "User"}</span>
-            <button
-              type="button"
-              onClick={onSignOut}
-              title="Sign out"
-              className="p-1.5 rounded-lg hover:bg-accent transition-colors text-muted-foreground hover:text-foreground"
-            >
-              <LogOut className="h-3.5 w-3.5" />
-            </button>
-          </div>
-        ) : (
+      ) : (
+        <div className="p-2 border-t border-[var(--border-default)] bg-[var(--bg-surface)] flex flex-col items-center gap-2">
           <button
             type="button"
-            onClick={onSignIn}
-            className="w-full flex items-center justify-center gap-1.5 text-xs px-3 py-2 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
+            onClick={onToggleTheme}
+            title="Toggle theme"
+            className="p-2 rounded-md hover:bg-[var(--bg-surface-alt)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-1"
           >
-            <UserRound className="h-3.5 w-3.5" />
-            Sign in
+            {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
           </button>
-        )}
-      </div>
+        </div>
+      )}
     </aside>
   );
 }
