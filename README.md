@@ -53,13 +53,16 @@ Simply paste any code snippet in **any programming language**, and OptiCode inst
 
 *(Dark theme aesthetic with warm orange, sunset amber, and glassmorphism accents)*
 
-| Workspace Interface | Side-by-Side Diff View |
-|:---:|:---:|
-| <img src="https://raw.githubusercontent.com/Isobit7/OptiCode/main/code-optimizer-explainer/frontend/public/docs/workspace_preview.png" width="250" alt="OptiCode Workspace"/> | <img src="https://raw.githubusercontent.com/Isobit7/OptiCode/main/code-optimizer-explainer/frontend/public/docs/diff_view.png" width="250" alt="OptiCode Diff View"/> |
-
-| Security + Secret Audit | Interactive Flowchart Engine |
-|:---:|:---:|
-| <img src="https://raw.githubusercontent.com/Isobit7/OptiCode/main/code-optimizer-explainer/frontend/public/docs/security_audit.png" width="250" alt="Security Audit"/> | <img src="https://raw.githubusercontent.com/Isobit7/OptiCode/main/code-optimizer-explainer/frontend/public/docs/flowchart_engine.png" width="250" alt="Flowchart Engine"/> |
+<div align="center">
+  <img src="https://raw.githubusercontent.com/Isobit7/OptiCode/main/code-optimizer-explainer/frontend/public/docs/workspace_preview.png" width="185" alt="Workspace Interface"/>
+  <img src="https://raw.githubusercontent.com/Isobit7/OptiCode/main/code-optimizer-explainer/frontend/public/docs/diff_view.png" width="185" alt="Diff View"/>
+  <img src="https://raw.githubusercontent.com/Isobit7/OptiCode/main/code-optimizer-explainer/frontend/public/docs/security_audit.png" width="185" alt="Security Audit"/>
+  <img src="https://raw.githubusercontent.com/Isobit7/OptiCode/main/code-optimizer-explainer/frontend/public/docs/flowchart_engine.png" width="185" alt="Flowchart Engine"/>
+</div>
+<br/>
+<div align="center">
+  <sub>Workspace Interface &nbsp;|&nbsp; Diff View &nbsp;|&nbsp; Security Audit &nbsp;|&nbsp; Flowchart Engine</sub>
+</div>
 
 ---
 
