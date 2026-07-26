@@ -55,11 +55,11 @@ Simply paste any code snippet in **any programming language**, and OptiCode inst
 
 | Workspace Interface | Side-by-Side Diff View |
 |:---:|:---:|
-| ![OptiCode Workspace Placeholder](https://via.placeholder.com/600x350/0d1017/f97316?text=OptiCode+Workspace+UI) | ![OptiCode Diff View Placeholder](https://via.placeholder.com/600x350/0d1017/38bdf8?text=Side-by-Side+Code+Diff+View) |
+| ![OptiCode Workspace](https://raw.githubusercontent.com/Isobit7/OptiCode/main/code-optimizer-explainer/frontend/public/docs/workspace_preview.png) | ![OptiCode Diff View](https://raw.githubusercontent.com/Isobit7/OptiCode/main/code-optimizer-explainer/frontend/public/docs/diff_view.png) |
 
 | Security & Secret Audit | Interactive Flowchart Engine |
 |:---:|:---:|
-| ![Security Audit Placeholder](https://via.placeholder.com/600x350/0d1017/ef4444?text=Security+Audit+%26+Secret+Scanner) | ![Flowchart Engine Placeholder](https://via.placeholder.com/600x350/0d1017/10b981?text=Mermaid.js+Logic+Flowchart) |
+| ![Security Audit](https://raw.githubusercontent.com/Isobit7/OptiCode/main/code-optimizer-explainer/frontend/public/docs/security_audit.png) | ![Flowchart Engine](https://raw.githubusercontent.com/Isobit7/OptiCode/main/code-optimizer-explainer/frontend/public/docs/flowchart_engine.png) |
 
 ---
 
