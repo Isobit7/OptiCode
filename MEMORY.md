@@ -188,6 +188,7 @@ code-optimizer-explainer/
 | 2026-07-24 | Added Notion/Slack-style Slash Commands popover menu (/explain, /humanize, /prettify, /shorten, /seo, /alternatives) with keyboard selection (Arrow keys + Enter/Tab) in CodeInputBar.tsx |
 | 2026-07-24 | Implemented ChatGPT-style layout transition in OptimizerApp.tsx: anchored CodeInputBar + ActionPills to sticky bottom dock when response is active, rendering ResultsPanel in top viewport |
 | 2026-07-24 | Integrated full React frontend application from frontendopticode into OptiCode/code-optimizer-explainer/frontend, connecting UI components and SignInModal to backend auth, sessions, and AI APIs |
+| 2026-07-26 | Removed unused `GeneratingLoader.tsx` from `components/custom/` — user confirmed TurnCard skeleton loader (rotating dev messages + pulse skeletons) is the preferred loader |
 | 2026-07-24 | Added WhatsApp OTP authentication (`/api/auth/whatsapp/send-otp`, `/api/auth/whatsapp/verify`) storing user profiles (`auth_provider="whatsapp"`), active sessions, and cookies in DB |
 | 2026-07-24 | Integrated Email, Google OAuth, and Phone SMS OTP authentication with database storage for user profiles (`user_profiles`), active sessions, and cookie token metadata (`user_sessions`) in backend |
 | 2026-07-24 | Created PROJECT_SYSTEM_OVERVIEW_AND_REQUEST_FLOW.md detailing full system architecture, Mermaid sequence diagrams, component maps, and request lifecycles |

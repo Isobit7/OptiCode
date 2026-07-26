@@ -13,6 +13,8 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as ChatRouteImport } from './routes/chat'
 import { Route as HeroRouteImport } from './routes/hero'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as PreferencesRouteImport } from './routes/preferences'
 import { Route as ShareSlugRouteImport } from './routes/share/$slug'
 
 const IndexRoute = IndexRouteImport.update({
@@ -35,6 +37,16 @@ const HeroRoute = HeroRouteImport.update({
   path: '/hero',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PreferencesRoute = PreferencesRouteImport.update({
+  id: '/preferences',
+  path: '/preferences',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ShareSlugRoute = ShareSlugRouteImport.update({
   id: '/share/$slug',
   path: '/share/$slug',
@@ -46,6 +58,8 @@ export interface FileRoutesByFullPath {
   '/app': typeof AppRoute
   '/chat': typeof ChatRoute
   '/hero': typeof HeroRoute
+  '/login': typeof LoginRoute
+  '/preferences': typeof PreferencesRoute
   '/share/$slug': typeof ShareSlugRoute
 }
 export interface FileRoutesByTo {
@@ -53,6 +67,8 @@ export interface FileRoutesByTo {
   '/app': typeof AppRoute
   '/chat': typeof ChatRoute
   '/hero': typeof HeroRoute
+  '/login': typeof LoginRoute
+  '/preferences': typeof PreferencesRoute
   '/share/$slug': typeof ShareSlugRoute
 }
 export interface FileRoutesById {
@@ -61,14 +77,38 @@ export interface FileRoutesById {
   '/app': typeof AppRoute
   '/chat': typeof ChatRoute
   '/hero': typeof HeroRoute
+  '/login': typeof LoginRoute
+  '/preferences': typeof PreferencesRoute
   '/share/$slug': typeof ShareSlugRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/app' | '/chat' | '/hero' | '/share/$slug'
+  fullPaths:
+    | '/'
+    | '/app'
+    | '/chat'
+    | '/hero'
+    | '/login'
+    | '/preferences'
+    | '/share/$slug'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/app' | '/chat' | '/hero' | '/share/$slug'
-  id: '__root__' | '/' | '/app' | '/chat' | '/hero' | '/share/$slug'
+  to:
+    | '/'
+    | '/app'
+    | '/chat'
+    | '/hero'
+    | '/login'
+    | '/preferences'
+    | '/share/$slug'
+  id:
+    | '__root__'
+    | '/'
+    | '/app'
+    | '/chat'
+    | '/hero'
+    | '/login'
+    | '/preferences'
+    | '/share/$slug'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -76,6 +116,8 @@ export interface RootRouteChildren {
   AppRoute: typeof AppRoute
   ChatRoute: typeof ChatRoute
   HeroRoute: typeof HeroRoute
+  LoginRoute: typeof LoginRoute
+  PreferencesRoute: typeof PreferencesRoute
   ShareSlugRoute: typeof ShareSlugRoute
 }
 
@@ -109,6 +151,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HeroRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/preferences': {
+      id: '/preferences'
+      path: '/preferences'
+      fullPath: '/preferences'
+      preLoaderRoute: typeof PreferencesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/share/$slug': {
       id: '/share/$slug'
       path: '/share/$slug'
@@ -124,6 +180,8 @@ const rootRouteChildren: RootRouteChildren = {
   AppRoute: AppRoute,
   ChatRoute: ChatRoute,
   HeroRoute: HeroRoute,
+  LoginRoute: LoginRoute,
+  PreferencesRoute: PreferencesRoute,
   ShareSlugRoute: ShareSlugRoute,
 }
 export const routeTree = rootRouteImport

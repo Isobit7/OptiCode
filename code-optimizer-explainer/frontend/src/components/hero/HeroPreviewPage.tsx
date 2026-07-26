@@ -171,7 +171,7 @@ export function HeroPreviewPage() {
 
       {/* ── Back link ── */}
       <Link
-        to="/app"
+        to="/login"
         style={{
           position: "fixed", top: 16, left: 16, zIndex: 50,
           display: "inline-flex", alignItems: "center", gap: 6,
@@ -183,7 +183,7 @@ export function HeroPreviewPage() {
         }}
       >
         <ArrowLeft style={{ width: 14, height: 14 }} />
-        Open Workspace
+        Get Started
       </Link>
 
       {/* ── Main content ── */}
@@ -243,13 +243,13 @@ export function HeroPreviewPage() {
 
         {/* CTA buttons */}
         <div style={{ marginTop: 36, display: "flex", flexWrap: "wrap", gap: 12, justifyContent: "center" }}>
-          <Link to="/app">
+          <Link to="/login">
             <Button
               size="lg"
               className="gap-2 bg-gradient-to-r from-orange-500 to-amber-500 text-white font-semibold shadow-lg shadow-orange-500/25 border-0 hover:from-orange-600 hover:to-amber-600 hover:text-white"
             >
               <Rocket className="h-4 w-4 text-white" />
-              <span className="text-white font-bold">Open the Optimizer</span>
+              <span className="text-white font-bold">Get Started</span>
             </Button>
           </Link>
           <a href="https://github.com/Isobit7/OptiCode" target="_blank" rel="noreferrer">

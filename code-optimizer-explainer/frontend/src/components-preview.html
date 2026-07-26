@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Component Preview - OptiCode</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://unpkg.com/framer-motion@10.16.4/dist/framer-motion.js"></script>
+  <style>
+    :root {
+      --bg-base: #ffffff;
+      --bg-surface: #f8fafc;
+      --bg-surface-alt: #f1f5f9;
+      --text-primary: #0f172a;
+      --text-secondary: #64748b;
+      --text-muted: #94a3b8;
+      --border-default: #e2e8f0;
+      --border-subtle: #f1f5f9;
+      --accent: #f97316;
+      --accent-muted: #ffedd5;
+    }
+    
+    .dark {
+      --bg-base: #0a0a0a;
+      --bg-surface: #141418;
+      --bg-surface-alt: #1a1a1f;
+      --text-primary: #fafafa;
+      --text-secondary: #a1a1aa;
+      --text-muted: #71717a;
+      --border-default: #27272a;
+      --border-subtle: #1f1f23;
+      --accent: #f97316;
+      --accent-muted: #7c2d12;
+    }
+    
+    body {
+      background: var(--bg-base);
+      color: var(--text-primary);
+      font-family: system-ui, -apple-system, sans-serif;
+    }
+    
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    
+    .animate-spin {
+      animation: spin 1s linear infinite;
+    }
+    
+    .animate-pulse {
+      animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+  </style>
+</head>
+<body class="min-h-screen p-8">
+  <div class="max-w-4xl mx-auto">
+    <h1 class="text-3xl font-bold mb-2">Component Preview</h1>
+    <p class="text-[var(--text-secondary)] mb-8">Isolated preview of OptiCode components</p>
+    
+    <!-- Theme Toggle -->
+    <button onclick="document.documentElement.classList.toggle('dark')" 
+            class="mb-8 px-4 py-2 bg-[var(--accent)] text-white rounded-lg hover:opacity-90 transition">
+      Toggle Dark/Light Mode
+    </button>
+    
+    <!-- Loader Component -->
+    <section class="mb-12">
+      <h2 class="text-xl font-semibold mb-4 flex items-center gap-2">
+        <span class="text-[var(--accent)]">●</span> Loader Component
+      </h2>
+      
+      <div class="rounded-xl border border-[var(--border-default)] bg-[var(--bg-surface)] p-6 space-y-4">
+        <!-- Loading State -->
+        <div class="space-y-3 animate-pulse">
+          <div class="flex items-center gap-2 text-xs text-[var(--text-secondary)] font-mono font-medium">
+            <svg class="h-4 w-4 text-[var(--accent)] animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+            </svg>
+            <span id="loading-text">Optimizing Big-O complexity...</span>
+          </div>
+          
+          <!-- Explain Action Skeleton -->
+          <div class="space-y-2 pt-2">
+            <div class="h-4 bg-[var(--bg-surface-alt)] rounded w-3/4"></div>
+            <div class="h-3 bg-[var(--bg-surface-alt)] rounded w-full"></div>
+            <div class="h-3 bg-[var(--bg-surface-alt)] rounded w-5/6"></div>
+            <div class="h-3 bg-[var(--bg-surface-alt)] rounded w-2/3"></div>
+          </div>
+        </div>
+      </div>
+      
+      <p class="text-xs text-[var(--text-muted)] mt-2">Features: Spinning icon, rotating messages, skeleton bars</p>
+    </section>
+    
+    <!-- Action Badges -->
+    <section class="mb-12">
+      <h2 class="text-xl font-semibold mb-4 flex items-center gap-2">
+        <span class="text-[var(--accent)]">●</span> Action Badges
+      </h2>
+      
+      <div class="flex flex-wrap gap-3">
+        <span class="text-[11px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded border text-indigo-600 dark:text-indigo-400 bg-indigo-500/10 border-indigo-500/20">Explain</span>
+        <span class="text-[11px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded border text-amber-600 dark:text-amber-400 bg-amber-500/10 border-amber-500/20">Humanize</span>
+        <span class="text-[11px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded border text-rose-600 dark:text-rose-400 bg-rose-500/10 border-rose-500/20">Security Audit</span>
+        <span class="text-[11px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded border text-blue-600 dark:text-blue-400 bg-blue-500/10 border-blue-500/20">Translate</span>
+        <span class="text-[11px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded border text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border-emerald-500/20">PR Review</span>
+        <span class="text-[11px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded border text-orange-600 dark:text-orange-400 bg-orange-500/10 border-orange-500/20">Flowchart</span>
+        <span class="text-[11px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded border text-cyan-600 dark:text-cyan-400 bg-cyan-500/10 border-cyan-500/20">Diff Storytelling</span>
+        <span class="text-[11px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded border text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border-emerald-500/20">Prettify</span>
+        <span class="text-[11px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded border text-rose-600 dark:text-rose-400 bg-rose-500/10 border-rose-500/20">Shorten</span>
+        <span class="text-[11px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded border text-purple-600 dark:text-purple-400 bg-purple-500/10 border-purple-500/20">Alternatives</span>
+      </div>
+    </section>
+    
+    <!-- Theme Toggle -->
+    <section class="mb-12">
+      <h2 class="text-xl font-semibold mb-4 flex items-center gap-2">
+        <span class="text-[var(--accent)]">●</span> Theme Toggle
+      </h2>
+      
+      <div id="theme-toggle-root"></div>
+    </section>
+    
+    <!-- Animated Copy Button -->
+    <section class="mb-12">
+      <h2 class="text-xl font-semibold mb-4 flex items-center gap-2">
+        <span class="text-[var(--accent)]">●</span> Animated Copy Button
+      </h2>
+      
+      <div id="copy-button-root"></div>
+    </section>
+    
+    <!-- Error State -->
+    <section class="mb-12">
+      <h2 class="text-xl font-semibold mb-4 flex items-center gap-2">
+        <span class="text-[var(--accent)]">●</span> Error State
+      </h2>
+      
+      <div class="error-card" style="background: #141414; border: 1px solid #2a2a2a; border-radius: 16px; padding: 48px 40px; max-width: 480px; text-align: center;">
+        <div class="icon-wrap" style="width: 56px; height: 56px; background: rgba(239, 68, 68, 0.15); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px;">
+          <svg style="width: 24px; height: 24px; stroke: #ef4444;" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 9v4m0 4h.01M10.29 3.86l-8.18 14.18A2 2 0 0 0 3.9 21h16.2a2 2 0 0 0 1.79-2.96L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+          </svg>
+        </div>
+
+        <h2 style="color: #ffffff; font-size: 22px; font-weight: 700; margin: 0 0 12px;">Something went wrong</h2>
+        <p style="color: #9a9a9a; font-size: 15px; line-height: 1.5; margin: 0 0 28px;">We hit an unexpected error while loading your data. Check your connection and try again in a few moments.</p>
+
+        <div class="buttons" style="display: flex; gap: 12px; justify-content: center;">
+          <button class="btn-primary" style="display: flex; align-items: center; gap: 8px; padding: 12px 20px; border-radius: 10px; font-size: 14px; font-weight: 600; border: none; cursor: pointer; background: #e8e8e8; color: #111;" onclick="window.location.reload()">
+            <svg style="width: 16px; height: 16px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M1 4v6h6M23 20v-6h-6"/>
+              <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"/>
+            </svg>
+            Try Again
+          </button>
+          <button class="btn-secondary" style="display: flex; align-items: center; gap: 8px; padding: 12px 20px; border-radius: 10px; font-size: 14px; font-weight: 600; border: none; cursor: pointer; background: #1f1f1f; color: #fff; border: 1px solid #333;">
+            <svg style="width: 16px; height: 16px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18.36 6.64a9 9 0 1 1-12.72 0"/>
+              <path d="M12 2v10"/>
+            </svg>
+            Contact Support
+          </button>
+        </div>
+      </div>
+    </section>
+    
+    <!-- Code Input Bar Style -->
+    <section class="mb-12">
+      <h2 class="text-xl font-semibold mb-4 flex items-center gap-2">
+        <span class="text-[var(--accent)]">●</span> Code Input Style
+      </h2>
+      
+      <div class="rounded-xl border border-[var(--border-default)] bg-[var(--bg-surface)] p-4">
+        <textarea 
+          class="w-full bg-[var(--bg-surface-alt)] border border-[var(--border-subtle)] rounded-lg p-3 text-xs font-mono text-[var(--text-primary)] resize-none focus:outline-none focus:border-[var(--accent)]"
+          rows="4"
+          placeholder="Paste your code here..."
+          readonly
+        >function example() {
+  return "Hello, World!";
+}</textarea>
+      </div>
+    </section>
+  </div>
+  
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+    const { motion, AnimatePresence } = Motion;
+
+    // Theme Toggle Component
+    function ThemeToggle() {
+      const [dark, setDark] = useState(true);
+
+      return (
+        <div className="min-h-[200px] bg-[#0b0b0d] flex items-center justify-center p-8 rounded-xl">
+          <button
+            onClick={() => setDark(!dark)}
+            className="
+              relative
+              w-[66px]
+              h-[34px]
+              rounded-full
+              border
+              border-white/[0.08]
+              bg-[#111113]
+              overflow-hidden
+              shadow-[0_4px_16px_rgba(0,0,0,.45),inset_0_1px_0_rgba(255,255,255,.04)]
+            "
+          >
+            {/* Slider */}
+            <motion.div
+              animate={{
+                x: dark ? 2 : 34,
+                scale: [1, 1.03, 1],
+              }}
+              transition={{
+                x: {
+                  type: "spring",
+                  stiffness: 650,
+                  damping: 35,
+                  mass: 0.7,
+                },
+                scale: {
+                  duration: 0.25,
+                },
+              }}
+              className="
+                absolute
+                top-[2px]
+                left-0
+                w-[28px]
+                h-[28px]
+                rounded-full
+                bg-[#242428]
+                border
+                border-white/[0.05]
+                flex
+                items-center
+                justify-center
+                shadow-[0_3px_10px_rgba(0,0,0,.45),inset_0_1px_1px_rgba(255,255,255,.06)]
+              "
+            >
+              <AnimatePresence mode="wait">
+                {dark ? (
+                  <motion.div
+                    key="moon"
+                    initial={{ opacity: 0, rotate: -90, scale: 0.7 }}
+                    animate={{ opacity: 1, rotate: 0, scale: 1 }}
+                    exit={{ opacity: 0, rotate: 90, scale: 0.7 }}
+                    transition={{ duration: 0.18 }}
+                  >
+                    <svg className="text-white" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="sun"
+                    initial={{ opacity: 0, rotate: 90, scale: 0.7 }}
+                    animate={{ opacity: 1, rotate: 0, scale: 1 }}
+                    exit={{ opacity: 0, rotate: -90, scale: 0.7 }}
+                    transition={{ duration: 0.18 }}
+                  >
+                    <svg className="text-[#F4C542]" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="12" cy="12" r="5"></circle>
+                      <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"></path>
+                    </svg>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.div>
+
+            {/* Right Icon */}
+            <motion.div
+              animate={{ opacity: dark ? 0.35 : 0 }}
+              transition={{ duration: 0.2 }}
+              className="absolute right-[9px] top-1/2 -translate-y-1/2"
+            >
+              <svg className="text-[#6d7077]" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="5"></circle>
+                <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"></path>
+              </svg>
+            </motion.div>
+
+            {/* Left Icon */}
+            <motion.div
+              animate={{ opacity: dark ? 0 : 0.35 }}
+              transition={{ duration: 0.2 }}
+              className="absolute left-[9px] top-1/2 -translate-y-1/2"
+            >
+              <svg className="text-[#6d7077]" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+              </svg>
+            </motion.div>
+          </button>
+        </div>
+      );
+    }
+
+    // Render the Theme Toggle component
+    const themeToggleRoot = document.getElementById('theme-toggle-root');
+    if (themeToggleRoot) {
+      const root = ReactDOM.createRoot(themeToggleRoot);
+      root.render(<ThemeToggle />);
+    }
+
+    // Animated Copy Button Component
+    function CopyCode() {
+      const [copied, setCopied] = useState(false);
+      const [showConfirmation, setShowConfirmation] = useState(false);
+      const [progress, setProgress] = useState(0);
+      const code = "21DEV-LEO";
+      const duration = 4000;
+
+      useEffect(() => {
+        if (copied) {
+          const showTimer = setTimeout(() => {
+            setShowConfirmation(true);
+          }, 400);
+
+          setProgress(0);
+          const startTime = Date.now();
+          
+          const interval = setInterval(() => {
+            const elapsed = Date.now() - startTime;
+            const newProgress = Math.min((elapsed / duration) * 100, 100);
+            setProgress(newProgress);
+            
+            if (elapsed >= duration) {
+              clearInterval(interval);
+              setShowConfirmation(false);
+              setTimeout(() => {
+                setCopied(false);
+                setProgress(0);
+              }, 400);
+            }
+          }, 16);
+
+          return () => {
+            clearInterval(interval);
+            clearTimeout(showTimer);
+          };
+        }
+      }, [copied]);
+
+      const handleCopy = async () => {
+        try {
+          await navigator.clipboard.writeText(code);
+        } catch (err) {
+          const textArea = document.createElement('textarea');
+          textArea.value = code;
+          textArea.style.position = 'fixed';
+          textArea.style.left = '-9999px';
+          textArea.style.top = '-9999px';
+          document.body.appendChild(textArea);
+          textArea.focus();
+          textArea.select();
+          document.execCommand('copy');
+          document.body.removeChild(textArea);
+        }
+        setCopied(true);
+      };
+
+      return (
+        <div className="flex items-center justify-center bg-white dark:bg-[#141413] p-4 rounded-xl">
+          <div className="relative overflow-hidden flex items-center justify-center bg-gray-100 dark:bg-[#1f1f1e] rounded-full px-10 py-3 min-w-80 h-16">
+            {/* Progress background */}
+            <div 
+              className="absolute left-0 top-0 bottom-0 bg-gray-200 dark:bg-[#2a2a29]"
+              style={{ 
+                width: `${progress}%`,
+                opacity: copied ? 1 : 0,
+                transition: 'opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
+              }}
+            />
+            
+            {/* Original content - code and button */}
+            <div 
+              className="absolute inset-0 flex items-center justify-between pl-10 pr-3"
+              style={{
+                opacity: copied ? 0 : 1,
+                filter: copied ? 'blur(12px)' : 'blur(0px)',
+                transform: copied ? 'scale(0.92)' : 'scale(1)',
+                transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
+                pointerEvents: copied ? 'none' : 'auto',
+                zIndex: copied ? 0 : 20,
+              }}
+            >
+              <span className="text-2xl font-medium tracking-wide text-gray-400 dark:text-[#6b6b6a] select-all truncate max-w-48">
+                {code}
+              </span>
+              <button
+                onClick={handleCopy}
+                className="bg-white dark:bg-[#2a2a29] hover:bg-gray-50 dark:hover:bg-[#353534] text-gray-700 dark:text-[#e5e5e4] font-medium text-lg px-8 py-3 rounded-full shadow-sm dark:shadow-black/30 transition-all duration-300 hover:shadow-md dark:hover:shadow-black/50 active:scale-95 cursor-pointer select-none"
+              >
+                Copy
+              </button>
+            </div>
+
+            {/* Confirmation content - Code Copied! */}
+            <div 
+              className="relative flex items-center gap-3"
+              style={{
+                opacity: showConfirmation ? 1 : 0,
+                filter: showConfirmation ? 'blur(0px)' : 'blur(12px)',
+                transform: showConfirmation ? 'scale(1)' : 'scale(1.08)',
+                transition: 'all 0.8s cubic-bezier(0.4, 0, 0.2, 1)',
+                pointerEvents: 'none',
+                zIndex: 10,
+              }}
+            >
+              <div className="w-7 h-7 bg-gray-800 dark:bg-[#e5e5e4] rounded-full flex items-center justify-center">
+                <svg 
+                  className="w-4 h-4 text-white dark:text-[#141413]" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                >
+                  <path 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round" 
+                    strokeWidth={3} 
+                    d="M5 13l4 4L19 7"
+                    style={{
+                      strokeDasharray: 24,
+                      strokeDashoffset: showConfirmation ? 0 : 24,
+                      transition: 'stroke-dashoffset 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.3s',
+                    }}
+                  />
+                </svg>
+              </div>
+              <span className="text-xl font-semibold text-gray-800 dark:text-[#e5e5e4]">
+                Code Copied!
+              </span>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // Render the Copy Button component
+    const copyButtonRoot = document.getElementById('copy-button-root');
+    if (copyButtonRoot) {
+      const root = ReactDOM.createRoot(copyButtonRoot);
+      root.render(<CopyCode />);
+    }
+  </script>
+
+  <script>
+    // Rotating loading messages
+    const loadingMessages = [
+      "Optimizing Big-O complexity...",
+      "De-spaghettifying nested loops...",
+      "Teaching AI standard language idioms...",
+      "Tidying variable names & comments...",
+      "Refactoring logic bounds..."
+    ];
+    
+    let msgIndex = 0;
+    const loadingText = document.getElementById('loading-text');
+    
+    setInterval(() => {
+      msgIndex = (msgIndex + 1) % loadingMessages.length;
+      loadingText.textContent = loadingMessages[msgIndex];
+    }, 1800);
+  </script>
+</body>
+</html>

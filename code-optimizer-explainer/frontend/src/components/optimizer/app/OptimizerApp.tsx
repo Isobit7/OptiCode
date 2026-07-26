@@ -5,7 +5,6 @@ import { Thread } from "./Thread";
 import { ActionPills } from "../input/ActionPills";
 import { type ChatMessage } from "../results/ResultsPanel";
 import { SidebarHistory, type HistoryItem } from "../sidebar/SidebarHistory";
-import { SignInModal } from "../modals/SignInModal";
 import { AnalyticsModal } from "../modals/AnalyticsModal";
 import { KeyboardShortcutsModal } from "../modals/KeyboardShortcutsModal";
 import { PreferencesDropdown, type ExplainDepth, type HumanizeMode } from "../modals/PreferencesDropdown";
@@ -15,7 +14,6 @@ import { Sparkles, UserRound, ShieldCheck, Terminal, LogOut, ArrowDown } from "l
 
 import { TranslateModal } from "../modals/TranslateModal";
 import { RightDashboardPanel } from "../sidebar/RightDashboardPanel";
-import { OnboardingModal, type OnboardingPreferences } from "../modals/OnboardingModal";
 
 const LOCAL_STORAGE_KEY = "code_companion_history";
 const ONBOARDING_KEY = "opticode_user_onboarding_prefs";
@@ -28,13 +26,9 @@ export function OptimizerApp() {
   const [submittedCode, setSubmittedCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [isSignInOpen, setIsSignInOpen] = useState(false);
   const [isAnalyticsOpen, setIsAnalyticsOpen] = useState(false);
   const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
   const [isTranslateOpen, setIsTranslateOpen] = useState(false);
-  const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
-  // Flow phase for first-time users: login → preferences → workspace
-  const [flowPhase, setFlowPhase] = useState<"login" | "preferences" | "workspace">("workspace");
   const [targetLang, setTargetLang] = useState("TypeScript");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -107,14 +101,14 @@ export function OptimizerApp() {
     const handleGlobalKeyDown = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement;
       const isInInput = target.tagName === "TEXTAREA" || target.tagName === "INPUT" || target.isContentEditable;
-      if (e.key === "?" && !isInInput && !isSignInOpen && !isAnalyticsOpen) {
+      if (e.key === "?" && !isInInput && !isAnalyticsOpen) {
         e.preventDefault();
         setIsShortcutsOpen((prev) => !prev);
       }
     };
     window.addEventListener("keydown", handleGlobalKeyDown);
     return () => window.removeEventListener("keydown", handleGlobalKeyDown);
-  }, [isSignInOpen, isAnalyticsOpen]);
+  }, [isAnalyticsOpen]);
 
   useEffect(() => {
     if (typeof window !== "undefined" && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
@@ -248,7 +242,7 @@ export function OptimizerApp() {
     }
   }, []);
 
-  const applyOnboardingPreferences = (prefs: OnboardingPreferences) => {
+  const applyOnboardingPreferences = (prefs: any) => {
     if (prefs.explainDepth) setExplainDepth(prefs.explainDepth);
     if (prefs.primaryGoal && prefs.primaryGoal !== "all") {
       setActiveAction(prefs.primaryGoal);
@@ -278,51 +272,14 @@ export function OptimizerApp() {
   useEffect(() => {
     try {
       const savedPrefs = localStorage.getItem(ONBOARDING_KEY);
-      if (!savedPrefs) {
-        // First-time user: start with login phase
-        setFlowPhase("login");
-        setIsSignInOpen(true);
-      } else {
-        const parsed = JSON.parse(savedPrefs) as OnboardingPreferences;
+      if (savedPrefs) {
+        const parsed = JSON.parse(savedPrefs);
         applyOnboardingPreferences(parsed);
-        setFlowPhase("workspace");
       }
     } catch {
-      setFlowPhase("login");
-      setIsSignInOpen(true);
+      // ignore errors
     }
   }, []);
-
-  const handleOnboardingComplete = (prefs: OnboardingPreferences) => {
-    try {
-      localStorage.setItem(ONBOARDING_KEY, JSON.stringify(prefs));
-    } catch {
-      // ignore
-    }
-    applyOnboardingPreferences(prefs);
-    setIsOnboardingOpen(false);
-    setFlowPhase("workspace");
-  };
-
-  // Handle login → preferences flow transition
-  const handleLoginFlowClose = () => {
-    setIsSignInOpen(false);
-    if (flowPhase === "login") {
-      // User skipped or completed login → advance to preferences
-      setFlowPhase("preferences");
-      setIsOnboardingOpen(true);
-    }
-  };
-
-  const handleLoginFlowSuccess = () => {
-    checkUserSession();
-    // After successful login → advance to preferences
-    setTimeout(() => {
-      setIsSignInOpen(false);
-      setFlowPhase("preferences");
-      setIsOnboardingOpen(true);
-    }, 800);
-  };
 
   const saveHistory = (items: HistoryItem[]) => {
     setHistory(items);
@@ -505,7 +462,6 @@ export function OptimizerApp() {
         theme={theme}
         onToggleTheme={handleToggleTheme}
         currentUser={currentUser}
-        onSignIn={() => setIsSignInOpen(true)}
         onSignOut={handleLogout}
         onOpenAnalytics={() => setIsAnalyticsOpen(true)}
         onOpenShortcuts={() => setIsShortcutsOpen(true)}
@@ -522,7 +478,6 @@ export function OptimizerApp() {
             onHumanizeModeChange={setHumanizeMode}
             settings={settings}
             onSettingChange={updateSetting}
-            onOpenOnboarding={() => setIsOnboardingOpen(true)}
           />
 
           <div className="flex items-center gap-3" />
@@ -606,12 +561,6 @@ export function OptimizerApp() {
         codeLength={code.length}
       />
 
-      <SignInModal
-        isOpen={isSignInOpen}
-        onClose={flowPhase === "login" ? handleLoginFlowClose : () => setIsSignInOpen(false)}
-        onSuccess={flowPhase === "login" ? handleLoginFlowSuccess : checkUserSession}
-      />
-
       <AnalyticsModal
         isOpen={isAnalyticsOpen}
         onClose={() => setIsAnalyticsOpen(false)}
@@ -630,12 +579,6 @@ export function OptimizerApp() {
           setTargetLang(targetLanguage);
           if (code.trim()) run("translate");
         }}
-      />
-
-      <OnboardingModal
-        isOpen={isOnboardingOpen}
-        onClose={() => setIsOnboardingOpen(false)}
-        onComplete={handleOnboardingComplete}
       />
     </div>
   );
