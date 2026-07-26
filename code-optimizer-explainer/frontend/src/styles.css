@@ -153,22 +153,36 @@
 :root {
   --radius: 0.5rem;
 
-  --bg-base: #ededed;
-  --bg-surface: #e5e5e5;
-  --bg-surface-alt: #dedede;
-  --border-default: #d1d1d1;
-  --border-subtle: #dcdcdc;
+  --bg-base: #f8fafc;
+  --bg-surface: #ffffff;
+  --bg-surface-alt: #f1f5f9;
+  --border-default: #cbd5e1;
+  --border-subtle: #e2e8f0;
 
-  --text-primary: #131313;
-  --text-secondary: #4d4d4d;
-  --text-muted: #5c5c5c;
+  /* Auth surface tokens stay local to the sign-in experience. */
+  --auth-workspace: #1d1d1b;
+  --auth-workspace-elevated: #272724;
+  --auth-workspace-deep: #131412;
+  --auth-pearl: #f7f4ee;
+  --auth-paper: #fffdf8;
+  --auth-ink: #161616;
+  --auth-muted: #706d67;
+  --auth-accent: #e34234;
+  --auth-accent-deep: #8a3324;
+  --auth-success: #3e8b68;
+  --auth-border: #ded9d0;
+  --auth-shadow: rgba(22, 22, 22, 0.18);
 
-  --accent: #f97316;
-  --accent-hover: #ea6a0c;
-  --accent-muted: rgba(249, 115, 22, 0.2);
+  --text-primary: #0f172a;
+  --text-secondary: #334155;
+  --text-muted: #64748b;
 
-  --success: #22c55e;
-  --danger: #ef4444;
+  --accent: #ea580c;
+  --accent-hover: #c2410c;
+  --accent-muted: rgba(234, 88, 12, 0.12);
+
+  --success: #16a34a;
+  --danger: #dc2626;
 
   --background: var(--bg-base);
   --foreground: var(--text-primary);
@@ -197,6 +211,19 @@
   --bg-surface-alt: #212121;
   --border-default: #2e2e2e;
   --border-subtle: #232323;
+
+  --auth-workspace: #0f0f0d;
+  --auth-workspace-elevated: #1c1c19;
+  --auth-workspace-deep: #080807;
+  --auth-pearl: #171714;
+  --auth-paper: #22221e;
+  --auth-ink: #f7f4ee;
+  --auth-muted: #b4afa6;
+  --auth-accent: #f06354;
+  --auth-accent-deep: #ff958b;
+  --auth-success: #69bd95;
+  --auth-border: #3d3c36;
+  --auth-shadow: rgba(0, 0, 0, 0.4);
 
   --text-primary: #ececec;
   --text-secondary: #9b9b9b;
@@ -244,7 +271,7 @@
   }
 }
 
-/* Custom Eye-Catching Keyframe Animations */
+/* Custom Keyframe Animations */
 @keyframes fadeInUp {
   from {
     opacity: 0;
@@ -320,22 +347,7 @@
   animation: floatGentle 4s infinite ease-in-out;
 }
 
-/* Ultra-Smooth Theme Conversion & View Transition Styles */
-::view-transition-old(root),
-::view-transition-new(root) {
-  animation: none;
-  mix-blend-mode: normal;
-}
-
-::view-transition-old(root) {
-  z-index: 1;
-}
-
-::view-transition-new(root) {
-  z-index: 9999;
-}
-
-/* Global Sleek Up-Down Scrollbar */
+/* Global Sleek Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -365,40 +377,6 @@
 .no-scrollbar {
   -ms-overflow-style: none !important;
   scrollbar-width: none !important;
-}
-
-.dark::view-transition-old(root) {
-  z-index: 9999;
-}
-
-.dark::view-transition-new(root) {
-  z-index: 1;
-}
-
-/* Smooth Theme Transitions for all visual elements */
-body,
-header,
-aside,
-main,
-section,
-div,
-button,
-input,
-textarea,
-span,
-p,
-h1,
-h2,
-h3,
-svg,
-a {
-  transition:
-    background-color 0.3s cubic-bezier(0.16, 1, 0.3, 1),
-    border-color 0.3s cubic-bezier(0.16, 1, 0.3, 1),
-    color 0.3s cubic-bezier(0.16, 1, 0.3, 1),
-    box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1),
-    fill 0.3s cubic-bezier(0.16, 1, 0.3, 1),
-    transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* Micro-Interaction & Refined Popover Animations */
@@ -470,19 +448,7 @@ a {
   animation: checkmarkBounce 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-/* Accessibility: Prefers Reduced Motion */
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
-}
-
-/* ─── Loading Border Shimmer Animation ────────────────────── */
+/* Loading Border Shimmer Animation */
 @property --border-angle {
   syntax: "<angle>";
   inherits: false;
@@ -530,12 +496,11 @@ a {
   z-index: -1;
 }
 
-/* Hero headline gradient: provide a robust fallback when background-clip:text isn't supported */
+/* Hero headline gradient */
 .hero-gradient-text {
   color: var(--text-primary);
   -webkit-background-clip: text;
   background-clip: text;
-  /* Exclude from the global color transition so background-clip:text renders correctly */
   transition: none !important;
 }
 
@@ -548,3 +513,36 @@ a {
   }
 }
 
+/* Performance & Rendering Containment Optimizations */
+.turn-card {
+  contain: content;
+}
+
+.sidebar-history-item {
+  content-visibility: auto;
+  contain-intrinsic-size: 0 48px;
+}
+
+.gpu-accelerated {
+  will-change: transform, opacity;
+  transform: translateZ(0);
+}
+
+/* Accessibility & Reduced Motion Hardening */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Text & Code Overflow Safety */
+pre, code {
+  overflow-x: auto;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}

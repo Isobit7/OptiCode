@@ -56,16 +56,39 @@ export interface ActionResult {
   nodesCount?: number;
 }
 
-async function post<T>(path: string, body: unknown): Promise<T> {
-  const res = await fetch(`${BASE_URL}${path}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
-  if (!res.ok) {
-    throw new Error(`Request failed: ${res.status}`);
+async function post<T>(path: string, body: unknown, timeoutMs = 15000): Promise<T> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    const res = await fetch(`${BASE_URL}${path}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+      signal: controller.signal,
+    });
+    clearTimeout(timeoutId);
+
+    if (!res.ok) {
+      if (res.status === 429) {
+        throw new Error("Rate limit exceeded. Please wait a moment before trying again.");
+      }
+      if (res.status >= 500) {
+        throw new Error(`Server error (${res.status}). The service is currently recovering.`);
+      }
+      throw new Error(`Request failed with status code ${res.status}`);
+    }
+    return (await res.json()) as T;
+  } catch (err: any) {
+    clearTimeout(timeoutId);
+    if (err.name === "AbortError") {
+      throw new Error("Request timed out after 15 seconds. Please check your connection and try again.");
+    }
+    if (err.message && err.message.includes("Failed to fetch")) {
+      throw new Error("Unable to connect to the backend server. Using local resilience mode.");
+    }
+    throw err;
   }
-  return (await res.json()) as T;
 }
 
 function detectLang(code: string, fallback: string): string {

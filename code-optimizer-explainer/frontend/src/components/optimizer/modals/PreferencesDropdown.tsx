@@ -66,7 +66,7 @@ const HUMANIZE_MODES: { id: HumanizeMode; name: string; desc: string; icon: type
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
-    <div className="text-[10px] font-bold uppercase tracking-wider text-orange-400/90 px-1 py-1 flex items-center gap-1">
+    <div className="text-[10px] font-bold uppercase tracking-wider text-[var(--accent)] px-1 py-1 flex items-center gap-1">
       <Sparkles className="h-3 w-3" />
       <span>{children}</span>
     </div>
@@ -83,7 +83,7 @@ function PillGroup<T extends string | number>({
   onChange: (v: T) => void;
 }) {
   return (
-    <div className="flex items-center gap-1 bg-[#161a23] p-1 rounded-xl border border-zinc-800/80">
+    <div className="flex items-center gap-1 bg-[var(--bg-surface-alt)] p-1 rounded-xl border border-[var(--border-subtle)]">
       {options.map((opt) => {
         const isSelected = value === opt.value;
         return (
@@ -93,8 +93,8 @@ function PillGroup<T extends string | number>({
             onClick={() => onChange(opt.value)}
             className={`flex-1 py-1 px-2 text-[11px] font-bold rounded-lg transition-all cursor-pointer ${
               isSelected
-                ? "bg-orange-500/20 text-orange-400 border border-orange-500/30 shadow-xs"
-                : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50"
+                ? "bg-[var(--accent-muted)] text-[var(--accent)] border border-[var(--accent)]/30 shadow-xs"
+                : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface)]"
             }`}
           >
             {opt.label}
@@ -167,7 +167,7 @@ export function PreferencesDropdown({
   return (
     <div className="flex items-center gap-3">
       {/* Brand title */}
-      <span className="font-headings text-lg font-bold tracking-tight text-white select-none flex items-center gap-2">
+      <span className="font-headings text-lg font-bold tracking-tight text-[var(--text-primary)] select-none flex items-center gap-2">
         <span>OptiCode</span>
       </span>
 
@@ -180,7 +180,7 @@ export function PreferencesDropdown({
           aria-haspopup="true"
           aria-label="Select AI Model & Preferences"
           title="Select AI Model & Preferences"
-          className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-lg bg-orange-500/10 border border-orange-500/25 text-orange-400 hover:bg-orange-500/20 transition-all cursor-pointer shadow-xs"
+          className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-lg bg-[var(--accent-muted)] border border-[var(--accent)]/30 text-[var(--accent)] hover:bg-[var(--accent)]/20 transition-all cursor-pointer shadow-xs"
         >
           <Sparkles className="h-3.5 w-3.5" />
           <span>{activeModel.name.replace("OptiCode ", "")}</span>
@@ -196,11 +196,11 @@ export function PreferencesDropdown({
             role="dialog"
             aria-modal="true"
             aria-label="Model & Preferences settings"
-            className="absolute left-0 mt-2 w-84 sm:w-96 rounded-2xl bg-zinc-950 text-zinc-100 border border-zinc-800 shadow-2xl backdrop-blur-xl z-50 animate-pop-in overflow-hidden p-0"
+            className="absolute left-0 mt-2 w-84 sm:w-96 rounded-2xl bg-[var(--bg-surface)] text-[var(--text-primary)] border border-[var(--border-default)] shadow-2xl backdrop-blur-xl z-50 animate-pop-in overflow-hidden p-0"
           >
             {/* Segmented Pill Tabs */}
             <div className="p-3 pb-0">
-              <div className="flex items-center gap-1 bg-zinc-900 p-1 rounded-xl border border-zinc-800">
+              <div className="flex items-center gap-1 bg-[var(--bg-surface-alt)] p-1 rounded-xl border border-[var(--border-subtle)]">
                 {(["models", "preferences", "ci"] as const).map((tab) => {
                   const isSelected = activeTab === tab;
                   return (
@@ -210,8 +210,8 @@ export function PreferencesDropdown({
                       onClick={() => setActiveTab(tab)}
                       className={`flex-1 py-1.5 text-[11px] font-bold uppercase tracking-wider rounded-lg transition-all cursor-pointer capitalize ${
                         isSelected
-                          ? "bg-orange-500/20 text-orange-400 border border-orange-500/30 shadow-xs"
-                          : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/40"
+                          ? "bg-[var(--accent-muted)] text-[var(--accent)] border border-[var(--accent)]/30 shadow-xs font-bold"
+                          : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface)]"
                       }`}
                     >
                       {tab === "ci" ? "CI Mode" : tab}
@@ -238,36 +238,36 @@ export function PreferencesDropdown({
                           onClick={() => onExplainDepthChange(model.id)}
                           className={`w-full flex items-start justify-between gap-3 p-3 rounded-xl transition-all duration-150 text-left cursor-pointer border ${
                             isSelected
-                              ? "bg-orange-500/10 text-white border-orange-500/40 shadow-xs"
-                              : "bg-zinc-900/60 text-zinc-300 border-zinc-800/80 hover:bg-zinc-900 hover:border-zinc-700 hover:text-white"
+                              ? "bg-[var(--accent-muted)] text-[var(--text-primary)] border-[var(--accent)]/40 shadow-xs"
+                              : "bg-[var(--bg-surface-alt)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)]"
                           }`}
                         >
                           <div className="flex items-start gap-2.5 min-w-0 flex-1">
                             <div
                               className={`p-1.5 rounded-lg shrink-0 mt-0.5 ${
-                                isSelected ? "bg-orange-500/20 text-orange-400 border border-orange-500/30" : "bg-zinc-800/60 text-zinc-400"
+                                isSelected ? "bg-[var(--accent-muted)] text-[var(--accent)] border border-[var(--accent)]/30" : "bg-[var(--bg-surface)] text-[var(--text-muted)]"
                               }`}
                             >
                               <Icon className="h-4 w-4" aria-hidden="true" />
                             </div>
                             <div className="min-w-0 flex-1">
                               <div className="flex items-center gap-1.5">
-                                <span className="text-xs font-bold text-white">{model.name}</span>
-                                <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-zinc-800 text-zinc-400 border border-zinc-700">
+                                <span className="text-xs font-bold text-[var(--text-primary)]">{model.name}</span>
+                                <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-[var(--bg-surface)] text-[var(--text-muted)] border border-[var(--border-subtle)]">
                                   {model.tag}
                                 </span>
                               </div>
-                              <p className="text-[11px] text-zinc-400 leading-snug mt-0.5">{model.desc}</p>
+                              <p className="text-[11px] text-[var(--text-muted)] leading-snug mt-0.5">{model.desc}</p>
                             </div>
                           </div>
-                          {isSelected && <Check className="h-4 w-4 text-orange-400 shrink-0 mt-1" aria-hidden="true" />}
+                          {isSelected && <Check className="h-4 w-4 text-[var(--accent)] shrink-0 mt-1" aria-hidden="true" />}
                         </button>
                       );
                     })}
                   </div>
 
                   {/* Humanizer Modes */}
-                  <div className="space-y-1.5 pt-2 border-t border-zinc-800/80">
+                  <div className="space-y-1.5 pt-2 border-t border-[var(--border-subtle)]">
                     <SectionLabel>Humanizer Engine Style</SectionLabel>
                     {HUMANIZE_MODES.map((mode) => {
                       const Icon = mode.icon;
@@ -279,24 +279,24 @@ export function PreferencesDropdown({
                           onClick={() => onHumanizeModeChange(mode.id)}
                           className={`w-full flex items-start justify-between gap-3 p-3 rounded-xl transition-all duration-150 text-left cursor-pointer border ${
                             isSelected
-                              ? "bg-orange-500/10 text-white border-orange-500/40 shadow-xs"
-                              : "bg-zinc-900/60 text-zinc-300 border-zinc-800/80 hover:bg-zinc-900 hover:border-zinc-700 hover:text-white"
+                              ? "bg-[var(--accent-muted)] text-[var(--text-primary)] border-[var(--accent)]/40 shadow-xs"
+                              : "bg-[var(--bg-surface-alt)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)]"
                           }`}
                         >
                           <div className="flex items-start gap-2.5 min-w-0 flex-1">
                             <div
                               className={`p-1.5 rounded-lg shrink-0 mt-0.5 ${
-                                isSelected ? "bg-orange-500/20 text-orange-400 border border-orange-500/30" : "bg-zinc-800/60 text-zinc-400"
+                                isSelected ? "bg-[var(--accent-muted)] text-[var(--accent)] border border-[var(--accent)]/30" : "bg-[var(--bg-surface)] text-[var(--text-muted)]"
                               }`}
                             >
                               <Icon className="h-4 w-4" aria-hidden="true" />
                             </div>
                             <div className="min-w-0 flex-1">
-                              <span className="text-xs font-bold text-white">{mode.name}</span>
-                              <p className="text-[11px] text-zinc-400 leading-snug mt-0.5">{mode.desc}</p>
+                              <span className="text-xs font-bold text-[var(--text-primary)]">{mode.name}</span>
+                              <p className="text-[11px] text-[var(--text-muted)] leading-snug mt-0.5">{mode.desc}</p>
                             </div>
                           </div>
-                          {isSelected && <Check className="h-4 w-4 text-orange-400 shrink-0 mt-1" aria-hidden="true" />}
+                          {isSelected && <Check className="h-4 w-4 text-[var(--accent)] shrink-0 mt-1" aria-hidden="true" />}
                         </button>
                       );
                     })}

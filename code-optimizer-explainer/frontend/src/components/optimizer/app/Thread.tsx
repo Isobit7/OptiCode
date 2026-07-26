@@ -16,7 +16,7 @@ export function Thread({ messages, onRetry }: ThreadProps) {
   if (messages.length === 0) return null;
 
   return (
-    <div className="w-full max-w-[760px] mx-auto flex-1 overflow-y-auto px-4 py-6 space-y-6">
+    <div className="w-full max-w-[780px] mx-auto flex-1 overflow-y-auto px-4 py-6 space-y-6">
       {messages.map((msg) => (
         <TurnCard key={msg.id} message={msg} onRetry={onRetry} />
       ))}

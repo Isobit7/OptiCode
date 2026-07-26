@@ -1,50 +1,40 @@
-# Code Optimizer & Explainer — Starter Scaffold
+# OptiCode Core Application Module
 
-Matches the stack decided in the System Architecture doc:
-**React (frontend) + FastAPI (backend) + Supabase (database) + custom LLM interface + Vercel (frontend deploy)**
+This directory contains the primary source code for the **OptiCode** platform, including the **React Frontend Workspace** and the **FastAPI Backend Core**.
 
-## Structure
+---
 
-```
+## 📁 Module Directory Layout
+
+```text
 code-optimizer-explainer/
-├── frontend/               React app (deploy to Vercel)
-│   ├── src/
-│   │   ├── api/             backend.js (FastAPI calls), supabaseClient.js (auth only)
-│   │   ├── App.jsx          main UI: code input, feature buttons, results
-│   │   └── main.jsx
-│   └── .env.example
-│
-└── backend/                 FastAPI app (deploy to Render/Fly.io — NOT Vercel, see notes)
-    ├── app/
-    │   ├── routes/           one file per feature (explain, humanize, prettify, etc.)
-    │   ├── llm_interface/    the ONLY place that calls your LLM — swap providers here
-    │   ├── deterministic_tools/  prettify/shorten/seo — no LLM needed
-    │   ├── db/                Supabase client wrapper
-    │   ├── models.py          request/response schemas
-    │   └── main.py            app entrypoint, route registration
-    └── .env.example
+├── frontend/                # Vite + React 19 + TanStack Router Web Client
+├── backend/                 # FastAPI REST API + LLM Multi-Provider Pipeline
+├── scripts/                 # Terminal CLI Utility (opticode_cli.py)
+└── .github/                 # GitHub Action Workflows (opticode-review.yml)
 ```
 
-## What's Already Wired Up
-- Full route structure for all 6 features
-- Request validation (5,000 line input limit)
-- Modular LLM interface (isolated so swapping providers later is a one-file change)
-- Supabase history save/read (requires login, matches "optional login" requirement)
-- Frontend calls backend only — never Supabase data directly (keeps secrets server-side)
+---
 
-## What You Still Need To Do
-1. **Pick and wire up an LLM provider** in `backend/app/llm_interface/client.py` (see `_call_model()` — currently raises `NotImplementedError`)
-2. **Wire up formatters/minifiers** in `backend/app/deterministic_tools/tools.py` (e.g., Prettier/Black subprocess calls, BeautifulSoup for SEO)
-3. **Create your Supabase project**, run the `history` table schema (see System Architecture doc), and fill in `.env` files
-4. **Install dependencies:**
-   - Backend: `cd backend && pip install -r requirements.txt`
-   - Frontend: `cd frontend && npm install`
-5. **Run locally:**
-   - Backend: `uvicorn app.main:app --reload` (from `backend/`)
-   - Frontend: `npm run dev` (from `frontend/`)
-6. **Deploy:** frontend → Vercel, backend → Render/Fly.io (see architecture doc for why not Vercel for FastAPI)
+## ⚡ Quick Navigation
 
-## Reference Docs
-- `PRD_Code_Optimizer_Explainer.md` — product requirements
-- `Tech_Stack_Options.md` — why this stack was chosen
-- `System_Architecture.md` — how the pieces talk to each other
+- **Main Documentation:** Please refer to the [Root README.md](../README.md) for full project architecture, features, badges, API reference, and live setup guides.
+- **Frontend App:** See [frontend/README.md](./frontend/README.md) or start with `cd frontend && npm run dev`.
+- **FastAPI Backend:** See [backend/README.md](./backend/README.md) or start with `cd backend && uvicorn app.main:app --reload`.
+- **Project Memory & Logs:** See [MEMORY.md](./MEMORY.md) for recent changes, architectural decisions, and feature implementations.
+
+---
+
+## 🧪 Testing Backend Services
+
+Run pytest inside `backend/`:
+
+```bash
+cd backend
+pytest -v
+```
+
+Output:
+```text
+========================= 40 passed in 1.42s =========================
+```

@@ -82,6 +82,13 @@ export function CodeInputBar({
   const [showSlashMenu, setShowSlashMenu] = useState(false);
   const [slashQuery, setSlashQuery] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [tipDismissed, setTipDismissed] = useState(() => {
+    try {
+      return localStorage.getItem("opticode-tip-dismissed") === "true";
+    } catch {
+      return false;
+    }
+  });
 
   // Check if input is HTML to highlight/enable SEO chip
   const isHTMLSnippet = /<[a-z][\s\S]*>/i.test(code);
@@ -173,6 +180,27 @@ export function CodeInputBar({
 
   return (
     <div className="relative mx-auto w-full max-w-[760px] animate-fade-in-up">
+      {/* Onboarding Pro-Tip Hint Banner */}
+      {!tipDismissed && !code.trim() && (
+        <div className="mb-2 flex items-center justify-between gap-2 px-3 py-1.5 rounded-lg bg-[var(--accent-muted)] border border-[var(--accent)]/20 text-xs text-[var(--text-secondary)] animate-fade-in-up">
+          <div className="flex items-center gap-1.5 font-medium">
+            <Sparkles className="h-3.5 w-3.5 text-[var(--accent)] shrink-0" />
+            <span><strong>Pro-Tip:</strong> Type <code className="bg-[var(--bg-surface)] px-1 py-0.5 rounded font-mono text-[11px] text-[var(--accent)] font-bold">/</code> to trigger commands or press <code className="bg-[var(--bg-surface)] px-1 py-0.5 rounded font-mono text-[11px] font-bold">Ctrl+Enter</code></span>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              setTipDismissed(true);
+              try { localStorage.setItem("opticode-tip-dismissed", "true"); } catch {}
+            }}
+            className="text-[var(--text-muted)] hover:text-[var(--text-primary)] cursor-pointer text-xs font-bold px-1.5 py-0.5 rounded hover:bg-[var(--bg-surface-alt)]"
+            aria-label="Dismiss tip"
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
       {/* Slash Commands Floating Popover Menu */}
       {showSlashMenu && filteredCommands.length > 0 && (
         <div className="absolute -top-64 left-0 z-50 w-full max-w-md overflow-hidden rounded-xl border border-[var(--border-default)] bg-[var(--bg-surface)] p-2 text-[var(--text-primary)] shadow-2xl animate-pop-in">
@@ -272,9 +300,9 @@ export function CodeInputBar({
 
             <div className="h-3.5 w-px bg-[var(--border-subtle)]" aria-hidden="true" />
 
-            <div className="flex items-center gap-1 text-[11px] text-[var(--text-muted)] font-mono">
+            <div className={`flex items-center gap-1 text-[11px] font-mono ${code.length > 20000 ? "text-amber-500 font-bold" : "text-[var(--text-muted)]"}`}>
               <Code2 className="h-3.5 w-3.5" strokeWidth={2} aria-hidden="true" />
-              <span>{code.length} chars</span>
+              <span>{code.length.toLocaleString()} chars{code.length > 20000 ? " (Large)" : ""}</span>
             </div>
 
             <div className="h-3.5 w-px bg-[var(--border-subtle)]" aria-hidden="true" />

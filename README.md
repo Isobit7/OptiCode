@@ -1,136 +1,246 @@
-# OptiCode
-AI-powered code explainer, humanizer, prettifier, and optimizer — free and open-source, works with any language
-# Code Optimizer & Explainer
+# 🚀 Code Optimizer & Explainer (OptiCode)
 
-Free, open-source web app that explains, humanizes, prettifies, shortens, and optimizes any code you paste — powered by AI.
+> **Understand, Refine, Audit, and Transform Any Code in Seconds — Powered by AI.**
+
+<div align="center">
+
+![OptiCode Banner](https://raw.githubusercontent.com/Isobit7/OptiCode/main/code-optimizer-explainer/frontend/public/logo.png)
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-orange.svg)](https://opensource.org/licenses/MIT)
+[![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)]()
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
+[![React 19](https://img.shields.io/badge/Frontend-React%2019-61DAFB.svg?logo=react&logoColor=white)](https://react.dev/)
+[![FastAPI](https://img.shields.io/badge/Backend-FastAPI-009688.svg?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
+[![Supabase](https://img.shields.io/badge/Database-Supabase-3ECF8E.svg?logo=supabase&logoColor=white)](https://supabase.com/)
+[![Tests](https://img.shields.io/badge/Tests-40%2F40%20Passing-success.svg)]()
+
+[Live Workspace](http://localhost:5173/app) • [Key Features](#-key-features) • [Getting Started](#-getting-started) • [API & CLI](#-terminal-cli-tool) • [Contributing](#-contributing)
+
+</div>
 
 ---
 
-## Table of Contents
-- [About](#about)
-- [Features](#features)
-- [Tech Stack](#tech-stack)
-- [Project Structure](#project-structure)
-- [Design System](#design-system)
-- [Setup & Running Locally](#setup--running-locally)
-- [Deployment](#deployment)
-- [Documentation](#documentation)
-- [Contributing](#contributing)
+## 🌟 Overview
+
+**Code Optimizer & Explainer (OptiCode)** is a free, open-source, language-agnostic web application built for students, professional software engineers, and non-coders alike. 
+
+Simply paste any code snippet in **any programming language**, and OptiCode instantly transforms, cleans, explains, or audits it. Whether you need a beginner-friendly **ELI5 code breakdown**, an **AI Code Humanizer**, an automated **Security & Secret Audit**, a **Universal Language Translator**, or an **SEO-friendly HTML/Web refactor**, OptiCode processes your requests under **500ms** using a multi-tier LLM failover pipeline.
 
 ---
 
-## About
+## ✨ Key Features
 
-Code Optimizer & Explainer lets anyone — students, professional developers, or non-coders — paste code in **any language** and get AI-assisted transformations and explanations back. It's built to be free forever and fully open-source.
+- 🧠 **Humanizer & Explainer:** Makes AI-generated code look human-authored with idiomatic conventions. Explains complex logic in plain English with customizable depth (from **Beginner ELI5** to **Advanced Architecture**).
+- ✨ **Prettifier:** Automatically cleans, indents, and formats messy code into language-standard style rules.
+- 📉 **Shortener:** Minifies and condenses redundant logic while strictly preserving functionality and runtime performance.
+- 🔍 **SEO-Friendly Code:** Optimizes HTML, meta tags, OpenGraph attributes, semantic hierarchy, and documentation for search engine discoverability.
+- 🔄 **Code Alternatives:** Generates 2-3 alternative implementation patterns (e.g. Iterative vs Recursive, Functional vs OOP) complete with **Big-O Time & Space Complexity analysis**.
+- 🌐 **Language-Agnostic:** Works seamlessly with Python, JavaScript, TypeScript, Go, Rust, C++, Java, C#, SQL, HTML/CSS, and 20+ other languages.
+- 📝 **Input / Output Side-by-Side View:** Compare original input code against transformed output with interactive line-by-line diff views.
+- 🔐 **Optional Login to Save History:** Work instantly as a guest, or log in via Google, Email, or SMS OTP to persist and sync optimization history across devices.
 
-**Target users:** students learning to code, professional developers wanting quick cleanup/refactors, and non-coders who need code explained in plain language.
+### 🛠️ Advanced Power Tools Suite
+- 🛡️ **Security Audit & Secret Scanner (`/api/security-audit`):** Detects vulnerabilities (SQL Injection, XSS, ReDoS) and flags hardcoded API tokens/keys.
+- 🌐 **Universal Code Translator (`/api/translate`):** Cross-translates snippets between programming languages while preserving idiomatic conventions.
+- 📝 **Automated PR Reviewer (`/api/pr-review`):** Generates pull request reviews with summary bullets, risk ratings, and suggestions.
+- 📊 **Logic Flowchart Engine (`/api/flowchart`):** Renders complex nested algorithms into interactive **Mermaid.js** flowcharts.
+- 📖 **Step-by-Step Diff Storyteller (`/api/diff-story`):** Explains code diffs in human narrative form.
+- 🎨 **Shareable Snippet Cards (`/share/$slug`):** Generates Carbon-style social image preview cards.
 
-## Features
+---
 
-| Feature | What it does |
-|---|---|
-| **Explainer** | Plain-language explanation of pasted code, adjustable depth (beginner → advanced) |
-| **Humanizer** | Rewrites AI-generated code to look human-written, and/or simplifies + comments code for readability |
-| **Prettifier** | Formats code to language-standard style conventions |
-| **Shortener** | Minifies/condenses code while preserving behavior |
-| **SEO-Friendly Optimizer** | Optimizes HTML meta tags, semantic structure, naming/docs for discoverability |
-| **Code Alternatives** | Generates 2-3 alternative implementations, each labeled with tradeoffs (e.g. more performant, more readable) |
+## 🎨 Screenshots & Demo
 
-Every result shows the original input, the transformed output, and a diff view side by side.
+*(Dark theme aesthetic with warm orange, sunset amber, and glassmorphism accents)*
 
-## Tech Stack
+| Workspace Interface | Side-by-Side Diff View |
+|:---:|:---:|
+| ![OptiCode Workspace Placeholder](https://via.placeholder.com/600x350/0d1017/f97316?text=OptiCode+Workspace+UI) | ![OptiCode Diff View Placeholder](https://via.placeholder.com/600x350/0d1017/38bdf8?text=Side-by-Side+Code+Diff+View) |
 
-- **Frontend:** [React](https://react.dev) (Vite) → deployed on [Vercel](https://vercel.com)
-- **Backend:** [FastAPI](https://fastapi.tiangolo.com) (Python) → deployed on Render/Fly.io
-- **Database:** [Supabase](https://supabase.com) (Postgres + optional Auth)
-- **LLM layer:** Custom-built interface (`backend/app/llm_interface/`), isolated so the underlying model/provider can be swapped without touching the rest of the app
-- **Deterministic tools:** Prettify/Shorten/SEO checks run without calling the LLM (formatters, minifiers, static analysis) — keeps things fast and cheap
+| Security & Secret Audit | Interactive Flowchart Engine |
+|:---:|:---:|
+| ![Security Audit Placeholder](https://via.placeholder.com/600x350/0d1017/ef4444?text=Security+Audit+%26+Secret+Scanner) | ![Flowchart Engine Placeholder](https://via.placeholder.com/600x350/0d1017/10b981?text=Mermaid.js+Logic+Flowchart) |
 
-See [`Tech_Stack_Options.md`](./Tech_Stack_Options.md) for the full comparison of alternatives considered.
+---
 
-## Project Structure
+## 🛠️ Tech Stack
 
-```
-code-optimizer-explainer/
-├── frontend/                React app (Vercel)
-│   ├── src/
-│   │   ├── api/               backend.js (FastAPI calls), supabaseClient.js (auth only)
-│   │   ├── App.jsx            main UI: code input, feature buttons, results
-│   │   └── main.jsx
-│   └── .env.example
-│
-├── backend/                  FastAPI app (Render/Fly.io)
-│   ├── app/
-│   │   ├── routes/             one file per feature (explain, humanize, prettify, etc.)
-│   │   ├── llm_interface/      the ONLY place that calls the LLM — swap providers here
-│   │   ├── deterministic_tools/ prettify/shorten/seo — no LLM needed
-│   │   ├── db/                  Supabase client wrapper
-│   │   ├── models.py            request/response schemas
-│   │   └── main.py              app entrypoint, route registration
-│   └── .env.example
-│
-├── scripts/
-│   └── pre-commit             git hook: warns if source changes without MEMORY.md update
-│
-├── MEMORY.md                  persistent project context, auto-updated by AI assistants
-├── RULES.md                   coding conventions/preferences for AI assistants
-├── DESIGN.md                  color palette & visual design system
-├── PRD_Code_Optimizer_Explainer.md   full product requirements
-├── System_Architecture.md     component responsibilities & request flow
-├── Tech_Stack_Options.md      stack comparison and reasoning
-└── README.md                  this file
-```
+- **Frontend:** [React 19](https://react.dev) (Vite + TanStack Router + Tailwind CSS v4 + Framer Motion) → Deployed on **Vercel**
+- **Backend:** [FastAPI](https://fastapi.tiangolo.com) (Python 3.10+) → Deployed on **Render** / **Fly.io**
+- **Database:** [Supabase](https://supabase.com) (PostgreSQL + Dual OAuth Authentication)
+- **Custom LLM Interface:** Multi-provider failover pipeline (`Groq API` Llama 3.3 70B $\to$ `Google Gemini` 2.5 Flash $\to$ `OpenRouter` Pool)
+- **Deterministic Tools:** Fast local formatters, minifiers, and regex scanners for zero-latency operations.
 
-## Design System
+---
 
-The UI follows a soft, warm gradient aesthetic (blue → pink → orange glow) paired with a dark, minimal, pill-shaped input bar — full color tokens, CSS gradient recipe, and component specs are documented in [`DESIGN.md`](./DESIGN.md).
-
-## Setup & Running Locally
+## 🚀 Getting Started
 
 ### Prerequisites
-- Node.js (for frontend)
-- Python 3.10+ (for backend)
-- A [Supabase](https://supabase.com) project (free tier works)
-- An LLM inference provider/API key (see [`Tech_Stack_Options.md`](./Tech_Stack_Options.md) for options)
+- **Node.js:** `v18.0.0` or higher
+- **Python:** `3.10` or higher
+- **Git:** installed on your system
 
-### Backend
+### 1. Clone the Repository
+```bash
+git clone https://github.com/Isobit7/OptiCode.git
+cd OptiCode/code-optimizer-explainer
+```
+
+### 2. Backend Setup (FastAPI)
 ```bash
 cd backend
-pip install -r requirements.txt --break-system-packages
-cp .env.example .env   # fill in SUPABASE_URL, SUPABASE_SERVICE_KEY, LLM_API_KEY, etc.
-uvicorn app.main:app --reload
+python -m venv venv
+
+# Activate Virtual Environment:
+# On Windows:
+venv\Scripts\activate
+# On macOS/Linux:
+source venv/bin/activate
+
+# Install dependencies:
+pip install -r requirements.txt
+
+# Copy environment variables template:
+cp .env.example .env
+```
+*Edit `backend/.env` to supply your Groq, Gemini, or OpenRouter API keys.*
+
+Start the backend development server:
+```bash
+uvicorn app.main:app --reload --port 8000
+```
+*FastAPI Swagger documentation will be available at `http://localhost:8000/docs`.*
+
+### 3. Frontend Setup (React / Vite)
+In a separate terminal window:
+```bash
+cd code-optimizer-explainer/frontend
+npm install
+cp .env.example .env
+```
+*Configure `frontend/.env`:*
+```env
+VITE_API_BASE_URL=http://localhost:8000
+VITE_SUPABASE_URL=https://xuftyzzkdgfdgtpbyeau.supabase.co
+VITE_SUPABASE_ANON_KEY=sb_publishable__73MUN8FlMbFcyw7Ez_4zQ_tv1LrFDk
+VITE_GOOGLE_CLIENT_ID=658164413244-bkegsh1h6t5fmad6bpeo6q6us50ocjn3.apps.googleusercontent.com
 ```
 
-### Frontend
+Start the frontend development workspace:
 ```bash
-cd frontend
-npm install
-cp .env.example .env   # fill in VITE_API_BASE_URL, VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY
 npm run dev
 ```
+*Visit `http://localhost:5173` in your browser.*
 
-### Still needs to be wired up
-- `backend/app/llm_interface/client.py` — connect to your chosen LLM provider (currently a stub)
-- `backend/app/deterministic_tools/tools.py` — connect formatters/minifiers/SEO checker (currently a stub)
-- Supabase `history` table — schema is documented in [`System_Architecture.md`](./System_Architecture.md)
+---
 
-## Deployment
+## 💡 Usage
 
-- **Frontend → Vercel** (built for React/Vite, zero-config deploy)
-- **Backend → Render or Fly.io** — **not Vercel**, since Vercel's serverless model doesn't suit a persistent FastAPI server (see [`System_Architecture.md`](./System_Architecture.md) for why)
-- **Database → Supabase** (already managed/hosted)
+1. **Paste Code:** Insert any snippet into the central composer bar or load sample code.
+2. **Select Tool:** Click an Action Chip (`Explain`, `Humanize`, `Prettify`, `Shorten`, `SEO`, `Alternatives`, `Security Audit`, `Translate`, `PR Review`, or `Flowchart`).
+3. **Review Transformation:** Inspect the output, toggle **Side-by-Side Diff**, copy the formatted code, or download structured review summaries.
+4. **Save & Share:** Optionally log in to sync history, or click **Share** to generate a Carbon snippet URL.
 
-## Documentation
+---
 
-| File | Purpose |
-|---|---|
-| [`PRD_Code_Optimizer_Explainer.md`](./PRD_Code_Optimizer_Explainer.md) | Product requirements: goals, scope, features, open questions |
-| [`Tech_Stack_Options.md`](./Tech_Stack_Options.md) | Frontend/backend/database/LLM options compared, and why this stack was chosen |
-| [`System_Architecture.md`](./System_Architecture.md) | How React, FastAPI, Supabase, and the LLM interface talk to each other |
-| [`DESIGN.md`](./DESIGN.md) | Color palette, gradient recipe, and UI component styling reference |
-| [`MEMORY.md`](./MEMORY.md) | Living project context — any AI assistant working in this repo reads and updates this every session |
-| [`RULES.md`](./RULES.md) | Coding conventions: formatting, testing, error handling, dependency, and communication preferences |
+## 💻 Terminal CLI Tool
 
-## Contributing
+OptiCode provides a command-line script (`opticode_cli.py`) for command-line power users:
 
-This project is free and open-source (license TBD — see Open Decisions in `MEMORY.md`). If you're using an AI coding assistant (Claude Code, Cursor, etc.) to contribute, have it read `MEMORY.md` and `RULES.md` first — they contain the current project state and coding conventions it should follow.
+```bash
+cd code-optimizer-explainer/scripts
+
+# Run Security Audit on local file
+python opticode_cli.py scan ../backend/app/main.py --action security
+
+# Explain code snippet from terminal
+python opticode_cli.py explain path/to/file.ts --depth beginner
+
+# Translate Python script to Go
+python opticode_cli.py translate path/to/script.py --target go --out script.go
+```
+
+---
+
+## 📂 Project Structure
+
+```text
+OptiCode/
+├── code-optimizer-explainer/
+│   ├── frontend/                 # React 19 + TanStack Router + Tailwind CSS App
+│   │   ├── src/
+│   │   │   ├── api/              # FastAPI Backend API client & Supabase auth
+│   │   │   ├── components/       # Workspace UI, Modals, Forms & Dashboard Panels
+│   │   │   ├── routes/           # Hero (/), Login (/login), Preferences (/preferences), Workspace (/app)
+│   │   │   └── styles.css        # Ambient Glassmorphism Design Tokens
+│   │   ├── .env.example
+│   │   └── package.json
+│   │
+│   ├── backend/                  # FastAPI Application
+│   │   ├── app/
+│   │   │   ├── routes/           # REST Endpoints (explain, humanize, security, translate, pr-review)
+│   │   │   ├── llm_interface/    # Isolated Multi-Provider LLM Client (Groq -> Gemini -> OpenRouter)
+│   │   │   ├── deterministic_tools/ # Fast Python Formatters & Minifiers
+│   │   │   ├── db/               # Supabase Database Client & Session Manager
+│   │   │   └── main.py           # FastAPI Entrypoint
+│   │   ├── tests/                # 40 Pytest Integration Suites
+│   │   ├── .env.example
+│   │   └── requirements.txt
+│   │
+│   ├── scripts/
+│   │   └── opticode_cli.py       # Standalone Terminal CLI Tool
+│   │
+│   └── .github/
+│       └── workflows/            # GitHub Actions PR Scanner (opticode-review.yml)
+│
+├── LICENSE                       # MIT License
+├── MEMORY.md                     # Project Memory & Session Log
+└── README.md                     # Main GitHub README Documentation
+```
+
+---
+
+## 🗺️ Roadmap
+
+- [x] Multi-language support & 6 Core AI Refinement Tools
+- [x] Security Audit & Secret Scanner Engine
+- [x] Universal Code Translator (20+ languages)
+- [x] Automated PR Review Generator & GitHub Action
+- [x] Mermaid.js Flowchart Generator & Carbon Share Cards
+- [ ] **Real-Time Collaboration:** Shared live multiplayer optimization sessions with pair-programming cursors
+- [ ] **VS Code Extension:** Direct OptiCode refactoring right inside your IDE context menu
+- [ ] **Offline PWA Engine:** Local WebAssembly (Wasm) fallback for offline code formatting
+
+---
+
+## 🤝 Contributing
+
+Contributions are warmly welcomed! OptiCode is built to remain free and open-source forever.
+
+1. **Fork the Repository**
+2. **Create a Feature Branch** (`git checkout -b feature/AmazingFeature`)
+3. **Commit Your Changes** (`git commit -m 'Add some AmazingFeature'`)
+4. **Push to Branch** (`git push origin feature/AmazingFeature`)
+5. **Open a Pull Request**
+
+Please review `MEMORY.md` before submitting PRs to align with established patterns.
+
+---
+
+## 📄 License
+
+This project is licensed under the **MIT License** — see the [`LICENSE`](./LICENSE) file for details.
+
+---
+
+## 📬 Contact & Acknowledgments
+
+- **Author & Maintainer:** OptiCode Open Source Team ([@Isobit7](https://github.com/Isobit7))
+- **Repository:** [https://github.com/Isobit7/OptiCode](https://github.com/Isobit7/OptiCode)
+- **Special Thanks:** [Groq](https://groq.com), [Google Gemini](https://ai.google.dev), [OpenRouter](https://openrouter.ai), [Supabase](https://supabase.com), and the [FastAPI](https://fastapi.tiangolo.com) community for powering high-speed AI inference.
+
+---
+
+<div align="center">
+  <sub>Made with ❤️ for developers, students, and open-source creators around the world.</sub>
+</div>

@@ -92,10 +92,10 @@ export function VoiceInputButton({ onSpeechResult }: Props) {
       type="button"
       onClick={toggleListening}
       title={listening ? "Listening... Speak now!" : "Voice Dictation / Speech Input"}
-      className={`relative inline-flex items-center justify-center rounded-full p-2 transition-all duration-300 cursor-pointer ${
+      className={`rounded-md p-1.5 transition-colors cursor-pointer min-h-[28px] min-w-[28px] flex items-center justify-center ${
         listening
           ? "bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 text-white shadow-[0_0_20px_rgba(236,72,153,0.8)] scale-110 animate-pulse"
-          : "hover:bg-[#1C1C22]/5 dark:hover:bg-white/10 text-[#6B6B75] dark:text-zinc-400 hover:text-[#1C1C22] dark:hover:text-white hover:scale-110 active:scale-95"
+          : "bg-[var(--bg-surface-alt)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
       }`}
     >
       {listening ? (

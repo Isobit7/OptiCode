@@ -9,7 +9,7 @@ import {
   ChevronRight,
   PanelRightClose,
   PanelRightOpen,
-  Zap,
+  Cpu,
 } from "lucide-react";
 import { TranslateBarControl } from "../input/TranslateBarControl";
 
@@ -75,10 +75,10 @@ export function RightDashboardPanel({
       <div className="hidden lg:flex flex-col items-center py-4 px-2 border-l border-[var(--border-subtle)] bg-[var(--bg-surface)] w-14 shrink-0 transition-all">
         <button
           onClick={() => setCollapsed(false)}
-          className="rounded-lg p-2 text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 transition"
-          title="Expand Right Dashboard"
+          className="rounded-lg p-2 text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-alt)] transition cursor-pointer"
+          title="Expand Code Intelligence Panel"
         >
-          <PanelRightOpen className="h-5 w-5 text-orange-400" />
+          <PanelRightOpen className="h-5 w-5 text-[var(--accent)]" />
         </button>
         <div className="mt-6 flex flex-col gap-3">
           {POWER_TOOLS.map(({ id, icon: Icon, label }) => (
@@ -87,10 +87,10 @@ export function RightDashboardPanel({
               onClick={() => onSelectAction(id)}
               disabled={loading}
               title={label}
-              className={`rounded-xl p-2.5 transition ${
+              className={`rounded-xl p-2.5 transition cursor-pointer ${
                 activeAction === id
-                  ? "bg-orange-500 text-white"
-                  : "text-orange-400 hover:bg-orange-500/20"
+                  ? "bg-[var(--accent)] text-white"
+                  : "text-[var(--accent)] bg-[var(--accent-muted)] hover:bg-[var(--accent)]/20"
               }`}
             >
               <Icon className="h-4 w-4" />
@@ -103,39 +103,36 @@ export function RightDashboardPanel({
 
   return (
     <aside className="hidden lg:flex flex-col h-full w-80 shrink-0 border-l border-[var(--border-subtle)] bg-[var(--bg-surface)] p-4 overflow-y-auto no-scrollbar transition-all">
-      {/* Dashboard Header */}
+      {/* Panel Header */}
       <div className="flex items-center justify-between border-b border-[var(--border-subtle)] pb-3">
-        <div className="flex items-center gap-2">
-          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-orange-500/10 text-orange-400 font-bold">
-            <Zap className="h-4 w-4" />
+        <div className="flex items-center gap-2.5">
+          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[var(--accent-muted)] text-[var(--accent)] font-semibold">
+            <Cpu className="h-4 w-4" />
           </div>
           <div>
             <h2 className="text-xs font-bold uppercase tracking-wider text-[var(--text-primary)]">
-              AI Tools Dashboard
+              Code Intelligence
             </h2>
             <p className="text-[10px] text-[var(--text-muted)]">
-              {codeLength > 0 ? `${codeLength} characters loaded` : "Select an action to execute"}
+              {codeLength > 0 ? `${codeLength} characters loaded` : "Security, Translation & Analysis"}
             </p>
           </div>
         </div>
         <button
           onClick={() => setCollapsed(true)}
-          className="rounded-lg p-1.5 text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 transition"
-          title="Collapse Dashboard"
+          className="rounded-lg p-1.5 text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-alt)] transition cursor-pointer"
+          title="Collapse Panel"
         >
           <PanelRightClose className="h-4 w-4" />
         </button>
       </div>
 
-      {/* Section 1: Power Tools */}
+      {/* Section 1: Analysis Modules */}
       <div className="mt-4 space-y-2">
         <div className="flex items-center justify-between">
-          <span className="text-[10px] font-extrabold uppercase tracking-widest text-orange-400 flex items-center gap-1.5">
-            <span className="inline-block h-2 w-2 rounded-full bg-orange-500 animate-pulse" />
-            Power Tools
-          </span>
-          <span className="text-[10px] font-bold text-orange-400/70 bg-orange-500/10 px-2 py-0.5 rounded-full border border-orange-500/20">
-            PRO SUITE
+          <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)] flex items-center gap-1.5">
+            <span className="inline-block h-1.5 w-1.5 rounded-full bg-[var(--accent)]" />
+            Analysis Modules
           </span>
         </div>
 
@@ -150,30 +147,30 @@ export function RightDashboardPanel({
                   disabled={loading}
                   className={`group flex w-full items-center justify-between rounded-xl border p-3 text-left transition-all duration-150 cursor-pointer ${
                     isActive
-                      ? "border-orange-500 bg-orange-500/15 shadow-md shadow-orange-500/10"
-                      : "border-orange-500/20 bg-orange-500/5 hover:border-orange-500/50 hover:bg-orange-500/10"
+                      ? "border-[var(--accent)] bg-[var(--accent-muted)] shadow-md shadow-[var(--accent)]/10"
+                      : "border-[var(--border-subtle)] bg-[var(--bg-surface-alt)] hover:border-[var(--accent)]/40 hover:bg-[var(--bg-surface)]"
                   }`}
                 >
                   <div className="flex items-center gap-3 min-w-0">
                     <div
                       className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition ${
-                        isActive ? "bg-orange-500 text-white" : "bg-orange-500/20 text-orange-400 group-hover:scale-105"
+                        isActive ? "bg-[var(--accent)] text-white" : "bg-[var(--accent-muted)] text-[var(--accent)] group-hover:scale-105"
                       }`}
                     >
                       <Icon className="h-4 w-4" />
                     </div>
                     <div className="min-w-0">
                       <div className="flex items-center gap-1.5">
-                        <span className="text-xs font-bold text-zinc-100 group-hover:text-orange-400 transition">
+                        <span className="text-xs font-bold text-[var(--text-primary)] group-hover:text-[var(--accent)] transition">
                           {label}
                         </span>
                       </div>
-                      <p className="text-[10px] text-zinc-400 truncate">{description}</p>
+                      <p className="text-[10px] text-[var(--text-muted)] truncate">{description}</p>
                     </div>
                   </div>
                   <ChevronRight
                     className={`h-4 w-4 shrink-0 transition ${
-                      isActive ? "text-orange-400 translate-x-0.5" : "text-zinc-600 group-hover:text-zinc-400"
+                      isActive ? "text-[var(--accent)] translate-x-0.5" : "text-[var(--text-muted)] group-hover:text-[var(--text-primary)]"
                     }`}
                   />
                 </button>

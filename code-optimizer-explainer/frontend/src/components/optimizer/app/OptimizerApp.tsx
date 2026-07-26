@@ -1,19 +1,19 @@
-import { useCallback, useEffect, useState, useRef } from "react";
+import { useCallback, useEffect, useState, useRef, lazy, Suspense } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { CodeInputBar } from "../input/CodeInputBar";
 import { Thread } from "./Thread";
 import { ActionPills } from "../input/ActionPills";
 import { type ChatMessage } from "../results/ResultsPanel";
 import { SidebarHistory, type HistoryItem } from "../sidebar/SidebarHistory";
-import { AnalyticsModal } from "../modals/AnalyticsModal";
-import { KeyboardShortcutsModal } from "../modals/KeyboardShortcutsModal";
 import { PreferencesDropdown, type ExplainDepth, type HumanizeMode } from "../modals/PreferencesDropdown";
 import { useSettings } from "@/hooks/useSettings";
 import { runAction, fetchCurrentUser, logoutUser, fetchHistory, saveHistoryEntry, type ActionId, type ActionResult } from "@/api/backend";
-import { Sparkles, UserRound, ShieldCheck, Terminal, LogOut, ArrowDown } from "lucide-react";
-
-import { TranslateModal } from "../modals/TranslateModal";
+import { Sparkles, UserRound, ShieldCheck, Terminal, LogOut, ArrowDown, ArrowRight } from "lucide-react";
 import { RightDashboardPanel } from "../sidebar/RightDashboardPanel";
+
+const AnalyticsModal = lazy(() => import("../modals/AnalyticsModal").then(m => ({ default: m.AnalyticsModal })));
+const KeyboardShortcutsModal = lazy(() => import("../modals/KeyboardShortcutsModal").then(m => ({ default: m.KeyboardShortcutsModal })));
+const TranslateModal = lazy(() => import("../modals/TranslateModal").then(m => ({ default: m.TranslateModal })));
 
 const LOCAL_STORAGE_KEY = "code_companion_history";
 const ONBOARDING_KEY = "opticode_user_onboarding_prefs";
@@ -297,9 +297,9 @@ export function OptimizerApp() {
   };
 
   const run = useCallback(
-    async (action: ActionId) => {
-      if (!code.trim() || loading) return;
-      const inputSnippet = code;
+    async (action: ActionId, codeOverride?: string, targetLangOverride?: string) => {
+      const inputSnippet = (codeOverride ?? code).trim();
+      if (!inputSnippet || loading) return;
       const msgId = `msg_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
       
       // Clear code input field immediately for next input
@@ -325,7 +325,7 @@ export function OptimizerApp() {
           action,
           code: inputSnippet,
           language,
-          options: { explainDepth, humanizeMode, targetLanguage: targetLang },
+          options: { explainDepth, humanizeMode, targetLanguage: targetLangOverride ?? targetLang },
         });
         setResult(res);
 
@@ -368,15 +368,16 @@ export function OptimizerApp() {
         scrollToBottom();
       }
     },
-    [code, language, loading, explainDepth, humanizeMode, actionMutation],
+    [code, language, loading, explainDepth, humanizeMode, targetLang, actionMutation],
   );
 
   const handleSelectAction = (id: ActionId) => {
     setActiveAction(id);
+    const targetCode = code.trim() || submittedCode.trim() || (messages.length > 0 ? messages[messages.length - 1].original : "");
     if (id === "translate") {
       setIsTranslateOpen(true);
-    } else if (code.trim()) {
-      run(id);
+    } else if (targetCode) {
+      run(id, targetCode);
     }
   };
 
@@ -487,12 +488,15 @@ export function OptimizerApp() {
         <div className="flex-1 flex flex-col min-h-0 overflow-hidden relative">
           {messages.length === 0 ? (
             /* Empty State / Greeting View */
-            <div className="flex-1 flex flex-col items-center justify-center px-4 sm:px-6 py-6 max-w-[760px] mx-auto w-full overflow-y-auto no-scrollbar">
-              <section className="text-center mb-8 space-y-3">
+            <div className="flex-1 flex flex-col items-center justify-center px-4 sm:px-6 py-6 max-w-[760px] mx-auto w-full overflow-y-auto no-scrollbar space-y-6">
+              <section className="text-center space-y-3">
                 <h1 className="font-headings text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-[var(--text-primary)] leading-tight">
-                  Paste your code — let's clean it up
+                  Transform Any Code <br className="hidden sm:inline" />
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-[var(--accent)] via-amber-500 to-orange-600">
+                    Line-by-Line with Zero Setup
+                  </span>
                 </h1>
-                <p className="text-sm sm:text-base text-[var(--text-secondary)] max-w-xl mx-auto font-normal">
+                <p className="text-sm sm:text-base text-[var(--text-muted)] max-w-xl mx-auto leading-relaxed">
                   Transform, explain, prettify, or optimize any snippet instantly with AI.
                 </p>
               </section>
@@ -561,25 +565,28 @@ export function OptimizerApp() {
         codeLength={code.length}
       />
 
-      <AnalyticsModal
-        isOpen={isAnalyticsOpen}
-        onClose={() => setIsAnalyticsOpen(false)}
-        history={Array.isArray(history) ? history : []}
-      />
+      <Suspense fallback={null}>
+        <AnalyticsModal
+          isOpen={isAnalyticsOpen}
+          onClose={() => setIsAnalyticsOpen(false)}
+          history={Array.isArray(history) ? history : []}
+        />
 
-      <KeyboardShortcutsModal
-        isOpen={isShortcutsOpen}
-        onClose={() => setIsShortcutsOpen(false)}
-      />
+        <KeyboardShortcutsModal
+          isOpen={isShortcutsOpen}
+          onClose={() => setIsShortcutsOpen(false)}
+        />
 
-      <TranslateModal
-        isOpen={isTranslateOpen}
-        onClose={() => setIsTranslateOpen(false)}
-        onSelectTarget={(targetLanguage) => {
-          setTargetLang(targetLanguage);
-          if (code.trim()) run("translate");
-        }}
-      />
+        <TranslateModal
+          isOpen={isTranslateOpen}
+          onClose={() => setIsTranslateOpen(false)}
+          onSelectTarget={(targetLanguage) => {
+            setTargetLang(targetLanguage);
+            const targetCode = code.trim() || submittedCode.trim() || (messages.length > 0 ? messages[messages.length - 1].original : "");
+            if (targetCode) run("translate", targetCode, targetLanguage);
+          }}
+        />
+      </Suspense>
     </div>
   );
 }

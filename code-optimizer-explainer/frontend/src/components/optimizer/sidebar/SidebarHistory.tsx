@@ -271,11 +271,17 @@ export function SidebarHistory({
       <div className="flex items-center justify-between p-2.5 border-b border-[var(--border-subtle)] bg-[var(--bg-surface)]">
         {!collapsed ? (
           <div className="flex items-center">
-            <img
-              src="/logo.png"
-              alt="OptiCode Logo"
-              className="h-7 w-7 rounded-md object-cover shadow-xs border border-[var(--border-subtle)]"
-            />
+            <picture>
+              <source srcSet="/logo.webp" type="image/webp" />
+              <img
+                src="/logo.png"
+                alt="OptiCode Logo"
+                width={28}
+                height={28}
+                decoding="async"
+                className="h-7 w-7 rounded-md object-cover shadow-xs border border-[var(--border-subtle)]"
+              />
+            </picture>
           </div>
         ) : (
           <button
@@ -383,6 +389,7 @@ export function SidebarHistory({
                         key={item.id}
                         onClick={() => onSelectHistory(item)}
                         className={[
+                          "sidebar-history-item",
                           "group relative flex items-center justify-between gap-2 py-1.5 px-2.5 rounded-lg border transition-colors duration-150 cursor-pointer text-left shadow-2xs",
                           isSelected
                             ? "bg-[var(--accent-muted)] text-[var(--accent)] border-[var(--accent)] font-bold shadow-xs"

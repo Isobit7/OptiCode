@@ -1,7 +1,9 @@
-import { useState, useEffect, type ReactNode } from "react";
+import { useState, useEffect, memo, type ReactNode } from "react";
 import type { ActionId, ActionResult } from "@/api/backend";
 import { Copy, Check, Sparkles, AlertCircle, ChevronDown, ChevronUp, RefreshCw } from "lucide-react";
 import { SimpleDiffView } from "../results/DiffLine";
+import { FlowchartViewer } from "../results/FlowchartViewer";
+import { SecurityScorecard } from "../results/SecurityScorecard";
 import { toast } from "sonner";
 
 export interface TurnMessage {
@@ -244,7 +246,7 @@ function RotatingLoadingText() {
   return <span>{DEV_LOADING_MESSAGES[msgIdx]}</span>;
 }
 
-export function TurnCard({ message, onRetry }: Props) {
+function TurnCardBase({ message, onRetry }: Props) {
   const [codeExpanded, setCodeExpanded] = useState(false);
   const [diffViewMode, setDiffViewMode] = useState<"unified" | "split">("unified");
   const codeLines = message.original ? message.original.split("\n") : [];
@@ -344,7 +346,7 @@ export function TurnCard({ message, onRetry }: Props) {
                   </span>
                 )}
                 <span className="text-[10px] font-mono font-bold text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
-                  O(N) Optimized
+                  {message.action === "explain" ? "Line-by-Line Walkthrough" : message.action === "security-audit" ? "Security Audit Scan" : message.action === "translate" ? "Language Port" : "Optimized Code Diff"}
                 </span>
               </div>
 
@@ -398,8 +400,15 @@ export function TurnCard({ message, onRetry }: Props) {
                   </pre>
                 </div>
               </div>
-            ) : message.action === "explain" ? (
+            ) : message.action === "explain" || message.action === "pr-review" || message.action === "diff-story" ? (
               <MarkdownRenderer content={message.result.output || ""} />
+            ) : message.action === "flowchart" ? (
+              <FlowchartViewer
+                mermaidCode={message.result.mermaidCode || message.result.output || ""}
+                nodesCount={message.result.nodesCount}
+              />
+            ) : message.action === "security-audit" && message.result.securityData ? (
+              <SecurityScorecard data={message.result.securityData} />
             ) : message.action === "alternatives" && message.result.alternatives && message.result.alternatives.length > 0 ? (
               <div className="space-y-3">
                 {message.result.alternatives.map((alt, idx) => (
@@ -446,3 +455,12 @@ export function TurnCard({ message, onRetry }: Props) {
     </div>
   );
 }
+
+export const TurnCard = memo(TurnCardBase, (prevProps, nextProps) => {
+  return (
+    prevProps.message.id === nextProps.message.id &&
+    prevProps.message.loading === nextProps.message.loading &&
+    prevProps.message.error === nextProps.message.error &&
+    prevProps.message.result === nextProps.message.result
+  );
+});

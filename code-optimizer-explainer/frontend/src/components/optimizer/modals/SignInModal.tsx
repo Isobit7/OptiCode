@@ -68,16 +68,25 @@ export function SignInModal({ isOpen, onClose, onSuccess }: SignInModalProps) {
         if (supabaseUrl && supabaseKey) {
           try {
             const { supabase } = await import("@/api/supabaseClient");
-            const { error } = await supabase.auth.signInWithOAuth({
+            const { data, error } = await supabase.auth.signInWithOAuth({
               provider: "google",
               options: {
                 redirectTo: `${window.location.origin}/app`,
               },
             });
             if (error) throw error;
+            if (data?.url) {
+              window.location.href = data.url;
+              return;
+            }
             return;
           } catch (err: any) {
-            console.warn("Supabase Google OAuth fallback to backend auth:", err);
+            console.warn("Supabase Google OAuth warning:", err);
+            if (err.message && !err.message.includes("fallback")) {
+              setAuthError(err.message || "Google sign-in failed. Please verify provider settings.");
+              setLoading(false);
+              return;
+            }
           }
         }
         await loginGoogle("google_user@opticode.dev", "Google Developer");

@@ -11,12 +11,12 @@ export interface ActionItem {
 }
 
 export const CORE_ACTIONS: ActionItem[] = [
-  { id: "explain", label: "Explain", icon: BookOpen, description: "Plain-language walkthrough" },
-  { id: "humanize", label: "Humanize", icon: UserRound, description: "Rewrite to feel human-authored" },
-  { id: "prettify", label: "Prettify", icon: Sparkles, description: "Auto-format to standard style" },
-  { id: "shorten", label: "Shorten", icon: Minimize2, description: "Condense / minify" },
-  { id: "seo-optimize", label: "SEO", icon: Search, description: "Improve HTML for SEO" },
-  { id: "alternatives", label: "Alternatives", icon: Shuffle, description: "Different implementations" },
+  { id: "explain", label: "Explain", icon: BookOpen, description: "Line-by-line code explanation with complexity analysis" },
+  { id: "humanize", label: "Humanize", icon: UserRound, description: "Remove AI patterns and convert to idiomatic human code" },
+  { id: "prettify", label: "Prettify", icon: Sparkles, description: "Format and align code to standard style guidelines" },
+  { id: "shorten", label: "Shorten", icon: Minimize2, description: "Condense and minify code without altering logic" },
+  { id: "seo-optimize", label: "SEO", icon: Search, description: "Optimize HTML metadata and structure for search engines" },
+  { id: "alternatives", label: "Alternatives", icon: Shuffle, description: "Generate 2-3 alternate implementations with trade-offs" },
 ];
 
 export const ACTIONS: ActionItem[] = [...CORE_ACTIONS];
@@ -63,13 +63,13 @@ export function ActionPills({
                 compact ? "px-2.5 py-1 text-[11px]" : "px-3 py-1.5 text-xs",
                 "disabled:cursor-not-allowed disabled:opacity-40",
                 isActive
-                  ? "bg-[var(--accent-muted)] text-[var(--accent)] font-semibold shadow-xs"
-                  : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface)]",
+                  ? "bg-[var(--accent)] text-white font-bold shadow-sm shadow-[var(--accent)]/20 scale-[1.02]"
+                  : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface)] hover:-translate-y-0.5",
               ].join(" ")}
             >
               <Icon
                 className={`h-3.5 w-3.5 ${
-                  isActive ? "text-[var(--accent)]" : "text-[var(--text-muted)] group-hover:text-[var(--text-secondary)]"
+                  isActive ? "text-white" : "text-[var(--text-muted)] group-hover:text-[var(--accent)]"
                 }`}
                 strokeWidth={2}
                 aria-hidden="true"
