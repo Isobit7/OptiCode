@@ -12,10 +12,6 @@ export default defineConfig({
     // nitro/vite builds from this
     server: { entry: "server" },
   },
-  nitro: {
-    // Target Vercel serverless output so deployment works correctly on Vercel
-    preset: "vercel",
-  },
   vite: {
     server: { allowedHosts: [".e2b.app"] },
   },

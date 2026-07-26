@@ -1,5 +1,7 @@
 {
   "version": 2,
+  "buildCommand": "NITRO_PRESET=vercel npm run build",
+  "installCommand": "npm install",
   "headers": [
     {
       "source": "/assets/(.*)",
