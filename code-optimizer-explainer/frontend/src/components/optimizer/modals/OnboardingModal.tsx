@@ -15,9 +15,9 @@ import {
   Code,
   User,
   Zap,
-  LogIn,
 } from "lucide-react";
 import type { ExplainDepth, HumanizeMode } from "./PreferencesDropdown";
+import { StarsBackground } from "@/components/ui/stars";
 import type { ActionId } from "@/api/backend";
 
 export interface OnboardingPreferences {
@@ -34,16 +34,14 @@ interface OnboardingModalProps {
   isOpen: boolean;
   onClose: () => void;
   onComplete: (prefs: OnboardingPreferences) => void;
-  onOpenLogin: () => void;
 }
 
-const TOTAL_STEPS = 6;
+const TOTAL_STEPS = 5;
 
 export function OnboardingModal({
   isOpen,
   onClose,
   onComplete,
-  onOpenLogin,
 }: OnboardingModalProps) {
   const [step, setStep] = useState(1);
 
@@ -59,7 +57,7 @@ export function OnboardingModal({
     "Add natural, human-style comments",
   ]);
   const [explainDepth, setExplainDepth] = useState<ExplainDepth>("intermediate");
-  const [saveHistoryChoice, setSaveHistoryChoice] = useState(false);
+
 
   const toggleLanguage = (lang: string) => {
     setSelectedLanguages((prev) =>
@@ -73,20 +71,17 @@ export function OnboardingModal({
     );
   };
 
-  const handleFinish = (wantsLogin = saveHistoryChoice) => {
+  const handleFinish = () => {
     const prefs: OnboardingPreferences = {
       userRole,
       primaryGoal,
       languages: selectedLanguages,
       humanizerTypes,
       explainDepth,
-      saveHistory: wantsLogin,
+      saveHistory: false,
       completedAt: new Date().toISOString(),
     };
     onComplete(prefs);
-    if (wantsLogin) {
-      onOpenLogin();
-    }
   };
 
   const nextStep = () => {
@@ -100,7 +95,7 @@ export function OnboardingModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-[560px] bg-[#0d0d0f] text-zinc-100 border border-zinc-800 shadow-2xl p-0 overflow-hidden rounded-2xl">
+      <DialogContent className="sm:max-w-[560px] bg-zinc-950 text-zinc-100 border border-zinc-800 shadow-2xl p-0 overflow-hidden rounded-2xl">
         {/* Header Banner & Stepper Progress */}
         <div className="bg-gradient-to-r from-orange-500/10 via-amber-500/10 to-transparent p-6 pb-4 border-b border-zinc-800/80 relative">
           <div className="flex items-center gap-2 text-orange-400 text-xs font-bold uppercase tracking-wider mb-2 pr-8">
@@ -117,9 +112,8 @@ export function OnboardingModal({
             {step === 3 && "Which programming language(s) do you mainly work with?"}
             {step === 4 && "What type of humanizing do you need?"}
             {step === 5 && "How much detail do you want in explanations?"}
-            {step === 6 && "Would you like to save your history?"}
           </DialogTitle>
-          
+
           <DialogDescription className="text-xs text-zinc-400 mt-1">
             Personalizing your workspace takes less than 20 seconds.
           </DialogDescription>
@@ -151,11 +145,10 @@ export function OnboardingModal({
                     setUserRole(label);
                     nextStep();
                   }}
-                  className={`flex flex-col text-left p-3.5 rounded-xl border transition cursor-pointer ${
-                    userRole === label
-                      ? "border-orange-500 bg-orange-500/10 text-white shadow-sm"
-                      : "border-zinc-800/90 bg-[#141417] text-zinc-300 hover:border-zinc-700 hover:bg-[#1a1a1f]"
-                  }`}
+                  className={`flex flex-col text-left p-3.5 rounded-xl border transition cursor-pointer ${userRole === label
+                    ? "border-orange-500 bg-orange-500/10 text-white shadow-sm"
+                    : "border-zinc-800 bg-zinc-900/90 text-zinc-300 hover:border-zinc-700 hover:bg-zinc-900"
+                    }`}
                 >
                   <div className="flex items-center justify-between w-full mb-1">
                     <Icon className="h-4 w-4 text-orange-400" />
@@ -186,11 +179,10 @@ export function OnboardingModal({
                     setPrimaryGoal(id);
                     nextStep();
                   }}
-                  className={`flex items-center justify-between p-3 rounded-xl border text-left transition cursor-pointer ${
-                    primaryGoal === id
-                      ? "border-orange-500 bg-orange-500/10 text-white"
-                      : "border-zinc-800/90 bg-[#141417] text-zinc-300 hover:border-zinc-700 hover:bg-[#1a1a1f]"
-                  }`}
+                  className={`flex items-center justify-between p-3 rounded-xl border text-left transition cursor-pointer ${primaryGoal === id
+                    ? "border-orange-500 bg-orange-500/10 text-white"
+                    : "border-zinc-800 bg-zinc-900/90 text-zinc-300 hover:border-zinc-700 hover:bg-zinc-900"
+                    }`}
                 >
                   <div>
                     <div className="text-xs font-bold text-white">{label}</div>
@@ -221,17 +213,15 @@ export function OnboardingModal({
                       key={lang}
                       type="button"
                       onClick={() => toggleLanguage(lang)}
-                      className={`flex items-center justify-between p-3 rounded-xl border text-left text-xs font-semibold transition cursor-pointer ${
-                        isChecked
-                          ? "border-orange-500 bg-orange-500/10 text-white"
-                          : "border-zinc-800/90 bg-[#141417] text-zinc-300 hover:border-zinc-700 hover:bg-[#1a1a1f]"
-                      }`}
+                      className={`flex items-center justify-between p-3 rounded-xl border text-left text-xs font-semibold transition cursor-pointer ${isChecked
+                        ? "border-orange-500 bg-orange-500/10 text-white"
+                        : "border-zinc-800 bg-zinc-900/90 text-zinc-300 hover:border-zinc-700 hover:bg-zinc-900"
+                        }`}
                     >
                       <span>{lang}</span>
                       <div
-                        className={`h-4 w-4 rounded border flex items-center justify-center transition ${
-                          isChecked ? "border-orange-500 bg-orange-500 text-white" : "border-zinc-700"
-                        }`}
+                        className={`h-4 w-4 rounded border flex items-center justify-center transition ${isChecked ? "border-orange-500 bg-orange-500 text-white" : "border-zinc-700"
+                          }`}
                       >
                         {isChecked && <Check className="h-3 w-3" />}
                       </div>
@@ -260,17 +250,15 @@ export function OnboardingModal({
                     key={ht}
                     type="button"
                     onClick={() => toggleHumanizerType(ht)}
-                    className={`flex items-center justify-between p-2.5 rounded-xl border text-left text-xs font-medium transition cursor-pointer ${
-                      isChecked
-                        ? "border-orange-500 bg-orange-500/10 text-white"
-                        : "border-zinc-800/90 bg-[#141417] text-zinc-300 hover:border-zinc-700 hover:bg-[#1a1a1f]"
-                    }`}
+                    className={`flex items-center justify-between p-2.5 rounded-xl border text-left text-xs font-medium transition cursor-pointer ${isChecked
+                      ? "border-orange-500 bg-orange-500/10 text-white"
+                      : "border-zinc-800 bg-zinc-900/90 text-zinc-300 hover:border-zinc-700 hover:bg-zinc-900"
+                      }`}
                   >
                     <span className="pr-2">{ht}</span>
                     <div
-                      className={`h-4 w-4 shrink-0 rounded border flex items-center justify-center transition ${
-                        isChecked ? "border-orange-500 bg-orange-500 text-white" : "border-zinc-700"
-                      }`}
+                      className={`h-4 w-4 shrink-0 rounded border flex items-center justify-center transition ${isChecked ? "border-orange-500 bg-orange-500 text-white" : "border-zinc-700"
+                        }`}
                     >
                       {isChecked && <Check className="h-3 w-3" />}
                     </div>
@@ -304,11 +292,10 @@ export function OnboardingModal({
                   key={id}
                   type="button"
                   onClick={() => setExplainDepth(id)}
-                  className={`flex items-start justify-between p-3.5 rounded-xl border text-left transition cursor-pointer ${
-                    explainDepth === id
-                      ? "border-orange-500 bg-orange-500/10 text-white"
-                      : "border-zinc-800/90 bg-[#141417] text-zinc-300 hover:border-zinc-700 hover:bg-[#1a1a1f]"
-                  }`}
+                  className={`flex items-start justify-between p-3.5 rounded-xl border text-left transition cursor-pointer ${explainDepth === id
+                    ? "border-orange-500 bg-orange-500/10 text-white"
+                    : "border-zinc-800 bg-zinc-900/90 text-zinc-300 hover:border-zinc-700 hover:bg-zinc-900"
+                    }`}
                 >
                   <div>
                     <div className="text-xs font-bold text-white">{label}</div>
@@ -319,55 +306,10 @@ export function OnboardingModal({
               ))}
             </div>
           )}
-
-          {/* QUESTION 6 */}
-          {step === 6 && (
-            <div className="grid grid-cols-1 gap-3 pt-2">
-              <button
-                type="button"
-                onClick={() => {
-                  setSaveHistoryChoice(true);
-                  handleFinish(true);
-                }}
-                className="flex items-center gap-3 p-4 rounded-xl border border-orange-500/40 bg-gradient-to-r from-orange-500/20 to-amber-500/10 text-left hover:border-orange-500 transition cursor-pointer group"
-              >
-                <div className="h-10 w-10 rounded-lg bg-orange-500 text-white flex items-center justify-center shrink-0">
-                  <LogIn className="h-5 w-5" />
-                </div>
-                <div>
-                  <div className="text-xs font-bold text-white group-hover:text-orange-400 transition">
-                    Yes, let me log in
-                  </div>
-                  <div className="text-[10px] text-zinc-400">
-                    Sync your optimizations & code history across all devices.
-                  </div>
-                </div>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  setSaveHistoryChoice(false);
-                  handleFinish(false);
-                }}
-                className="flex items-center gap-3 p-4 rounded-xl border border-zinc-800/90 bg-[#141417] text-left hover:border-zinc-700 hover:bg-[#1a1a1f] transition cursor-pointer group"
-              >
-                <div className="h-10 w-10 rounded-lg bg-zinc-800 text-zinc-300 flex items-center justify-center shrink-0">
-                  <Zap className="h-5 w-5 text-orange-400" />
-                </div>
-                <div>
-                  <div className="text-xs font-bold text-white">No, just let me use it now</div>
-                  <div className="text-[10px] text-zinc-400">
-                    Jump straight into the workspace (no account needed).
-                  </div>
-                </div>
-              </button>
-            </div>
-          )}
         </div>
 
         {/* Modal Footer Controls */}
-        <div className="flex items-center justify-between p-4 bg-[#0a0a0c] border-t border-zinc-800/80">
+        <div className="flex items-center justify-between p-4 bg-zinc-950 border-t border-zinc-800">
           {step > 1 ? (
             <Button
               type="button"
@@ -384,7 +326,7 @@ export function OnboardingModal({
               type="button"
               variant="ghost"
               size="sm"
-              onClick={() => handleFinish(false)}
+              onClick={() => handleFinish()}
               className="text-xs text-zinc-500 hover:text-zinc-300"
             >
               Skip Setup

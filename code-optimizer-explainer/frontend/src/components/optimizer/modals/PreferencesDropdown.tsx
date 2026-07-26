@@ -3,6 +3,7 @@ import {
   ChevronDown, Check, Sparkles, UserRound, Code, Layers,
   AlignLeft, Copy, Maximize2, ScanText, Type, Shield, Terminal, Key, Cpu, AlertCircle,
 } from "lucide-react";
+import { StarsBackground } from "@/components/ui/stars";
 import type { UserSettings, FontSize, ResponseLength, OutputFormat, MaxLines } from "@/hooks/useSettings";
 
 export type ExplainDepth = "beginner" | "intermediate" | "advanced";
@@ -195,11 +196,11 @@ export function PreferencesDropdown({
             role="dialog"
             aria-modal="true"
             aria-label="Model & Preferences settings"
-            className="absolute left-0 mt-2 w-84 sm:w-96 rounded-2xl bg-[#0d0d0f]/98 text-zinc-100 border border-zinc-800 shadow-2xl backdrop-blur-xl z-50 animate-pop-in overflow-hidden p-0"
+            className="absolute left-0 mt-2 w-84 sm:w-96 rounded-2xl bg-zinc-950 text-zinc-100 border border-zinc-800 shadow-2xl backdrop-blur-xl z-50 animate-pop-in overflow-hidden p-0"
           >
             {/* Segmented Pill Tabs */}
             <div className="p-3 pb-0">
-              <div className="flex items-center gap-1 bg-[#141417] p-1 rounded-xl border border-zinc-800/90">
+              <div className="flex items-center gap-1 bg-zinc-900 p-1 rounded-xl border border-zinc-800">
                 {(["models", "preferences", "ci"] as const).map((tab) => {
                   const isSelected = activeTab === tab;
                   return (

@@ -33,6 +33,8 @@ export function OptimizerApp() {
   const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
   const [isTranslateOpen, setIsTranslateOpen] = useState(false);
   const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
+  // Flow phase for first-time users: login → preferences → workspace
+  const [flowPhase, setFlowPhase] = useState<"login" | "preferences" | "workspace">("workspace");
   const [targetLang, setTargetLang] = useState("TypeScript");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -277,13 +279,17 @@ export function OptimizerApp() {
     try {
       const savedPrefs = localStorage.getItem(ONBOARDING_KEY);
       if (!savedPrefs) {
-        setIsOnboardingOpen(true);
+        // First-time user: start with login phase
+        setFlowPhase("login");
+        setIsSignInOpen(true);
       } else {
         const parsed = JSON.parse(savedPrefs) as OnboardingPreferences;
         applyOnboardingPreferences(parsed);
+        setFlowPhase("workspace");
       }
     } catch {
-      setIsOnboardingOpen(true);
+      setFlowPhase("login");
+      setIsSignInOpen(true);
     }
   }, []);
 
@@ -295,6 +301,27 @@ export function OptimizerApp() {
     }
     applyOnboardingPreferences(prefs);
     setIsOnboardingOpen(false);
+    setFlowPhase("workspace");
+  };
+
+  // Handle login → preferences flow transition
+  const handleLoginFlowClose = () => {
+    setIsSignInOpen(false);
+    if (flowPhase === "login") {
+      // User skipped or completed login → advance to preferences
+      setFlowPhase("preferences");
+      setIsOnboardingOpen(true);
+    }
+  };
+
+  const handleLoginFlowSuccess = () => {
+    checkUserSession();
+    // After successful login → advance to preferences
+    setTimeout(() => {
+      setIsSignInOpen(false);
+      setFlowPhase("preferences");
+      setIsOnboardingOpen(true);
+    }, 800);
   };
 
   const saveHistory = (items: HistoryItem[]) => {
@@ -581,8 +608,8 @@ export function OptimizerApp() {
 
       <SignInModal
         isOpen={isSignInOpen}
-        onClose={() => setIsSignInOpen(false)}
-        onSuccess={checkUserSession}
+        onClose={flowPhase === "login" ? handleLoginFlowClose : () => setIsSignInOpen(false)}
+        onSuccess={flowPhase === "login" ? handleLoginFlowSuccess : checkUserSession}
       />
 
       <AnalyticsModal
@@ -609,7 +636,6 @@ export function OptimizerApp() {
         isOpen={isOnboardingOpen}
         onClose={() => setIsOnboardingOpen(false)}
         onComplete={handleOnboardingComplete}
-        onOpenLogin={() => setIsSignInOpen(true)}
       />
     </div>
   );

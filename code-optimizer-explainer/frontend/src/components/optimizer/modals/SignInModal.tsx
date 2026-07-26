@@ -63,9 +63,26 @@ export function SignInModal({ isOpen, onClose, onSuccess }: SignInModalProps) {
     setLoading(true);
     try {
       if (providerName === "Google") {
-        await loginGoogle(email || undefined, fullName || "Google User");
+        const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+        const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+        if (supabaseUrl && supabaseKey) {
+          try {
+            const { supabase } = await import("@/api/supabaseClient");
+            const { error } = await supabase.auth.signInWithOAuth({
+              provider: "google",
+              options: {
+                redirectTo: `${window.location.origin}/app`,
+              },
+            });
+            if (error) throw error;
+            return;
+          } catch (err: any) {
+            console.warn("Supabase Google OAuth fallback to backend auth:", err);
+          }
+        }
+        await loginGoogle("google_user@opticode.dev", "Google Developer");
       } else {
-        await loginGoogle(email || undefined, fullName || `${providerName} User`);
+        await loginGoogle(`${providerName.toLowerCase()}_user@opticode.dev`, `${providerName} Developer`);
       }
       setAuthSuccess(true);
       if (onSuccess) onSuccess();
