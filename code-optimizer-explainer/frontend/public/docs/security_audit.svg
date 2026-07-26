@@ -23,15 +23,15 @@
 
   <!-- Score Card Top Row -->
   <rect x="20" y="56" width="240" height="90" rx="12" fill="#181e2b" stroke="#ef4444" stroke-opacity="0.5" stroke-width="1.5"/>
-  <text x="36" y="80" fill="#f87171" font-family="system-ui, sans-serif" font-weight="700" font-size="12">🛡️ Vulnerabilities Found</text>
+  <text x="36" y="80" fill="#f87171" font-family="system-ui, sans-serif" font-weight="700" font-size="12">Vulnerabilities Found</text>
   <text x="36" y="125" fill="#ef4444" font-family="system-ui, sans-serif" font-weight="900" font-size="32">2 Critical</text>
 
   <rect x="280" y="56" width="240" height="90" rx="12" fill="#181e2b" stroke="#f59e0b" stroke-opacity="0.5" stroke-width="1.5"/>
-  <text x="296" y="80" fill="#fbbf24" font-family="system-ui, sans-serif" font-weight="700" font-size="12">🔑 Secret Leak Status</text>
+  <text x="296" y="80" fill="#fbbf24" font-family="system-ui, sans-serif" font-weight="700" font-size="12">Secret Leak Status</text>
   <text x="296" y="125" fill="#f59e0b" font-family="system-ui, sans-serif" font-weight="900" font-size="32">API Key Exposed</text>
 
   <rect x="540" y="56" width="240" height="90" rx="12" fill="#181e2b" stroke="#10b981" stroke-opacity="0.5" stroke-width="1.5"/>
-  <text x="556" y="80" fill="#34d399" font-family="system-ui, sans-serif" font-weight="700" font-size="12">✅ Security Rating</text>
+  <text x="556" y="80" fill="#34d399" font-family="system-ui, sans-serif" font-weight="700" font-size="12">Security Rating</text>
   <text x="556" y="125" fill="#10b981" font-family="system-ui, sans-serif" font-weight="900" font-size="32">B+ (Fixable)</text>
 
   <!-- Detailed Audit Items -->

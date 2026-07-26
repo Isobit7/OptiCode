@@ -31,10 +31,10 @@
 
   <!-- Split View Headers -->
   <rect x="20" y="52" width="370" height="34" rx="8" fill="#1b202e" stroke="#2a3349" stroke-width="1"/>
-  <text x="36" y="74" fill="#f87171" font-family="system-ui, sans-serif" font-weight="700" font-size="12">🔴 Original Code (Before)</text>
+  <text x="36" y="74" fill="#f87171" font-family="system-ui, sans-serif" font-weight="700" font-size="12">[BEFORE] Original Code</text>
 
   <rect x="410" y="52" width="370" height="34" rx="8" fill="#1b202e" stroke="#2a3349" stroke-width="1"/>
-  <text x="426" y="74" fill="#34d399" font-family="system-ui, sans-serif" font-weight="700" font-size="12">🟢 Optimized Refactor (After)</text>
+  <text x="426" y="74" fill="#34d399" font-family="system-ui, sans-serif" font-weight="700" font-size="12">[AFTER] Optimized Refactor</text>
 
   <!-- Left Code Container -->
   <rect x="20" y="96" width="370" height="334" rx="10" fill="#121622" stroke="#232a3d" stroke-width="1"/>
@@ -95,7 +95,7 @@
 
   <rect x="412" y="237" width="366" height="30" fill="url(#diffGreen)" stroke="#10b981" stroke-opacity="0.4" stroke-width="1"/>
   <text x="424" y="257" fill="#10b981" font-family="monospace" font-weight="bold" font-size="11">+ 5</text>
-  <text x="450" y="257" fill="#34d399" font-family="Consolas, monospace" font-size="12">return data.map(user => user.name);</text>
+  <text x="450" y="257" fill="#34d399" font-family="Consolas, monospace" font-size="12">return data.map(user =&gt; user.name);</text>
 
   <text x="424" y="290" fill="#475569" font-family="monospace" font-size="11">6</text>
   <text x="450" y="290" fill="#e2e8f0" font-family="Consolas, monospace" font-size="12">}</text>
