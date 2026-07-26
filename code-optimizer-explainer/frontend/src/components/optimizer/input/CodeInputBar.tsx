@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { ArrowUp, Code2, Eraser, ClipboardPaste, Languages, BookOpen, UserRound, Sparkles, Minimize2, Search, Shuffle, Command } from "lucide-react";
+import { ArrowUp, Code2, Eraser, ClipboardPaste, Languages, BookOpen, UserRound, Sparkles, Minimize2, Search, Shuffle, Command, ShieldCheck, GitBranch, FileText } from "lucide-react";
 import type { ActionId } from "@/api/backend";
 import { VoiceInputButton } from "@/components/custom/VoiceInputButton";
 import { ActionPills } from "./ActionPills";
@@ -14,6 +14,8 @@ interface Props {
   activeAction: ActionId | null;
   onSelectAction: (actionId: ActionId) => void;
   fontSize?: 12 | 14 | 16;
+  targetLanguage?: string;
+  onSelectTargetLanguage?: (lang: string) => void;
 }
 
 const LANGS = [
@@ -38,6 +40,11 @@ const LANGS = [
 const SLASH_COMMANDS: Array<{ id: ActionId; label: string; cmd: string; icon: typeof BookOpen; description: string }> = [
   { id: "explain", label: "Explain", cmd: "/explain", icon: BookOpen, description: "Plain-language code walkthrough" },
   { id: "humanize", label: "Humanize", cmd: "/humanize", icon: UserRound, description: "Rewrite code to feel human-authored" },
+  { id: "security-audit", label: "Security", cmd: "/security", icon: ShieldCheck, description: "Scan secret leaks & OWASP security risks" },
+  { id: "translate", label: "Translate", cmd: "/translate", icon: Languages, description: "Port code to target programming language" },
+  { id: "pr-review", label: "PR Review", cmd: "/pr-review", icon: FileText, description: "Generate PR review notes & test suggestions" },
+  { id: "flowchart", label: "Flowchart", cmd: "/flowchart", icon: GitBranch, description: "Generate visual logic flowchart" },
+  { id: "diff-story", label: "Diff Story", cmd: "/diff-story", icon: GitBranch, description: "Generate plain-English 'What changed & why' summary" },
   { id: "prettify", label: "Prettify", cmd: "/prettify", icon: Sparkles, description: "Auto-format to standard language style" },
   { id: "shorten", label: "Shorten", cmd: "/shorten", icon: Minimize2, description: "Condense and minify code" },
   { id: "seo-optimize", label: "SEO Optimize", cmd: "/seo", icon: Search, description: "Improve HTML metadata & structure for SEO" },
@@ -47,6 +54,11 @@ const SLASH_COMMANDS: Array<{ id: ActionId; label: string; cmd: string; icon: ty
 const ACTION_BUTTON_LABELS: Record<ActionId, string> = {
   explain: "EXPLAIN",
   humanize: "HUMANIZE",
+  "security-audit": "AUDIT SECURITY",
+  translate: "TRANSLATE",
+  "pr-review": "GENERATE PR REVIEW",
+  flowchart: "GENERATE FLOWCHART",
+  "diff-story": "DIFF STORY",
   prettify: "PRETTIFY",
   shorten: "SHORTEN",
   "seo-optimize": "SEO OPTIMIZE",
@@ -63,6 +75,8 @@ export function CodeInputBar({
   activeAction,
   onSelectAction,
   fontSize = 14,
+  targetLanguage,
+  onSelectTargetLanguage,
 }: Props) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [showSlashMenu, setShowSlashMenu] = useState(false);
@@ -219,7 +233,14 @@ export function CodeInputBar({
 
         {/* Inline Action Selector Row */}
         <div className="mt-2 pt-2 border-t border-[var(--border-subtle)] flex items-center justify-between gap-2 flex-wrap">
-          <ActionPills active={activeAction} loading={loading} onSelect={onSelectAction} compact />
+          <ActionPills
+            active={activeAction}
+            loading={loading}
+            onSelect={onSelectAction}
+            compact
+            targetLanguage={targetLanguage}
+            onSelectTargetLanguage={onSelectTargetLanguage}
+          />
         </div>
 
         {/* Composer Controls Footer Bar */}

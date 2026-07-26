@@ -24,6 +24,10 @@ import {
   ChevronDown,
   LogOut,
   Keyboard,
+  ShieldCheck,
+  Languages,
+  FileText,
+  GitBranch,
 } from "lucide-react";
 import type { ActionId, ActionResult } from "@/api/backend";
 
@@ -144,6 +148,11 @@ module.exports = { authenticateToken };`,
 const ACTION_ICONS: Record<ActionId, typeof BookOpen> = {
   explain: BookOpen,
   humanize: UserRound,
+  "security-audit": ShieldCheck,
+  translate: Languages,
+  "pr-review": FileText,
+  flowchart: GitBranch,
+  "diff-story": GitBranch,
   prettify: Sparkles,
   shorten: Minimize2,
   "seo-optimize": Search,
@@ -153,6 +162,11 @@ const ACTION_ICONS: Record<ActionId, typeof BookOpen> = {
 const ACTION_LABELS: Record<ActionId, string> = {
   explain: "Explain",
   humanize: "Humanize",
+  "security-audit": "Security",
+  translate: "Translate",
+  "pr-review": "PR Review",
+  flowchart: "Flowchart",
+  "diff-story": "Diff Story",
   prettify: "Prettify",
   shorten: "Shorten",
   "seo-optimize": "SEO",

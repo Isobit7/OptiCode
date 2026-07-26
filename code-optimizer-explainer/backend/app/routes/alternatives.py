@@ -1,7 +1,7 @@
-﻿import asyncio
+import asyncio
 import json
 import logging
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import StreamingResponse
 
 from app.llm_interface import client as llm

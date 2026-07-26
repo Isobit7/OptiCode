@@ -198,6 +198,11 @@ function MarkdownRenderer({ content }: { content: string }) {
 const ACTION_LABELS: Record<ActionId, string> = {
   explain: "Explain",
   humanize: "Humanize",
+  "security-audit": "Security Audit",
+  translate: "Translate",
+  "pr-review": "PR Review",
+  flowchart: "Flowchart",
+  "diff-story": "Diff Storytelling",
   prettify: "Prettify",
   shorten: "Shorten",
   "seo-optimize": "SEO Optimize",
@@ -207,6 +212,11 @@ const ACTION_LABELS: Record<ActionId, string> = {
 const ACTION_BADGE_STYLES: Record<ActionId, string> = {
   explain: "text-indigo-600 dark:text-indigo-400 bg-indigo-500/10 border-indigo-500/20",
   humanize: "text-amber-600 dark:text-amber-400 bg-amber-500/10 border-amber-500/20",
+  "security-audit": "text-rose-600 dark:text-rose-400 bg-rose-500/10 border-rose-500/20",
+  translate: "text-blue-600 dark:text-blue-400 bg-blue-500/10 border-blue-500/20",
+  "pr-review": "text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
+  flowchart: "text-orange-600 dark:text-orange-400 bg-orange-500/10 border-orange-500/20",
+  "diff-story": "text-cyan-600 dark:text-cyan-400 bg-cyan-500/10 border-cyan-500/20",
   prettify: "text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
   shorten: "text-rose-600 dark:text-rose-400 bg-rose-500/10 border-rose-500/20",
   "seo-optimize": "text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border-emerald-500/20",

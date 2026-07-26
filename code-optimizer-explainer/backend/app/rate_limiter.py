@@ -1,4 +1,4 @@
-﻿import os
+import os
 import time
 from collections import defaultdict
 from typing import Dict, List
@@ -13,6 +13,8 @@ _llm_request_history: Dict[str, List[float]] = defaultdict(list)
 
 def check_rate_limit(request: Request) -> None:
     """General rate limiter: 20 req/min per IP for all routes."""
+    if os.getenv("TESTING") == "1":
+        return
     ip = request.client.host if request.client else "unknown"
     now = time.time()
     cutoff = now - 60.0
@@ -28,6 +30,8 @@ def check_rate_limit(request: Request) -> None:
 
 def check_llm_rate_limit(request: Request) -> None:
     """Tighter rate limiter for LLM-powered routes: 10 req/min per IP."""
+    if os.getenv("TESTING") == "1":
+        return
     check_rate_limit(request)
     ip = request.client.host if request.client else "unknown"
     now = time.time()

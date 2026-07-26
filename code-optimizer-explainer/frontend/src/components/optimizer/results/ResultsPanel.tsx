@@ -1,8 +1,13 @@
 import { useEffect, useState } from "react";
 import type { ActionResult } from "@/api/backend";
 import type { ReactNode } from "react";
-import { Copy, Eye, GitCompare } from "lucide-react";
+import { Copy, Eye, GitCompare, Sparkles, Share2, Check } from "lucide-react";
+import { toast } from "sonner";
+import { createShareLink } from "@/api/backend";
 import { SimpleDiffView } from "./DiffLine";
+import { SecurityScorecard } from "./SecurityScorecard";
+import { FlowchartViewer } from "./FlowchartViewer";
+import { ShareCardModal } from "../modals/ShareCardModal";
 
 export interface ChatMessage {
   id: string;
@@ -212,60 +217,122 @@ function ResultBox({
   isProse,
   action,
   language,
+  result,
 }: {
   content: string;
   originalCode?: string;
   isProse?: boolean;
   action?: string;
   language?: string;
+  result?: ActionResult;
 }) {
+  const modifiedForDiff =
+    action === "security-audit" && result?.securityData?.sanitized_code
+      ? result.securityData.sanitized_code
+      : action === "flowchart" && result?.mermaidCode
+      ? result.mermaidCode
+      : content;
+
   const hasDiffEligible =
-    !!originalCode && !!content && !isProse && action !== "explain" && action !== "alternatives";
+    !!originalCode && !!modifiedForDiff && action !== "explain";
   const [viewMode, setViewMode] = useState<OutputViewMode>("explanation");
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [isSharing, setIsSharing] = useState(false);
+
+  const handleCreateShareLink = async () => {
+    if (!result) return;
+    setIsSharing(true);
+    try {
+      const shareRes = await createShareLink({
+        input_code: originalCode || "",
+        language: language || result.detectedLanguage || "auto",
+        analysis_type: action || result.action || "explain",
+        result_json: result,
+      });
+      const url = `${window.location.origin}/share/${shareRes.slug}`;
+      await navigator.clipboard.writeText(url);
+      toast.success("Shareable review link copied to clipboard!");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to create share link");
+    } finally {
+      setIsSharing(false);
+    }
+  };
 
   return (
     <div className="space-y-3">
-      {hasDiffEligible && (
-        <div
-          role="tablist"
-          aria-label="Output view mode"
-          className="inline-flex rounded-lg bg-muted p-0.5 text-[11px] font-medium border border-border"
-        >
-          <button
-            role="tab"
-            type="button"
-            aria-selected={viewMode === "explanation"}
-            onClick={() => setViewMode("explanation")}
-            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 ${
-              viewMode === "explanation"
-                ? "bg-background text-foreground shadow-xs"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            <Eye className="h-3 w-3" aria-hidden="true" />
-            Output
-          </button>
-          <button
-            role="tab"
-            type="button"
-            aria-selected={viewMode === "diff"}
-            onClick={() => setViewMode("diff")}
-            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 ${
-              viewMode === "diff"
-                ? "bg-background text-foreground shadow-xs"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            <GitCompare className="h-3 w-3" aria-hidden="true" />
-            Diff
-          </button>
-        </div>
+      {result?.securityData && (
+        <SecurityScorecard data={result.securityData} />
       )}
+
+      {result?.mermaidCode && (
+        <FlowchartViewer mermaidCode={result.mermaidCode} nodesCount={result.nodesCount} />
+      )}
+
+      <div className="flex items-center justify-between">
+        {hasDiffEligible ? (
+          <div
+            role="tablist"
+            aria-label="Output view mode"
+            className="inline-flex rounded-lg bg-muted p-0.5 text-[11px] font-medium border border-border"
+          >
+            <button
+              role="tab"
+              type="button"
+              aria-selected={viewMode === "explanation"}
+              onClick={() => setViewMode("explanation")}
+              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 ${
+                viewMode === "explanation"
+                  ? "bg-background text-foreground shadow-xs"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <Eye className="h-3 w-3" aria-hidden="true" />
+              Output
+            </button>
+            <button
+              role="tab"
+              type="button"
+              aria-selected={viewMode === "diff"}
+              onClick={() => setViewMode("diff")}
+              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 ${
+                viewMode === "diff"
+                  ? "bg-background text-foreground shadow-xs"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <GitCompare className="h-3 w-3" aria-hidden="true" />
+              Diff
+            </button>
+          </div>
+        ) : <div />}
+
+        {content && (
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleCreateShareLink}
+              disabled={isSharing}
+              className="flex items-center gap-1.5 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface-alt)] px-2.5 py-1 text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface)] transition disabled:opacity-50"
+              title="Generate public share link"
+            >
+              <Share2 className="h-3.5 w-3.5 text-orange-400" />
+              <span>{isSharing ? "Sharing..." : "Share Link"}</span>
+            </button>
+            <button
+              onClick={() => setIsShareModalOpen(true)}
+              className="flex items-center gap-1.5 rounded-lg border border-orange-500/30 bg-orange-500/10 px-2.5 py-1 text-xs font-semibold text-orange-400 hover:bg-orange-500/20"
+            >
+              <Sparkles className="h-3.5 w-3.5" />
+              <span>Create Share Card</span>
+            </button>
+          </div>
+        )}
+      </div>
 
       {viewMode === "diff" && hasDiffEligible ? (
         <SimpleDiffView
           original={originalCode}
-          modified={content}
+          modified={modifiedForDiff}
           isSEO={action === "seo-optimize"}
         />
       ) : isProse ? (
@@ -274,6 +341,16 @@ function ResultBox({
         </div>
       ) : (
         <SafeCodeBlock code={content} language={language} />
+      )}
+
+      {isShareModalOpen && (
+        <ShareCardModal
+          isOpen={isShareModalOpen}
+          onClose={() => setIsShareModalOpen(false)}
+          code={content}
+          language={language || "code"}
+          actionTitle={action}
+        />
       )}
     </div>
   );
@@ -298,6 +375,7 @@ export function ResultsPanel({ messages = [], original, result, loading, error }
               isProse={msg.result.isProse}
               action={msg.result.action}
               language={msg.result.detectedLanguage}
+              result={msg.result}
             />
           )}
         </div>

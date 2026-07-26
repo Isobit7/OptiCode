@@ -13,7 +13,12 @@ import { useSettings } from "@/hooks/useSettings";
 import { runAction, fetchCurrentUser, logoutUser, fetchHistory, saveHistoryEntry, type ActionId, type ActionResult } from "@/api/backend";
 import { Sparkles, UserRound, ShieldCheck, Terminal, LogOut, ArrowDown } from "lucide-react";
 
+import { TranslateModal } from "../modals/TranslateModal";
+import { RightDashboardPanel } from "../sidebar/RightDashboardPanel";
+import { OnboardingModal, type OnboardingPreferences } from "../modals/OnboardingModal";
+
 const LOCAL_STORAGE_KEY = "code_companion_history";
+const ONBOARDING_KEY = "opticode_user_onboarding_prefs";
 
 export function OptimizerApp() {
   const [code, setCode] = useState("");
@@ -26,6 +31,9 @@ export function OptimizerApp() {
   const [isSignInOpen, setIsSignInOpen] = useState(false);
   const [isAnalyticsOpen, setIsAnalyticsOpen] = useState(false);
   const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
+  const [isTranslateOpen, setIsTranslateOpen] = useState(false);
+  const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
+  const [targetLang, setTargetLang] = useState("TypeScript");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -43,7 +51,7 @@ export function OptimizerApp() {
     action: ActionId;
     code: string;
     language: string;
-    options: { explainDepth: ExplainDepth; humanizeMode: HumanizeMode };
+    options: { explainDepth: ExplainDepth; humanizeMode: HumanizeMode; targetLanguage?: string };
   };
   const actionMutation = useMutation({
     mutationFn: ({ action, code, language, options }: RunActionInput) =>
@@ -224,10 +232,7 @@ export function OptimizerApp() {
   };
 
   const [activeHistoryId, setActiveHistoryId] = useState<string | null>(null);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
-    if (typeof window !== "undefined") return window.innerWidth < 768;
-    return false;
-  });
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
 
   useEffect(() => {
     try {
@@ -240,6 +245,57 @@ export function OptimizerApp() {
       // Ignore localStorage read errors
     }
   }, []);
+
+  const applyOnboardingPreferences = (prefs: OnboardingPreferences) => {
+    if (prefs.explainDepth) setExplainDepth(prefs.explainDepth);
+    if (prefs.primaryGoal && prefs.primaryGoal !== "all") {
+      setActiveAction(prefs.primaryGoal);
+    }
+    // Auto-configure Humanize Mode based on preference selections
+    if (prefs.humanizerTypes && prefs.humanizerTypes.length > 0) {
+      const typesStr = prefs.humanizerTypes.join(" ").toLowerCase();
+      if (typesStr.includes("simplify") || typesStr.includes("eli5")) {
+        setHumanizeMode("simplify");
+      } else if (typesStr.includes("casual") || typesStr.includes("conversational")) {
+        setHumanizeMode("idiomatic");
+      } else {
+        setHumanizeMode("de-ai");
+      }
+    }
+    // Auto-configure default language
+    if (prefs.languages && prefs.languages.length > 0) {
+      const primaryLang = prefs.languages[0].toLowerCase();
+      if (primaryLang.includes("python")) setLanguage("python");
+      else if (primaryLang.includes("typescript") || primaryLang.includes("javascript")) setLanguage("javascript");
+      else if (primaryLang.includes("java")) setLanguage("java");
+      else if (primaryLang.includes("c++") || primaryLang.includes("c /")) setLanguage("cpp");
+      else if (primaryLang.includes("html") || primaryLang.includes("css")) setLanguage("html");
+    }
+  };
+
+  useEffect(() => {
+    try {
+      const savedPrefs = localStorage.getItem(ONBOARDING_KEY);
+      if (!savedPrefs) {
+        setIsOnboardingOpen(true);
+      } else {
+        const parsed = JSON.parse(savedPrefs) as OnboardingPreferences;
+        applyOnboardingPreferences(parsed);
+      }
+    } catch {
+      setIsOnboardingOpen(true);
+    }
+  }, []);
+
+  const handleOnboardingComplete = (prefs: OnboardingPreferences) => {
+    try {
+      localStorage.setItem(ONBOARDING_KEY, JSON.stringify(prefs));
+    } catch {
+      // ignore
+    }
+    applyOnboardingPreferences(prefs);
+    setIsOnboardingOpen(false);
+  };
 
   const saveHistory = (items: HistoryItem[]) => {
     setHistory(items);
@@ -285,7 +341,7 @@ export function OptimizerApp() {
           action,
           code: inputSnippet,
           language,
-          options: { explainDepth, humanizeMode },
+          options: { explainDepth, humanizeMode, targetLanguage: targetLang },
         });
         setResult(res);
 
@@ -333,7 +389,11 @@ export function OptimizerApp() {
 
   const handleSelectAction = (id: ActionId) => {
     setActiveAction(id);
-    if (code.trim()) run(id);
+    if (id === "translate") {
+      setIsTranslateOpen(true);
+    } else if (code.trim()) {
+      run(id);
+    }
   };
 
   const handleSubmit = () => {
@@ -435,6 +495,7 @@ export function OptimizerApp() {
             onHumanizeModeChange={setHumanizeMode}
             settings={settings}
             onSettingChange={updateSetting}
+            onOpenOnboarding={() => setIsOnboardingOpen(true)}
           />
 
           <div className="flex items-center gap-3" />
@@ -447,7 +508,7 @@ export function OptimizerApp() {
             <div className="flex-1 flex flex-col items-center justify-center px-4 sm:px-6 py-6 max-w-[760px] mx-auto w-full overflow-y-auto no-scrollbar">
               <section className="text-center mb-8 space-y-3">
                 <h1 className="font-headings text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-[var(--text-primary)] leading-tight">
-                  {currentUser ? `Welcome back, ${currentUser.email?.split("@")[0] || currentUser.full_name || "Developer"}` : "Paste your code — let's clean it up"}
+                  Paste your code — let's clean it up
                 </h1>
                 <p className="text-sm sm:text-base text-[var(--text-secondary)] max-w-xl mx-auto font-normal">
                   Transform, explain, prettify, or optimize any snippet instantly with AI.
@@ -499,12 +560,24 @@ export function OptimizerApp() {
                   activeAction={activeAction}
                   onSelectAction={handleSelectAction}
                   fontSize={settings.fontSize}
+                  targetLanguage={targetLang}
+                  onSelectTargetLanguage={setTargetLang}
                 />
               </div>
             </div>
           )}
         </div>
       </div>
+
+      {/* Right Side Dashboard Panel */}
+      <RightDashboardPanel
+        activeAction={activeAction}
+        loading={loading}
+        onSelectAction={handleSelectAction}
+        targetLanguage={targetLang}
+        onSelectTargetLanguage={setTargetLang}
+        codeLength={code.length}
+      />
 
       <SignInModal
         isOpen={isSignInOpen}
@@ -521,6 +594,22 @@ export function OptimizerApp() {
       <KeyboardShortcutsModal
         isOpen={isShortcutsOpen}
         onClose={() => setIsShortcutsOpen(false)}
+      />
+
+      <TranslateModal
+        isOpen={isTranslateOpen}
+        onClose={() => setIsTranslateOpen(false)}
+        onSelectTarget={(targetLanguage) => {
+          setTargetLang(targetLanguage);
+          if (code.trim()) run("translate");
+        }}
+      />
+
+      <OnboardingModal
+        isOpen={isOnboardingOpen}
+        onClose={() => setIsOnboardingOpen(false)}
+        onComplete={handleOnboardingComplete}
+        onOpenLogin={() => setIsSignInOpen(true)}
       />
     </div>
   );

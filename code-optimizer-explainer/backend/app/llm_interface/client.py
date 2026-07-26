@@ -1,4 +1,4 @@
-﻿import json
+import json
 import logging
 import os
 import re
@@ -349,3 +349,233 @@ def alternatives(
                 "space_complexity": None,
             }
         ], detected
+
+
+def security_audit(
+    code: str, language: Optional[str] = None
+) -> Tuple[Dict[str, Any], str]:
+    """Scans code for hardcoded secrets, OWASP vulnerabilities, and generates a security scorecard."""
+    detected = detect_language(code, language)
+    
+    # 1. Deterministic secret scanner
+    secret_patterns = [
+        (r"(?i)(api[_-]?key|secret|token|password|auth_token)\s*[:=]\s*[\"']([A-Za-z0-9_\-\.]{8,})[\"']", "Hardcoded API Key / Secret"),
+        (r"(?i)bearer\s+[A-Za-z0-9_\-\.]{20,}", "Hardcoded Bearer Token"),
+        (r"AKIA[0-9A-Z]{16}", "AWS Access Key ID"),
+        (r"ghp_[A-Za-z0-9_]{36}", "GitHub Personal Access Token"),
+        (r"sk-[A-Za-z0-9]{32,}", "Secret Key Pattern"),
+        (r"postgres://[^\s]+", "PostgreSQL Connection String with Credentials"),
+        (r"mongodb(\+srv)?://[^\s]+", "MongoDB Connection String with Credentials"),
+    ]
+
+    detected_leaks: List[Dict[str, Any]] = []
+    sanitized_code = code
+    secrets_found = 0
+
+    for pattern, title in secret_patterns:
+        matches = re.finditer(pattern, sanitized_code)
+        for match in matches:
+            secrets_found += 1
+            full_match = match.group(0)
+            line_no = sanitized_code[:match.start()].count("\n") + 1
+            detected_leaks.append({
+                "severity": "CRITICAL",
+                "category": "Secret Leak",
+                "title": title,
+                "description": f"Hardcoded credential or secret key exposed on line {line_no}.",
+                "line_number": line_no,
+                "recommendation": "Move secret to environment variables or secret manager (e.g. process.env / os.getenv)."
+            })
+            # Replace secret substring with env placeholder
+            replacement = re.sub(r"[\"'](.*?)[\"']", '"YOUR_ENV_SECRET_KEY"', full_match)
+            sanitized_code = sanitized_code.replace(full_match, replacement)
+
+    # 2. LLM Security Audit
+    system_prompt = (
+        "You are an expert OWASP Application Security Auditor. Analyze the provided code for security flaws "
+        "(SQL Injection, XSS, insecure deserialization, unvalidated input, hardcoded credentials, buffer overflow).\n"
+        "Output ONLY valid JSON matching this exact structure:\n"
+        "{\n"
+        '  "grade": "A+",\n'
+        '  "score": 95,\n'
+        '  "vulnerabilities": [\n'
+        '    {\n'
+        '      "severity": "HIGH",\n'
+        '      "category": "OWASP Top 10",\n'
+        '      "title": "SQL Injection Vulnerability",\n'
+        '      "description": "Raw string formatting used in SQL query.",\n'
+        '      "line_number": 12,\n'
+        '      "recommendation": "Use parameterized queries or ORM bindings."\n'
+        '    }\n'
+        '  ],\n'
+        '  "summary": "Overall security assessment summary text."\n'
+        "}"
+    )
+
+    prompt = f"Language: {detected}\n\nCode:\n```{detected}\n{code}\n```"
+
+    try:
+        raw_output, provider = _call_model(prompt, system_prompt=system_prompt)
+        logger.info(f"[security_audit] LLM provider used: {provider}")
+        json_str = re.sub(r"^```json\s*|^```\s*|```$", "", raw_output.strip()).strip()
+        parsed = json.loads(json_str)
+
+        all_vulns = detected_leaks + [
+            {
+                "severity": str(v.get("severity", "MEDIUM")).upper(),
+                "category": str(v.get("category", "Security Concern")),
+                "title": str(v.get("title", "Potential Security Issue")),
+                "description": str(v.get("description", "Vulnerability detected.")),
+                "line_number": v.get("line_number"),
+                "recommendation": str(v.get("recommendation", "Review and sanitize input.")),
+            }
+            for v in parsed.get("vulnerabilities", [])
+            if isinstance(v, dict)
+        ]
+
+        score = int(parsed.get("score", 90 if secrets_found == 0 else 45))
+        if secrets_found > 0:
+            score = min(score, 50)
+
+        grade = "A+" if score >= 95 else "A" if score >= 85 else "B" if score >= 70 else "C" if score >= 55 else "F"
+
+        return {
+            "grade": grade,
+            "score": score,
+            "secrets_found": secrets_found,
+            "vulnerabilities": all_vulns,
+            "sanitized_code": sanitized_code,
+            "summary": str(parsed.get("summary", f"Security audit completed. Found {len(all_vulns)} potential risk items.")),
+        }, detected
+    except Exception as err:
+        logger.error(f"Error in security_audit LLM call: {err}")
+        grade = "F" if secrets_found > 0 else "B"
+        return {
+            "grade": grade,
+            "score": 40 if secrets_found > 0 else 80,
+            "secrets_found": secrets_found,
+            "vulnerabilities": detected_leaks,
+            "sanitized_code": sanitized_code,
+            "summary": f"Deterministic scan completed ({secrets_found} secret leaks detected). LLM security scan fallback.",
+        }, detected
+
+
+def translate(
+    code: str, source_language: Optional[str] = None, target_language: str = "TypeScript"
+) -> Tuple[str, List[str], str]:
+    """Translates source code to target programming language while enforcing idiomatic conventions."""
+    src = detect_language(code, source_language)
+    target = target_language.strip()
+
+    system_prompt = (
+        f"You are a polyglot lead software engineer. Translate the provided {src} code to {target}.\n"
+        f"1. Enforce native idioms and standard style conventions of {target}.\n"
+        f"2. Return ONLY the translated code inside standard Markdown code blocks ```{target.lower()}\n...\n```.\n"
+        f"3. After the code block, list 2-3 key conversion notes starting with `- Note: `."
+    )
+    prompt = f"Source Language: {src}\nTarget Language: {target}\n\nOriginal Code:\n```{src}\n{code}\n```"
+
+    try:
+        raw_output, provider = _call_model(prompt, system_prompt=system_prompt)
+        logger.info(f"[translate] LLM provider used: {provider}")
+
+        code_match = re.search(r"```(?:\w+)?\s*\n([\s\S]*?)\n```", raw_output)
+        translated_code = code_match.group(1).strip() if code_match else raw_output.strip()
+
+        notes = [
+            line.strip().replace("- Note: ", "").replace("- ", "")
+            for line in raw_output.splitlines()
+            if line.strip().startswith("- ") or line.strip().startswith("Note:")
+        ]
+        if not notes:
+            notes = [f"Direct idiomatic translation from {src} to {target}."]
+
+        return translated_code, notes, src
+    except Exception as err:
+        logger.error(f"Error in translate: {err}")
+        return f"// Translation failed: {str(err)}\n{code}", [str(err)], src
+
+
+def pr_review(
+    code: str, language: Optional[str] = None, pr_title: Optional[str] = None
+) -> Tuple[str, str, List[str], List[str], str]:
+    """Generates a GitHub PR description and code review summary."""
+    detected = detect_language(code, language)
+    title = pr_title or "Code Update & Refactoring"
+
+    system_prompt = (
+        "You are a GitHub Pull Request & Code Review Specialist. Generate a comprehensive PR Review document.\n"
+        "Return clean Markdown formatted with section headers:\n"
+        "## 📌 PR Summary\n"
+        "...\n"
+        "## ⚠️ Technical Risks & Caveats\n"
+        "...\n"
+        "## 🧪 Suggested Test Cases\n"
+        "...\n"
+        "## 📋 Code Changes Breakdown\n"
+        "..."
+    )
+    prompt = f"PR Title: {title}\nLanguage: {detected}\n\nCode Snippet:\n```{detected}\n{code}\n```"
+
+    try:
+        markdown, provider = _call_model(prompt, system_prompt=system_prompt)
+        logger.info(f"[pr_review] LLM provider used: {provider}")
+
+        summary = f"Pull Request review generated for {title} in {detected}."
+        risks = [
+            line.strip().replace("- ", "")
+            for line in markdown.splitlines()
+            if line.strip().startswith("- Risk") or line.strip().startswith("- ")
+        ][:4]
+        tests = [
+            line.strip().replace("- ", "")
+            for line in markdown.splitlines()
+            if "Test" in line or "test" in line
+        ][:4]
+
+        return summary, markdown, risks, tests, detected
+    except Exception as err:
+        logger.error(f"Error in pr_review: {err}")
+        return f"PR review generation failed: {err}", f"# PR Review\n\nFailed to generate review: {err}", [], [], detected
+
+
+def flowchart(
+    code: str, language: Optional[str] = None
+) -> Tuple[str, int, str, str]:
+    """Generates valid Mermaid.js graph TD syntax representing logic flow."""
+    detected = detect_language(code, language)
+
+    system_prompt = (
+        "You are a software visualizer. Convert the logical flow of the code into a valid Mermaid.js flowchart.\n"
+        "Output ONLY valid Mermaid graph TD code inside a ```mermaid ... ``` codeblock.\n"
+        "Use subgraphs or clear decision nodes [Decision?] and process nodes [Process action].\n"
+        "Example:\n"
+        "```mermaid\n"
+        "graph TD\n"
+        "  Start([Start Execution]) --> CheckInput{Input Valid?}\n"
+        "  CheckInput -- Yes --> Process[Process Payload]\n"
+        "  CheckInput -- No --> Error[Return Error 400]\n"
+        "  Process --> Finish([End Execution])\n"
+        "```"
+    )
+    prompt = f"Language: {detected}\n\nCode:\n```{detected}\n{code}\n```"
+
+    try:
+        raw_output, provider = _call_model(prompt, system_prompt=system_prompt)
+        logger.info(f"[flowchart] LLM provider used: {provider}")
+
+        mermaid_match = re.search(r"```mermaid\s*\n([\s\S]*?)\n```", raw_output)
+        mermaid_code = (
+            mermaid_match.group(1).strip()
+            if mermaid_match
+            else "graph TD\n  Start([Start]) --> Process[Execute Code] --> End([Finish])"
+        )
+        nodes_count = len(re.findall(r"-->|---|==>", mermaid_code)) + 1
+        summary = f"Generated {nodes_count}-node flowchart for {detected} logic."
+
+        return mermaid_code, nodes_count, summary, detected
+    except Exception as err:
+        logger.error(f"Error in flowchart: {err}")
+        fallback = "graph TD\n  Start([Start Execution]) --> Execute[Execute Code Snippet] --> End([Complete])"
+        return fallback, 3, "Fallback flowchart generated.", detected
+

@@ -1,3 +1,6 @@
+import os
+os.environ["TESTING"] = "1"
+
 from fastapi.testclient import TestClient
 from app.main import app
 
@@ -209,3 +212,44 @@ def test_auth_logout_clears_cookies():
     # Verify session is invalidated
     me_resp = client.get("/api/auth/me", headers={"Authorization": f"Bearer {session_token}"})
     assert me_resp.status_code == 401
+
+
+# --- Upgrade Features Endpoint Tests ---
+
+def test_security_audit_endpoint():
+    code_with_secret = 'API_KEY = "sk-1234567890abcdef1234567890abcdef"\ndef query_db(user_id):\n    return f"SELECT * FROM users WHERE id = {user_id}"\n'
+    response = client.post("/api/security-audit", json={"code": code_with_secret, "language": "python"})
+    assert response.status_code == 200
+    data = response.json()
+    assert "grade" in data
+    assert "score" in data
+    assert data["secrets_found"] > 0
+    assert "sanitized_code" in data
+
+
+def test_translate_endpoint():
+    py_code = "def add(a, b):\n    return a + b\n"
+    response = client.post("/api/translate", json={"code": py_code, "language": "python", "target_language": "TypeScript"})
+    assert response.status_code == 200
+    data = response.json()
+    assert "translated_code" in data
+    assert data["target_language"] == "TypeScript"
+
+
+def test_pr_review_endpoint():
+    code = "def process_payment(amount):\n    return True\n"
+    response = client.post("/api/pr-review", json={"code": code, "language": "python", "pr_title": "Add payment logic"})
+    assert response.status_code == 200
+    data = response.json()
+    assert "github_markdown" in data
+    assert "summary" in data
+
+
+def test_flowchart_endpoint():
+    code = "if x > 10:\n    print('High')\nelse:\n    print('Low')\n"
+    response = client.post("/api/flowchart", json={"code": code, "language": "python"})
+    assert response.status_code == 200
+    data = response.json()
+    assert "mermaid_code" in data
+    assert "graph TD" in data["mermaid_code"]
+

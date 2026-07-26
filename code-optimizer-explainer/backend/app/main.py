@@ -13,15 +13,24 @@ logging.basicConfig(
 )
 logger = logging.getLogger("code_optimizer.main")
 
+from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect
+
 from app.routes import (
     alternatives,
     auth,
+    ci,
+    diff_story,
     explain,
+    flowchart,
     history,
     humanize,
+    pr_review,
     prettify,
+    security_audit,
     seo_optimize,
+    shared_reviews,
     shorten,
+    translate,
 )
 
 app = FastAPI(
@@ -53,6 +62,41 @@ app.include_router(prettify.router, prefix="/api", tags=["Prettify"])
 app.include_router(shorten.router, prefix="/api", tags=["Shorten"])
 app.include_router(seo_optimize.router, prefix="/api", tags=["SEO Optimize"])
 app.include_router(history.router, prefix="/api", tags=["History"])
+app.include_router(security_audit.router, prefix="/api", tags=["Security Audit"])
+app.include_router(translate.router, prefix="/api", tags=["Translate"])
+app.include_router(pr_review.router, prefix="/api", tags=["PR Review"])
+app.include_router(flowchart.router, prefix="/api", tags=["Flowchart"])
+app.include_router(shared_reviews.router, prefix="/api", tags=["Shared Reviews"])
+app.include_router(ci.router, prefix="/api", tags=["CI Mode"])
+app.include_router(diff_story.router, prefix="/api", tags=["Diff Story"])
+
+
+@app.websocket("/ws/stream")
+async def websocket_stream_endpoint(websocket: WebSocket):
+    """WebSocket bi-directional real-time streaming endpoint for ultra-low latency actions."""
+    await websocket.accept()
+    try:
+        while True:
+            data = await websocket.receive_json()
+            action = data.get("action")
+            code = data.get("code", "")
+            language = data.get("language")
+
+            if action == "explain":
+                from app.llm_interface import client as llm
+                explanation, detected, _ = llm.explain(code, language)
+                await websocket.send_json({"type": "result", "action": action, "output": explanation, "detected_language": detected})
+            elif action == "security-audit":
+                from app.llm_interface import client as llm
+                res, detected = llm.security_audit(code, language)
+                await websocket.send_json({"type": "result", "action": action, "data": res, "detected_language": detected})
+            else:
+                await websocket.send_json({"type": "error", "message": f"Action '{action}' is not supported over WebSocket stream."})
+    except WebSocketDisconnect:
+        logger.info("Client disconnected from WebSocket stream.")
+    except Exception as err:
+        logger.error(f"WebSocket error: {err}")
+        await websocket.close()
 
 
 @app.exception_handler(Exception)

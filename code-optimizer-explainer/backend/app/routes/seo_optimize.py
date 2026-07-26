@@ -1,5 +1,5 @@
-﻿import logging
-from fastapi import APIRouter, Depends, HTTPException, Request
+import logging
+from fastapi import APIRouter, Depends, HTTPException
 
 from app.deterministic_tools import tools
 from app.models import CodeRequest, SeoOptimizeResponse

@@ -1,11 +1,11 @@
-﻿import asyncio
+import asyncio
 import json
 import logging
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import StreamingResponse
 
 from app.llm_interface import client as llm
-from app.models import ExplainRequest, ExplainResponse
+from app.models import MAX_LINES, ExplainRequest, ExplainResponse
 from app.rate_limiter import check_llm_rate_limit
 from app.cache import cache
 
@@ -17,8 +17,11 @@ MAX_CHARS = 20000
 
 @router.post("/explain", response_model=ExplainResponse, dependencies=[Depends(check_llm_rate_limit)])
 def explain_code(request: ExplainRequest) -> ExplainResponse:
-    if len(request.code) > MAX_CHARS:
-        raise HTTPException(status_code=400, detail=f"Input exceeds {MAX_CHARS} characters (~5000 tokens).")
+    if len(request.code) > MAX_CHARS or request.line_count() > MAX_LINES:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Input exceeds maximum allowed limit of {MAX_LINES} lines / {MAX_CHARS} characters.",
+        )
 
     cached = cache.get("explain", request.code, request.language, {"depth": request.depth})
     if cached:

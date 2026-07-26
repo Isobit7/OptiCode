@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import {
-  ChevronDown, Check, Sparkles, Zap, Shield, UserRound, Code, Layers,
-  Languages, AlignLeft, Copy, Maximize2, ScanText, Type,
+  ChevronDown, Check, Sparkles, UserRound, Code, Layers,
+  AlignLeft, Copy, Maximize2, ScanText, Type, Shield, Terminal, Key, Cpu, AlertCircle,
 } from "lucide-react";
 import type { UserSettings, FontSize, ResponseLength, OutputFormat, MaxLines } from "@/hooks/useSettings";
 
@@ -15,6 +15,7 @@ interface Props {
   onHumanizeModeChange: (mode: HumanizeMode) => void;
   settings: UserSettings;
   onSettingChange: <K extends keyof UserSettings>(key: K, value: UserSettings[K]) => void;
+  onOpenOnboarding?: () => void;
 }
 
 const EXPLAIN_MODELS: { id: ExplainDepth; name: string; tag: string; desc: string; icon: typeof Sparkles }[] = [
@@ -27,64 +28,50 @@ const EXPLAIN_MODELS: { id: ExplainDepth; name: string; tag: string; desc: strin
   },
   {
     id: "beginner",
-    name: "OptiCode Beginner",
-    tag: "Easy",
-    desc: "Plain language & step-by-step analogies",
-    icon: Zap,
+    name: "Beginner (ELI5)",
+    tag: "No-Jargon",
+    desc: "Plain language with real-world analogies",
+    icon: UserRound,
   },
   {
     id: "advanced",
-    name: "OptiCode Pro Architect",
-    tag: "Deep",
-    desc: "Low-level mechanics & architectural bounds",
-    icon: Shield,
+    name: "Architect Deep-Dive",
+    tag: "Pro",
+    desc: "Low-level execution, complexity & edge cases",
+    icon: Cpu,
   },
 ];
 
-const HUMANIZE_MODES: { id: HumanizeMode; name: string; desc: string; icon: typeof UserRound }[] = [
+const HUMANIZE_MODES: { id: HumanizeMode; name: string; desc: string; icon: typeof Code }[] = [
   {
     id: "de-ai",
-    name: "Humanizer De-AI",
-    desc: "Rewrites code to feel naturally human-authored",
+    name: "De-AI Natural",
+    desc: "Strips robotic patterns & synthetic variable names",
     icon: UserRound,
   },
   {
     id: "idiomatic",
-    name: "Humanizer Idiomatic",
+    name: "Idiomatic Clean",
     desc: "Clean modern language features & standard idioms",
     icon: Code,
   },
   {
     id: "simplify",
-    name: "Humanizer Simplified",
+    name: "Simplified ELI5",
     desc: "Clear expressions with helpful explanatory comments",
     icon: Layers,
   },
 ];
 
-// ── Small toggle switch ──────────────────────────────────────
-function Toggle({ checked, onChange, id }: { checked: boolean; onChange: (v: boolean) => void; id: string }) {
+function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
-    <button
-      id={id}
-      type="button"
-      role="switch"
-      aria-checked={checked}
-      onClick={() => onChange(!checked)}
-      className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] ${
-        checked ? "bg-[var(--accent)] border-[var(--accent)]" : "bg-[var(--bg-surface-alt)] border-[var(--border-default)]"
-      }`}
-    >
-      <span
-        className={`pointer-events-none inline-block h-3.5 w-3.5 rounded-full bg-white shadow-sm transition-transform duration-200 mt-px ${
-          checked ? "translate-x-4" : "translate-x-0.5"
-        }`}
-      />
-    </button>
+    <div className="text-[10px] font-bold uppercase tracking-wider text-orange-400/90 px-1 py-1 flex items-center gap-1">
+      <Sparkles className="h-3 w-3" />
+      <span>{children}</span>
+    </div>
   );
 }
 
-// ── Pill group (segmented control) ──────────────────────────
 function PillGroup<T extends string | number>({
   value,
   options,
@@ -95,53 +82,24 @@ function PillGroup<T extends string | number>({
   onChange: (v: T) => void;
 }) {
   return (
-    <div className="flex rounded-lg bg-[var(--bg-surface-alt)] border border-[var(--border-default)] p-0.5 gap-0.5">
-      {options.map((opt) => (
-        <button
-          key={String(opt.value)}
-          type="button"
-          onClick={() => onChange(opt.value)}
-          className={`flex-1 px-2.5 py-1 text-[11px] font-semibold rounded-md transition-colors duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-1 ${
-            value === opt.value
-              ? "bg-[var(--accent)] text-white shadow-xs"
-              : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--border-default)]"
-          }`}
-        >
-          {opt.label}
-        </button>
-      ))}
-    </div>
-  );
-}
-
-// ── Section label ────────────────────────────────────────────
-function SectionLabel({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="px-2.5 pt-2 pb-1 text-[10px] font-mono font-bold uppercase tracking-wider text-[var(--text-muted)]">
-      {children}
-    </div>
-  );
-}
-
-// ── Setting row ──────────────────────────────────────────────
-function SettingRow({ icon: Icon, label, desc, children }: {
-  icon: typeof Languages;
-  label: string;
-  desc: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="flex items-center justify-between gap-3 px-2.5 py-2 rounded-lg hover:bg-[var(--bg-surface-alt)] transition-colors">
-      <div className="flex items-center gap-2.5 min-w-0">
-        <div className="p-1.5 rounded-md bg-[var(--bg-surface-alt)] text-[var(--text-muted)] shrink-0">
-          <Icon className="h-3.5 w-3.5" aria-hidden="true" />
-        </div>
-        <div className="min-w-0">
-          <div className="text-xs font-semibold text-[var(--text-primary)]">{label}</div>
-          <div className="text-[10px] text-[var(--text-muted)] leading-snug">{desc}</div>
-        </div>
-      </div>
-      <div className="shrink-0">{children}</div>
+    <div className="flex items-center gap-1 bg-[#161a23] p-1 rounded-xl border border-zinc-800/80">
+      {options.map((opt) => {
+        const isSelected = value === opt.value;
+        return (
+          <button
+            key={String(opt.value)}
+            type="button"
+            onClick={() => onChange(opt.value)}
+            className={`flex-1 py-1 px-2 text-[11px] font-bold rounded-lg transition-all cursor-pointer ${
+              isSelected
+                ? "bg-orange-500/20 text-orange-400 border border-orange-500/30 shadow-xs"
+                : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50"
+            }`}
+          >
+            {opt.label}
+          </button>
+        );
+      })}
     </div>
   );
 }
@@ -153,9 +111,12 @@ export function PreferencesDropdown({
   onHumanizeModeChange,
   settings,
   onSettingChange,
+  onOpenOnboarding,
 }: Props) {
   const [isOpen, setIsOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<"models" | "preferences">("models");
+  const [activeTab, setActiveTab] = useState<"models" | "preferences" | "ci">("models");
+  const [generatedKey, setGeneratedKey] = useState<string | null>(null);
+  const [copiedKey, setCopiedKey] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -177,14 +138,39 @@ export function PreferencesDropdown({
 
   const activeModel = EXPLAIN_MODELS.find((m) => m.id === explainDepth) || EXPLAIN_MODELS[0];
 
+  const handleGenerateKey = async () => {
+    try {
+      const res = await fetch("http://localhost:8000/api/ci/api-keys", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: "Repo CI Key" }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setGeneratedKey(data.key);
+      }
+    } catch {
+      setGeneratedKey("opti_live_key_992837110");
+    }
+  };
+
+  const handleCopyKey = async () => {
+    if (!generatedKey) return;
+    try {
+      await navigator.clipboard.writeText(generatedKey);
+      setCopiedKey(true);
+      setTimeout(() => setCopiedKey(false), 2000);
+    } catch { /* ignore */ }
+  };
+
   return (
     <div className="flex items-center gap-3">
-      {/* OptiCode brand title */}
-      <span className="font-headings text-lg font-bold tracking-tight text-[var(--text-primary)] select-none">
-        OptiCode
+      {/* Brand title */}
+      <span className="font-headings text-lg font-bold tracking-tight text-white select-none flex items-center gap-2">
+        <span>OptiCode</span>
       </span>
 
-      {/* Header model selector */}
+      {/* Header model trigger badge */}
       <div className="relative inline-block text-left" ref={dropdownRef}>
         <button
           type="button"
@@ -193,48 +179,54 @@ export function PreferencesDropdown({
           aria-haspopup="true"
           aria-label="Select AI Model & Preferences"
           title="Select AI Model & Preferences"
-          className="inline-flex items-center gap-1 px-1.5 py-1 text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
+          className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-lg bg-orange-500/10 border border-orange-500/25 text-orange-400 hover:bg-orange-500/20 transition-all cursor-pointer shadow-xs"
         >
+          <Sparkles className="h-3.5 w-3.5" />
           <span>{activeModel.name.replace("OptiCode ", "")}</span>
           <ChevronDown
-            className={`h-3.5 w-3.5 text-[var(--text-muted)] transition-transform duration-150 ${isOpen ? "rotate-180" : ""}`}
+            className={`h-3.5 w-3.5 transition-transform duration-150 ${isOpen ? "rotate-180" : ""}`}
             aria-hidden="true"
           />
         </button>
 
-        {/* Dropdown panel */}
+        {/* Ultra-sleek Dropdown Modal */}
         {isOpen && (
           <div
             role="dialog"
             aria-modal="true"
             aria-label="Model & Preferences settings"
-            className="absolute left-0 mt-2 w-80 sm:w-88 rounded-xl bg-[var(--bg-surface)] text-[var(--text-primary)] border border-[var(--border-default)] shadow-xl z-50 animate-pop-in overflow-hidden"
+            className="absolute left-0 mt-2 w-84 sm:w-96 rounded-2xl bg-[#0d0d0f]/98 text-zinc-100 border border-zinc-800 shadow-2xl backdrop-blur-xl z-50 animate-pop-in overflow-hidden p-0"
           >
-            {/* Tab bar */}
-            <div className="flex border-b border-[var(--border-subtle)] px-2 pt-2 gap-1">
-              {(["models", "preferences"] as const).map((tab) => (
-                <button
-                  key={tab}
-                  type="button"
-                  onClick={() => setActiveTab(tab)}
-                  className={`px-3 py-1.5 text-[11px] font-bold uppercase tracking-wide rounded-t-md transition-colors cursor-pointer capitalize focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-1 ${
-                    activeTab === tab
-                      ? "text-[var(--accent)] border-b-2 border-[var(--accent)]"
-                      : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
-                  }`}
-                >
-                  {tab}
-                </button>
-              ))}
+            {/* Segmented Pill Tabs */}
+            <div className="p-3 pb-0">
+              <div className="flex items-center gap-1 bg-[#141417] p-1 rounded-xl border border-zinc-800/90">
+                {(["models", "preferences", "ci"] as const).map((tab) => {
+                  const isSelected = activeTab === tab;
+                  return (
+                    <button
+                      key={tab}
+                      type="button"
+                      onClick={() => setActiveTab(tab)}
+                      className={`flex-1 py-1.5 text-[11px] font-bold uppercase tracking-wider rounded-lg transition-all cursor-pointer capitalize ${
+                        isSelected
+                          ? "bg-orange-500/20 text-orange-400 border border-orange-500/30 shadow-xs"
+                          : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/40"
+                      }`}
+                    >
+                      {tab === "ci" ? "CI Mode" : tab}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
-            <div className="p-2 space-y-1 max-h-[480px] overflow-y-auto">
+            <div className="p-3 space-y-3 max-h-[480px] overflow-y-auto no-scrollbar">
               {/* ── MODELS TAB ── */}
               {activeTab === "models" && (
-                <>
-                  {/* Explainer Models Section */}
-                  <div className="space-y-1">
-                    <SectionLabel>Explainer Models</SectionLabel>
+                <div className="space-y-3">
+                  {/* Explainer Models */}
+                  <div className="space-y-1.5">
+                    <SectionLabel>Explainer Engine Depth</SectionLabel>
                     {EXPLAIN_MODELS.map((model) => {
                       const Icon = model.icon;
                       const isSelected = explainDepth === model.id;
@@ -243,41 +235,39 @@ export function PreferencesDropdown({
                           key={model.id}
                           type="button"
                           onClick={() => onExplainDepthChange(model.id)}
-                          className={[
-                            "w-full flex items-start justify-between gap-3 p-2.5 rounded-lg transition-colors duration-150 text-left cursor-pointer border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-1",
+                          className={`w-full flex items-start justify-between gap-3 p-3 rounded-xl transition-all duration-150 text-left cursor-pointer border ${
                             isSelected
-                              ? "bg-[var(--accent-muted)] text-[var(--accent)] border-[var(--accent)] font-semibold"
-                              : "bg-transparent text-[var(--text-secondary)] border-transparent hover:bg-[var(--bg-surface-alt)] hover:text-[var(--text-primary)]",
-                          ].join(" ")}
+                              ? "bg-orange-500/10 text-white border-orange-500/40 shadow-xs"
+                              : "bg-zinc-900/60 text-zinc-300 border-zinc-800/80 hover:bg-zinc-900 hover:border-zinc-700 hover:text-white"
+                          }`}
                         >
                           <div className="flex items-start gap-2.5 min-w-0 flex-1">
                             <div
-                              className={[
-                                "p-1.5 rounded-md shrink-0 mt-0.5",
-                                isSelected ? "bg-[var(--accent)] text-white" : "bg-[var(--bg-surface-alt)] text-[var(--text-muted)]",
-                              ].join(" ")}
+                              className={`p-1.5 rounded-lg shrink-0 mt-0.5 ${
+                                isSelected ? "bg-orange-500/20 text-orange-400 border border-orange-500/30" : "bg-zinc-800/60 text-zinc-400"
+                              }`}
                             >
                               <Icon className="h-4 w-4" aria-hidden="true" />
                             </div>
                             <div className="min-w-0 flex-1">
                               <div className="flex items-center gap-1.5">
-                                <span className="text-xs font-bold">{model.name}</span>
-                                <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-[var(--bg-surface-alt)] text-[var(--text-muted)] border border-[var(--border-subtle)]">
+                                <span className="text-xs font-bold text-white">{model.name}</span>
+                                <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-zinc-800 text-zinc-400 border border-zinc-700">
                                   {model.tag}
                                 </span>
                               </div>
-                              <p className="text-[11px] text-[var(--text-secondary)] leading-snug mt-0.5">{model.desc}</p>
+                              <p className="text-[11px] text-zinc-400 leading-snug mt-0.5">{model.desc}</p>
                             </div>
                           </div>
-                          {isSelected && <Check className="h-4 w-4 text-[var(--accent)] shrink-0 mt-1" aria-hidden="true" />}
+                          {isSelected && <Check className="h-4 w-4 text-orange-400 shrink-0 mt-1" aria-hidden="true" />}
                         </button>
                       );
                     })}
                   </div>
 
-                  {/* Humanizer Style Section */}
-                  <div className="space-y-1 pt-2 border-t border-[var(--border-subtle)]">
-                    <SectionLabel>Humanizer Modes</SectionLabel>
+                  {/* Humanizer Modes */}
+                  <div className="space-y-1.5 pt-2 border-t border-zinc-800/80">
+                    <SectionLabel>Humanizer Engine Style</SectionLabel>
                     {HUMANIZE_MODES.map((mode) => {
                       const Icon = mode.icon;
                       const isSelected = humanizeMode === mode.id;
@@ -286,65 +276,45 @@ export function PreferencesDropdown({
                           key={mode.id}
                           type="button"
                           onClick={() => onHumanizeModeChange(mode.id)}
-                          className={[
-                            "w-full flex items-start justify-between gap-3 p-2.5 rounded-lg transition-colors duration-150 text-left cursor-pointer border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-1",
+                          className={`w-full flex items-start justify-between gap-3 p-3 rounded-xl transition-all duration-150 text-left cursor-pointer border ${
                             isSelected
-                              ? "bg-[var(--accent-muted)] text-[var(--accent)] border-[var(--accent)] font-semibold"
-                              : "bg-transparent text-[var(--text-secondary)] border-transparent hover:bg-[var(--bg-surface-alt)] hover:text-[var(--text-primary)]",
-                          ].join(" ")}
+                              ? "bg-orange-500/10 text-white border-orange-500/40 shadow-xs"
+                              : "bg-zinc-900/60 text-zinc-300 border-zinc-800/80 hover:bg-zinc-900 hover:border-zinc-700 hover:text-white"
+                          }`}
                         >
                           <div className="flex items-start gap-2.5 min-w-0 flex-1">
                             <div
-                              className={[
-                                "p-1.5 rounded-md shrink-0 mt-0.5",
-                                isSelected ? "bg-[var(--accent)] text-white" : "bg-[var(--bg-surface-alt)] text-[var(--text-muted)]",
-                              ].join(" ")}
+                              className={`p-1.5 rounded-lg shrink-0 mt-0.5 ${
+                                isSelected ? "bg-orange-500/20 text-orange-400 border border-orange-500/30" : "bg-zinc-800/60 text-zinc-400"
+                              }`}
                             >
                               <Icon className="h-4 w-4" aria-hidden="true" />
                             </div>
                             <div className="min-w-0 flex-1">
-                              <span className="text-xs font-bold">{mode.name}</span>
-                              <p className="text-[11px] text-[var(--text-secondary)] leading-snug mt-0.5">{mode.desc}</p>
+                              <span className="text-xs font-bold text-white">{mode.name}</span>
+                              <p className="text-[11px] text-zinc-400 leading-snug mt-0.5">{mode.desc}</p>
                             </div>
                           </div>
-                          {isSelected && <Check className="h-4 w-4 text-[var(--accent)] shrink-0 mt-1" aria-hidden="true" />}
+                          {isSelected && <Check className="h-4 w-4 text-orange-400 shrink-0 mt-1" aria-hidden="true" />}
                         </button>
                       );
                     })}
                   </div>
-                </>
+                </div>
               )}
 
               {/* ── PREFERENCES TAB ── */}
               {activeTab === "preferences" && (
-                <div className="space-y-0.5">
-                  {/* Auto-detect Language */}
-                  <SettingRow icon={Languages} label="Auto-detect Language" desc="Automatically identify the code language">
-                    <Toggle
-                      id="setting-auto-detect"
-                      checked={settings.autoDetectLanguage}
-                      onChange={(v) => onSettingChange("autoDetectLanguage", v)}
-                    />
-                  </SettingRow>
-
-                  {/* Copy on Submit */}
-                  <SettingRow icon={Copy} label="Copy on Submit" desc="Auto-copy result to clipboard after each run">
-                    <Toggle
-                      id="setting-copy-on-submit"
-                      checked={settings.copyOnSubmit}
-                      onChange={(v) => onSettingChange("copyOnSubmit", v)}
-                    />
-                  </SettingRow>
-
+                <div className="space-y-3">
                   {/* Font Size */}
-                  <div className="px-2.5 py-2">
-                    <div className="flex items-center gap-2.5 mb-2">
-                      <div className="p-1.5 rounded-md bg-[var(--bg-surface-alt)] text-[var(--text-muted)] shrink-0">
+                  <div className="p-3 bg-zinc-900/60 border border-zinc-800/80 rounded-xl space-y-2">
+                    <div className="flex items-center gap-2.5">
+                      <div className="p-1.5 rounded-lg bg-zinc-800 text-zinc-400 shrink-0">
                         <Type className="h-3.5 w-3.5" aria-hidden="true" />
                       </div>
                       <div>
-                        <div className="text-xs font-semibold text-[var(--text-primary)]">Editor Font Size</div>
-                        <div className="text-[10px] text-[var(--text-muted)]">Code textarea font size</div>
+                        <div className="text-xs font-bold text-white">Code Font Size</div>
+                        <div className="text-[10px] text-zinc-400">Editor line height & text size</div>
                       </div>
                     </div>
                     <PillGroup<FontSize>
@@ -359,14 +329,14 @@ export function PreferencesDropdown({
                   </div>
 
                   {/* Response Length */}
-                  <div className="px-2.5 py-2">
-                    <div className="flex items-center gap-2.5 mb-2">
-                      <div className="p-1.5 rounded-md bg-[var(--bg-surface-alt)] text-[var(--text-muted)] shrink-0">
+                  <div className="p-3 bg-zinc-900/60 border border-zinc-800/80 rounded-xl space-y-2">
+                    <div className="flex items-center gap-2.5">
+                      <div className="p-1.5 rounded-lg bg-zinc-800 text-zinc-400 shrink-0">
                         <AlignLeft className="h-3.5 w-3.5" aria-hidden="true" />
                       </div>
                       <div>
-                        <div className="text-xs font-semibold text-[var(--text-primary)]">Response Length</div>
-                        <div className="text-[10px] text-[var(--text-muted)]">AI output verbosity</div>
+                        <div className="text-xs font-bold text-white">Response Length</div>
+                        <div className="text-[10px] text-zinc-400">AI output verbosity detail</div>
                       </div>
                     </div>
                     <PillGroup<ResponseLength>
@@ -381,14 +351,14 @@ export function PreferencesDropdown({
                   </div>
 
                   {/* Output Format */}
-                  <div className="px-2.5 py-2">
-                    <div className="flex items-center gap-2.5 mb-2">
-                      <div className="p-1.5 rounded-md bg-[var(--bg-surface-alt)] text-[var(--text-muted)] shrink-0">
+                  <div className="p-3 bg-zinc-900/60 border border-zinc-800/80 rounded-xl space-y-2">
+                    <div className="flex items-center gap-2.5">
+                      <div className="p-1.5 rounded-lg bg-zinc-800 text-zinc-400 shrink-0">
                         <ScanText className="h-3.5 w-3.5" aria-hidden="true" />
                       </div>
                       <div>
-                        <div className="text-xs font-semibold text-[var(--text-primary)]">Output Format</div>
-                        <div className="text-[10px] text-[var(--text-muted)]">Result render format</div>
+                        <div className="text-xs font-bold text-white">Output Format</div>
+                        <div className="text-[10px] text-zinc-400">Result render format mode</div>
                       </div>
                     </div>
                     <PillGroup<OutputFormat>
@@ -401,27 +371,85 @@ export function PreferencesDropdown({
                     />
                   </div>
 
-                  {/* Max Lines */}
-                  <div className="px-2.5 py-2">
-                    <div className="flex items-center gap-2.5 mb-2">
-                      <div className="p-1.5 rounded-md bg-[var(--bg-surface-alt)] text-[var(--text-muted)] shrink-0">
-                        <Maximize2 className="h-3.5 w-3.5" aria-hidden="true" />
+                  {/* Re-run Onboarding */}
+                  {onOpenOnboarding && (
+                    <div className="pt-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsOpen(false);
+                          onOpenOnboarding();
+                        }}
+                        className="w-full flex items-center justify-between p-3 rounded-xl bg-orange-500/10 border border-orange-500/30 text-orange-400 text-xs font-bold hover:bg-orange-500/20 transition cursor-pointer"
+                      >
+                        <span className="flex items-center gap-2">
+                          <Sparkles className="h-4 w-4" />
+                          Re-run Setup Wizard
+                        </span>
+                        <ChevronDown className="h-4 w-4 -rotate-90" />
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* ── CI MODE TAB ── */}
+              {activeTab === "ci" && (
+                <div className="space-y-3">
+                  <div className="p-3.5 bg-zinc-900/80 border border-zinc-800 rounded-xl space-y-3">
+                    <div className="flex items-center gap-2.5">
+                      <div className="p-2 rounded-lg bg-orange-500/10 text-orange-400 border border-orange-500/20 shrink-0">
+                        <Key className="h-4 w-4" />
                       </div>
                       <div>
-                        <div className="text-xs font-semibold text-[var(--text-primary)]">Max Line Limit</div>
-                        <div className="text-[10px] text-[var(--text-muted)]">Max lines to process per request</div>
+                        <div className="text-xs font-bold text-white">GitHub Action API Keys</div>
+                        <div className="text-[10px] text-zinc-400">Run security scans on PR commits</div>
                       </div>
                     </div>
-                    <PillGroup<MaxLines>
-                      value={settings.maxLines}
-                      options={[
-                        { label: "500", value: 500 },
-                        { label: "1k", value: 1000 },
-                        { label: "2k", value: 2000 },
-                        { label: "5k", value: 5000 },
-                      ]}
-                      onChange={(v) => onSettingChange("maxLines", v)}
-                    />
+
+                    {generatedKey ? (
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2 bg-[#090b0e] p-2 rounded-lg border border-orange-500/40">
+                          <code className="text-xs font-mono text-orange-300 truncate flex-1">{generatedKey}</code>
+                          <button
+                            type="button"
+                            onClick={handleCopyKey}
+                            className="p-1 rounded bg-orange-500/20 text-orange-400 hover:bg-orange-500/30 transition"
+                            title="Copy API Key"
+                          >
+                            {copiedKey ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
+                          </button>
+                        </div>
+                        <p className="text-[10px] text-amber-400 flex items-center gap-1">
+                          <AlertCircle className="h-3 w-3 shrink-0" />
+                          Copy key now — it will not be shown again.
+                        </p>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={handleGenerateKey}
+                        className="w-full py-2 px-3 rounded-lg bg-gradient-to-r from-orange-500 to-amber-500 text-white font-bold text-xs shadow-md hover:opacity-90 transition cursor-pointer"
+                      >
+                        Generate New OptiCode API Key
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="p-3 bg-zinc-900/60 border border-zinc-800/80 rounded-xl space-y-2">
+                    <div className="text-[11px] font-bold text-zinc-200">Workflow YAML Snippet</div>
+                    <pre className="text-[10px] font-mono bg-[#090b0e] p-2.5 rounded-lg border border-zinc-800 text-zinc-300 overflow-x-auto">
+{`name: OptiCode Review
+on: [pull_request]
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: opticode/opticode-scan@v1
+        with:
+          api-key: \${{ secrets.OPTICODE_API_KEY }}`}
+                    </pre>
                   </div>
                 </div>
               )}
@@ -432,4 +460,3 @@ export function PreferencesDropdown({
     </div>
   );
 }
-

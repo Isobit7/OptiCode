@@ -159,3 +159,58 @@ class AuthResponse(BaseModel):
     user: Optional[UserResponse] = Field(None, description="Detailed user profile model.")
     session_info: Optional[SessionInfo] = Field(None, description="Detailed session and cookie model.")
 
+
+# --- Security Audit Models ---
+
+class VulnerabilityItem(BaseModel):
+    severity: str = Field(..., description="Severity level: 'CRITICAL', 'HIGH', 'MEDIUM', 'LOW'.")
+    category: str = Field(..., description="Category (e.g., Secret Leak, SQLi, XSS, Hardcoded Key).")
+    title: str = Field(..., description="Brief title of the vulnerability.")
+    description: str = Field(..., description="Detailed description and risk assessment.")
+    line_number: Optional[int] = Field(None, description="Line number if localized.")
+    recommendation: str = Field(..., description="How to remediate or sanitize.")
+
+
+class SecurityAuditResponse(BaseModel):
+    grade: str = Field(..., description="Overall security letter grade (A+, A, B, C, D, F).")
+    score: int = Field(..., description="Security score out of 100.")
+    secrets_found: int = Field(0, description="Count of hardcoded secret/API key leaks detected.")
+    vulnerabilities: List[VulnerabilityItem] = Field(default_factory=list, description="Detected security issues.")
+    sanitized_code: str = Field(..., description="Auto-sanitized code with secrets replaced by environment variables.")
+    summary: str = Field(..., description="Executive summary of the security audit.")
+
+
+# --- Code Translation Models ---
+
+class TranslateRequest(CodeRequest):
+    target_language: str = Field(..., description="Target programming language (e.g. TypeScript, Python, Rust, Go).")
+
+
+class TranslateResponse(BaseModel):
+    translated_code: str = Field(..., description="Idiomatic code in target language.")
+    source_language: str = Field(..., description="Source programming language.")
+    target_language: str = Field(..., description="Target programming language.")
+    notes: List[str] = Field(default_factory=list, description="Key conversion notes or idiom changes.")
+
+
+# --- PR Review Models ---
+
+class PrReviewRequest(CodeRequest):
+    pr_title: Optional[str] = Field(None, description="Optional PR title or summary header.")
+
+
+class PrReviewResponse(BaseModel):
+    summary: str = Field(..., description="High-level summary of code changes.")
+    github_markdown: str = Field(..., description="Complete GitHub PR review markdown template.")
+    potential_risks: List[str] = Field(default_factory=list, description="Highlighted technical risks or caveats.")
+    test_suggestions: List[str] = Field(default_factory=list, description="Recommended unit/integration test cases.")
+
+
+# --- Flowchart Diagram Models ---
+
+class FlowchartResponse(BaseModel):
+    mermaid_code: str = Field(..., description="Valid Mermaid flowchart graph code (graph TD).")
+    nodes_count: int = Field(..., description="Number of logic nodes in the diagram.")
+    summary: str = Field(..., description="Brief explanation of the logic flow.")
+
+

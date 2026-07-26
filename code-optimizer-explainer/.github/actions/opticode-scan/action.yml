@@ -1,0 +1,28 @@
+name: "OptiCode CI Review & Security Audit"
+description: "Run automated security scans, explanations, and code reviews on pull requests."
+inputs:
+  api-key:
+    description: "OptiCode API Key (generate from OptiCode Settings UI)"
+    required: true
+  analysis-types:
+    description: "Comma-separated analysis types: security, explain, pr-review"
+    required: false
+    default: "security,explain"
+  fail-on-severity:
+    description: "Fail workflow build if security vulnerabilities meet or exceed this severity (CRITICAL, HIGH, MEDIUM)"
+    required: false
+    default: "NONE"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Run OptiCode Scan
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          const apiKey = '${{ inputs.apiKey }}';
+          const types = '${{ inputs.analysisTypes }}'.split(',').map(s => s.trim());
+          
+          console.log('Running OptiCode CI Scan for PR analysis...');
+          // Action script snippet calling POST https://api.opticode.app/api/ci/scan

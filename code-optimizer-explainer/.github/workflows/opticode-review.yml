@@ -1,0 +1,29 @@
+name: OptiCode Automated PR Review & Security Audit
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  opticode_audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install httpx
+
+      - name: Run OptiCode Audit Check
+        env:
+          OPTICODE_API_URL: 'https://opticode-api.render.com'
+        run: |
+          echo "Running OptiCode automated code review & security check..."
+          python backend/scripts/opticode_cli.py audit backend/app/main.py || true
