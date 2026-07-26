@@ -124,6 +124,10 @@ export function CodeInputBar({
       } else if (e.key === "Escape") {
         setShowSlashMenu(false);
       }
+    } else if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+      e.preventDefault();
+      onChange("");
+      textareaRef.current?.focus();
     } else if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
       e.preventDefault();
       if (code.trim() && !loading) {

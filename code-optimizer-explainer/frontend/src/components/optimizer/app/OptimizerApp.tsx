@@ -10,7 +10,7 @@ import { AnalyticsModal } from "../modals/AnalyticsModal";
 import { KeyboardShortcutsModal } from "../modals/KeyboardShortcutsModal";
 import { PreferencesDropdown, type ExplainDepth, type HumanizeMode } from "../modals/PreferencesDropdown";
 import { useSettings } from "@/hooks/useSettings";
-import { runAction, fetchCurrentUser, logoutUser, fetchHistory, type ActionId, type ActionResult } from "@/api/backend";
+import { runAction, fetchCurrentUser, logoutUser, fetchHistory, saveHistoryEntry, type ActionId, type ActionResult } from "@/api/backend";
 import { Sparkles, UserRound, ShieldCheck, Terminal, LogOut, ArrowDown } from "lucide-react";
 
 const LOCAL_STORAGE_KEY = "code_companion_history";
@@ -91,6 +91,20 @@ export function OptimizerApp() {
       );
     }
   }, []);
+
+  // Global keyboard shortcuts
+  useEffect(() => {
+    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      const isInInput = target.tagName === "TEXTAREA" || target.tagName === "INPUT" || target.isContentEditable;
+      if (e.key === "?" && !isInInput && !isSignInOpen && !isAnalyticsOpen) {
+        e.preventDefault();
+        setIsShortcutsOpen((prev) => !prev);
+      }
+    };
+    window.addEventListener("keydown", handleGlobalKeyDown);
+    return () => window.removeEventListener("keydown", handleGlobalKeyDown);
+  }, [isSignInOpen, isAnalyticsOpen]);
 
   useEffect(() => {
     if (typeof window !== "undefined" && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
@@ -210,7 +224,10 @@ export function OptimizerApp() {
   };
 
   const [activeHistoryId, setActiveHistoryId] = useState<string | null>(null);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+    if (typeof window !== "undefined") return window.innerWidth < 768;
+    return false;
+  });
 
   useEffect(() => {
     try {
@@ -286,6 +303,10 @@ export function OptimizerApp() {
           language,
           result: res,
         };
+        // Save to server if user is signed in
+        if (currentUser?.user_id && res.output) {
+          saveHistoryEntry(currentUser.user_id, inputSnippet, action, res.output).catch(void 0);
+        }
         setActiveHistoryId(newItem.id);
         setHistory((prev) => {
           const updated = [newItem, ...prev];
@@ -375,6 +396,14 @@ export function OptimizerApp() {
     <div
       className="relative flex h-screen w-full max-h-screen overflow-hidden bg-[var(--bg-base)] text-[var(--text-primary)] transition-colors duration-200"
     >
+      {/* Mobile sidebar overlay backdrop */}
+      {!sidebarCollapsed && (
+        <div
+          className="fixed inset-0 bg-black/50 z-20 md:hidden"
+          onClick={() => setSidebarCollapsed(true)}
+          aria-hidden="true"
+        />
+      )}
       <SidebarHistory
         history={Array.isArray(history) ? history : []}
         activeId={activeHistoryId}

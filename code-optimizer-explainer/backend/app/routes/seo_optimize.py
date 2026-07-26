@@ -1,33 +1,38 @@
-import logging
-from fastapi import APIRouter, HTTPException
+﻿import logging
+from fastapi import APIRouter, Depends, HTTPException, Request
 
 from app.deterministic_tools import tools
-from app.models import CodeRequest, MAX_LINES, SeoOptimizeResponse
+from app.models import CodeRequest, SeoOptimizeResponse
+from app.rate_limiter import check_rate_limit
+from app.cache import cache
 
 logger = logging.getLogger("code_optimizer.routes.seo")
 router = APIRouter()
 
+MAX_CHARS = 20000
 
-@router.post("/seo-optimize", response_model=SeoOptimizeResponse)
+
+@router.post("/seo-optimize", response_model=SeoOptimizeResponse, dependencies=[Depends(check_rate_limit)])
 def seo_optimize_code(request: CodeRequest) -> SeoOptimizeResponse:
-    if request.line_count() > MAX_LINES:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Input HTML code exceeds maximum allowed limit of {MAX_LINES} lines.",
-        )
+    if len(request.code) > MAX_CHARS:
+        raise HTTPException(status_code=400, detail=f"Input exceeds {MAX_CHARS} characters.")
+
+    cached = cache.get("seo-optimize", request.code, None, None)
+    if cached:
+        return SeoOptimizeResponse(**cached)
 
     try:
         optimized_code, suggestions, score, checklist = tools.seo_optimize(request.code)
-        return SeoOptimizeResponse(
+        result = SeoOptimizeResponse(
             score=score,
             optimized_code=optimized_code,
             suggestions=suggestions,
             checklist=checklist,
         )
+        cache.set("seo-optimize", request.code, None, None, result.model_dump())
+        return result
     except HTTPException:
         raise
     except Exception as err:
-        logger.error(f"Error processing SEO optimization request: {err}", exc_info=True)
-        raise HTTPException(
-            status_code=500, detail="Failed to perform SEO static analysis."
-        ) from err
+        logger.error(f"Error in seo-optimize: {err}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Failed to perform SEO analysis.") from err

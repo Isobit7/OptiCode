@@ -1,4 +1,4 @@
-import json
+﻿import json
 import logging
 import os
 import re
@@ -66,7 +66,7 @@ def detect_language(code: str, language: Optional[str] = None) -> str:
     return "unknown"
 
 
-def _call_model(prompt: str, system_prompt: Optional[str] = None) -> str:
+def _call_model(prompt: str, system_prompt: Optional[str] = None) -> Tuple[str, str]:
     """Sends prompt to configured LLM providers (Groq first for <500ms speed, Google Gemini 2nd, OpenRouter 3rd)."""
     groq_key = os.getenv("GROQ_API_KEY")
     gemini_key = os.getenv("GEMINI_API_KEY")
@@ -74,9 +74,15 @@ def _call_model(prompt: str, system_prompt: Optional[str] = None) -> str:
 
     if not groq_key and not gemini_key and not openrouter_key:
         logger.warning("No LLM API keys configured. Returning stub.")
-        return "[STUB] Set GROQ_API_KEY, GEMINI_API_KEY, or LLM_API_KEY in environment to enable real LLM responses."
+        return "[STUB] Set GROQ_API_KEY, GEMINI_API_KEY, or LLM_API_KEY in environment to enable real LLM responses.", "stub/none", "stub/none"
 
     messages: List[Dict[str, str]] = []
+
+    # Soft token size guard (~4 chars per token estimate)
+    estimated_tokens = len(prompt) // 4
+    if estimated_tokens > 6000:
+        raise RuntimeError(f"Input too large: ~{estimated_tokens} tokens estimated (soft limit 6000). Please reduce input size.")
+
     if system_prompt:
         messages.append({"role": "system", "content": system_prompt})
     messages.append({"role": "user", "content": prompt})
@@ -111,7 +117,7 @@ def _call_model(prompt: str, system_prompt: Optional[str] = None) -> str:
                         choices = data.get("choices", [])
                         if choices and len(choices) > 0:
                             logger.info(f"Groq API call succeeded with model: {g_model}")
-                            return choices[0]["message"]["content"].strip()
+                            return (choices[0]["message"]["content"].strip(), f"groq/{g_model}")
                     logger.warning(
                         f"Groq model {g_model} returned HTTP {response.status_code}: {response.text}"
                     )
@@ -146,7 +152,7 @@ def _call_model(prompt: str, system_prompt: Optional[str] = None) -> str:
                             parts = candidates[0].get("content", {}).get("parts", [])
                             if parts and "text" in parts[0]:
                                 logger.info(f"Gemini API call succeeded with model: {g_model}")
-                                return parts[0]["text"].strip()
+                                return (parts[0]["text"].strip(), f"gemini/{g_model}")
                     logger.warning(
                         f"Gemini model {g_model} returned HTTP {response.status_code}: {response.text}"
                     )
@@ -181,7 +187,7 @@ def _call_model(prompt: str, system_prompt: Optional[str] = None) -> str:
                         choices = data.get("choices", [])
                         if choices and len(choices) > 0:
                             logger.info(f"OpenRouter LLM call succeeded with model: {model_name}")
-                            return choices[0]["message"]["content"].strip()
+                            return (choices[0]["message"]["content"].strip(), f"openrouter/{model_name}")
 
                     logger.warning(
                         f"OpenRouter model {model_name} returned HTTP {response.status_code}: {response.text}"
@@ -225,7 +231,8 @@ def explain(
     prompt = f"Language: {detected}\nDepth Level: {depth_level}\n\nCode:\n```{detected}\n{code}\n```"
 
     try:
-        explanation = _call_model(prompt, system_prompt=system_prompt)
+        explanation, provider = _call_model(prompt, system_prompt=system_prompt)
+        logger.info(f"[explain] LLM provider used: {provider}")
         return explanation, detected, depth_level
     except Exception as err:
         logger.error(f"Error in explain: {err}")
@@ -260,7 +267,8 @@ def humanize(
     prompt = f"Language: {detected}\nMode: {mode_used}\n\nCode:\n```{detected}\n{code}\n```"
 
     try:
-        humanized = _call_model(prompt, system_prompt=system_prompt)
+        humanized, provider = _call_model(prompt, system_prompt=system_prompt)
+        logger.info(f"[humanize] LLM provider used: {provider}")
         cleaned = re.sub(
             r"^```(?:\w+)?\n|```$", "", humanized.strip(), flags=re.MULTILINE
         ).strip()
@@ -294,7 +302,8 @@ def alternatives(
     prompt = f"Language: {detected}\n\nCode:\n```{detected}\n{code}\n```"
 
     try:
-        raw_output = _call_model(prompt, system_prompt=system_prompt)
+        raw_output, provider = _call_model(prompt, system_prompt=system_prompt)
+        logger.info(f"[alternatives] LLM provider used: {provider}")
         json_str = re.sub(r"^```json\s*|^```\s*|```$", "", raw_output.strip()).strip()
 
         parsed = json.loads(json_str)

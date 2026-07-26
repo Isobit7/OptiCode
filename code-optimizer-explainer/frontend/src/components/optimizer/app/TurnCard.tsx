@@ -2,6 +2,7 @@ import { useState, useEffect, type ReactNode } from "react";
 import type { ActionId, ActionResult } from "@/api/backend";
 import { Copy, Check, Sparkles, AlertCircle, ChevronDown, ChevronUp, RefreshCw } from "lucide-react";
 import { SimpleDiffView } from "../results/DiffLine";
+import { toast } from "sonner";
 
 export interface TurnMessage {
   id: string;
@@ -28,6 +29,7 @@ function CopyButton({ text }: { text: string }) {
         try {
           await navigator.clipboard.writeText(text);
           setCopied(true);
+          toast.success("Copied to clipboard");
           setTimeout(() => setCopied(false), 1500);
         } catch {
           // Ignore
@@ -321,11 +323,16 @@ export function TurnCard({ message, onRetry }: Props) {
           <div className="space-y-4">
             {/* Header Result Bar */}
             <div className="flex items-center justify-between gap-2 pb-3 border-b border-[var(--border-subtle)] flex-wrap">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <span className="text-xs font-semibold text-[var(--text-primary)] flex items-center gap-1.5">
                   <Sparkles className="h-3.5 w-3.5 text-[var(--accent)]" />
                   <span>{ACTION_LABELS[message.action]} Result</span>
                 </span>
+                {message.result.detectedLanguage && (
+                  <span className="text-[10px] font-mono font-bold text-sky-500 bg-sky-500/10 px-2 py-0.5 rounded border border-sky-500/20 capitalize">
+                    {message.result.detectedLanguage}
+                  </span>
+                )}
                 <span className="text-[10px] font-mono font-bold text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
                   O(N) Optimized
                 </span>

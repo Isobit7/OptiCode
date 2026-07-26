@@ -1,26 +1,33 @@
-import logging
-from fastapi import APIRouter, HTTPException
+﻿import logging
+from fastapi import APIRouter, Depends, HTTPException, Request
 
 from app.deterministic_tools import tools
-from app.models import CodeRequest, MAX_LINES, PrettifyResponse
+from app.models import CodeRequest, PrettifyResponse
+from app.rate_limiter import check_rate_limit
+from app.cache import cache
 
 logger = logging.getLogger("code_optimizer.routes.prettify")
 router = APIRouter()
 
+MAX_CHARS = 20000
 
-@router.post("/prettify", response_model=PrettifyResponse)
+
+@router.post("/prettify", response_model=PrettifyResponse, dependencies=[Depends(check_rate_limit)])
 def prettify_code(request: CodeRequest) -> PrettifyResponse:
-    if request.line_count() > MAX_LINES:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Input code exceeds maximum allowed limit of {MAX_LINES} lines.",
-        )
+    if len(request.code) > MAX_CHARS:
+        raise HTTPException(status_code=400, detail=f"Input exceeds {MAX_CHARS} characters.")
+
+    cached = cache.get("prettify", request.code, request.language, None)
+    if cached:
+        return PrettifyResponse(**cached)
 
     try:
         formatted = tools.prettify(request.code, request.language)
-        return PrettifyResponse(formatted_code=formatted)
+        result = PrettifyResponse(formatted_code=formatted)
+        cache.set("prettify", request.code, request.language, None, result.model_dump())
+        return result
     except HTTPException:
         raise
     except Exception as err:
-        logger.error(f"Error processing prettify request: {err}", exc_info=True)
+        logger.error(f"Error in prettify: {err}", exc_info=True)
         raise HTTPException(status_code=500, detail="Failed to format code.") from err

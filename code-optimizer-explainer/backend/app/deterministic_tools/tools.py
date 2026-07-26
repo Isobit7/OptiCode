@@ -60,12 +60,25 @@ def shorten(code: str, language: Optional[str] = None) -> str:
         except Exception as err:
             logger.warning(f"AST Python shortening failed: {err}")
 
-    # Deterministic regex minification fallback for C/JS/HTML/CSS
-    # Remove single-line comments
+    # For non-Python: try LLM-powered shortening first
+    try:
+        from app.llm_interface.client import _call_model
+        system_prompt = (
+            "You are a code minifier. Remove all comments, docstrings, and unnecessary whitespace. "
+            "Shorten verbose variable names where safe. Keep functionality identical. "
+            "Return ONLY the shortened code, no explanation."
+        )
+        prompt = f"Language: {lang}\n\nCode:\n```{lang}\n{code}\n```"
+        shortened, _ = _call_model(prompt, system_prompt=system_prompt)
+        cleaned_llm = re.sub(r"^```(?:\w+)?\n|```$", "", shortened.strip(), flags=re.MULTILINE).strip()
+        if cleaned_llm:
+            return cleaned_llm
+    except Exception as llm_err:
+        logger.warning(f"LLM shorten fallback failed ({llm_err}), using regex minifier")
+
+    # Deterministic regex minification fallback
     cleaned = re.sub(r"//.*$", "", code, flags=re.MULTILINE)
-    # Remove multi-line comments
     cleaned = re.sub(r"/\*[\s\S]*?\*/", "", cleaned)
-    # Collapse multiple blank lines
     lines = [line.strip() for line in cleaned.splitlines() if line.strip()]
     return "\n".join(lines)
 
@@ -245,6 +258,25 @@ def seo_optimize(
 
         final_score = int((score_points / total_checks) * 100)
         optimized_html = soup.prettify()
+
+        # LLM enhancement: add intelligent SEO suggestions beyond static checks
+        try:
+            import json as _json
+            from app.llm_interface.client import _call_model
+            llm_system = (
+                "You are an SEO expert. Given this HTML, provide exactly 3 specific, actionable SEO suggestions "
+                "focusing on content quality, structured data (JSON-LD), and semantic markup improvements. "
+                "Do NOT repeat basic meta tag advice. Return ONLY a JSON array of 3 strings."
+            )
+            llm_prompt = f"HTML:\n```html\n{html_code[:3000]}\n```"
+            raw_llm, _ = _call_model(llm_prompt, system_prompt=llm_system)
+            json_str = re.sub(r"^```json?\s*|```$", "", raw_llm.strip()).strip()
+            extra_suggestions = _json.loads(json_str)
+            if isinstance(extra_suggestions, list):
+                suggestions.extend([str(s) for s in extra_suggestions[:3]])
+        except Exception as llm_err:
+            logger.warning(f"LLM SEO enhancement skipped: {llm_err}")
+
         return optimized_html, suggestions, final_score, checklist
 
     except Exception as err:

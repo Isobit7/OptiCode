@@ -236,6 +236,91 @@ export async function runAction(
   }
 }
 
+// SSE streaming for LLM actions (explain, humanize, alternatives)
+export type StreamableAction = "explain" | "humanize" | "alternatives";
+
+export async function* streamAction(
+  action: StreamableAction,
+  code: string,
+  language: string,
+  options?: ActionOptions,
+  signal?: AbortSignal,
+): AsyncGenerator<string, void, unknown> {
+  const payload: Record<string, unknown> = { code };
+  if (action !== "seo-optimize") payload.language = language;
+  if (action === "explain" && options?.explainDepth) payload.depth = options.explainDepth;
+  if (action === "humanize" && options?.humanizeMode) payload.mode = options.humanizeMode;
+
+  let path = "";
+  if (action === "explain") path = "/api/explain/stream";
+  else if (action === "humanize") path = "/api/humanize/stream";
+  else if (action === "alternatives") path = "/api/alternatives/stream";
+
+  try {
+    const res = await fetch(`${BASE_URL}${path}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Accept: "text/event-stream" },
+      body: JSON.stringify(payload),
+      signal,
+    });
+
+    if (!res.ok || !res.body) {
+      // Fall back to normal request
+      const result = await runAction(action, code, language, options);
+      yield result.output ?? "";
+      return;
+    }
+
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split("\n");
+      buffer = lines.pop() ?? "";
+      for (const line of lines) {
+        if (line.startsWith("data: ")) {
+          const data = line.slice(6).trim();
+          if (data === "[DONE]") return;
+          try {
+            const parsed = JSON.parse(data);
+            if (parsed.chunk) yield parsed.chunk as string;
+          } catch {
+            if (data) yield data;
+          }
+        }
+      }
+    }
+  } catch (err) {
+    // On any network error, fall back to normal request
+    if ((err as Error)?.name !== "AbortError") {
+      const result = await runAction(action, code, language, options);
+      yield result.output ?? "";
+    }
+  }
+}
+
+export async function saveHistoryEntry(
+  userId: string,
+  inputCode: string,
+  featureUsed: string,
+  output: string,
+): Promise<void> {
+  try {
+    await post("/api/history", {
+      user_id: userId,
+      input_code: inputCode,
+      feature_used: featureUsed,
+      output,
+    });
+  } catch {
+    // History save is best-effort — don't throw
+  }
+}
+
 // --- Authentication & User Session API Functions ---
 
 export interface UserProfile {

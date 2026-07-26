@@ -244,9 +244,13 @@ export function SidebarHistory({
   return (
     <aside
       className={[
-        "sticky top-0 h-screen flex flex-col transition-all duration-300 ease-in-out border-r border-[var(--border-default)] text-[var(--text-primary)] shadow-xs z-30 shrink-0",
+        "h-screen flex flex-col transition-all duration-300 ease-in-out border-r border-[var(--border-default)] text-[var(--text-primary)] shadow-xs z-30 shrink-0",
         "bg-[var(--bg-surface)]",
-        collapsed ? "w-14" : "w-56 sm:w-64",
+        // Desktop: sticky inline sidebar
+        "md:sticky md:top-0",
+        // Mobile: fixed drawer that slides in/out
+        "fixed top-0 left-0 md:relative",
+        collapsed ? "w-14 -translate-x-full md:translate-x-0" : "w-64 translate-x-0",
       ].join(" ")}
     >
       {/* Top Header */}

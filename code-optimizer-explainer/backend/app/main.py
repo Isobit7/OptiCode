@@ -73,8 +73,17 @@ def global_exception_handler(request: Request, exc: Exception) -> JSONResponse:
 @app.get("/")
 @app.get("/health")
 def health_check() -> dict:
+    from app.cache import cache
     return {
         "status": "ok",
         "service": "code-optimizer-explainer-api",
         "model": os.getenv("LLM_MODEL_NAME", "google/gemma-4-31b-it:free"),
+        "cache": cache.stats(),
     }
+
+
+@app.get("/cache/stats", tags=["Monitoring"])
+def get_cache_stats() -> dict:
+    """Returns current in-memory cache statistics."""
+    from app.cache import cache
+    return {"status": "ok", **cache.stats()}

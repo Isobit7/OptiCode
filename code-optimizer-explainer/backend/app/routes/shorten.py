@@ -1,26 +1,33 @@
-import logging
-from fastapi import APIRouter, HTTPException
+﻿import logging
+from fastapi import APIRouter, Depends, HTTPException, Request
 
 from app.deterministic_tools import tools
-from app.models import CodeRequest, MAX_LINES, ShortenResponse
+from app.models import CodeRequest, ShortenResponse
+from app.rate_limiter import check_rate_limit
+from app.cache import cache
 
 logger = logging.getLogger("code_optimizer.routes.shorten")
 router = APIRouter()
 
+MAX_CHARS = 20000
 
-@router.post("/shorten", response_model=ShortenResponse)
+
+@router.post("/shorten", response_model=ShortenResponse, dependencies=[Depends(check_rate_limit)])
 def shorten_code(request: CodeRequest) -> ShortenResponse:
-    if request.line_count() > MAX_LINES:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Input code exceeds maximum allowed limit of {MAX_LINES} lines.",
-        )
+    if len(request.code) > MAX_CHARS:
+        raise HTTPException(status_code=400, detail=f"Input exceeds {MAX_CHARS} characters.")
+
+    cached = cache.get("shorten", request.code, request.language, None)
+    if cached:
+        return ShortenResponse(**cached)
 
     try:
         shortened = tools.shorten(request.code, request.language)
-        return ShortenResponse(shortened_code=shortened)
+        result = ShortenResponse(shortened_code=shortened)
+        cache.set("shorten", request.code, request.language, None, result.model_dump())
+        return result
     except HTTPException:
         raise
     except Exception as err:
-        logger.error(f"Error processing shorten request: {err}", exc_info=True)
+        logger.error(f"Error in shorten: {err}", exc_info=True)
         raise HTTPException(status_code=500, detail="Failed to shorten code.") from err
