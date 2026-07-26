@@ -55,11 +55,11 @@ Simply paste any code snippet in **any programming language**, and OptiCode inst
 
 | Workspace Interface | Side-by-Side Diff View |
 |:---:|:---:|
-| <img src="https://raw.githubusercontent.com/Isobit7/OptiCode/main/code-optimizer-explainer/frontend/public/docs/workspace_preview.png" width="380" alt="OptiCode Workspace"/> | <img src="https://raw.githubusercontent.com/Isobit7/OptiCode/main/code-optimizer-explainer/frontend/public/docs/diff_view.png" width="380" alt="OptiCode Diff View"/> |
+| <img src="https://raw.githubusercontent.com/Isobit7/OptiCode/main/code-optimizer-explainer/frontend/public/docs/workspace_preview.png" width="250" alt="OptiCode Workspace"/> | <img src="https://raw.githubusercontent.com/Isobit7/OptiCode/main/code-optimizer-explainer/frontend/public/docs/diff_view.png" width="250" alt="OptiCode Diff View"/> |
 
 | Security + Secret Audit | Interactive Flowchart Engine |
 |:---:|:---:|
-| <img src="https://raw.githubusercontent.com/Isobit7/OptiCode/main/code-optimizer-explainer/frontend/public/docs/security_audit.png" width="380" alt="Security Audit"/> | <img src="https://raw.githubusercontent.com/Isobit7/OptiCode/main/code-optimizer-explainer/frontend/public/docs/flowchart_engine.png" width="380" alt="Flowchart Engine"/> |
+| <img src="https://raw.githubusercontent.com/Isobit7/OptiCode/main/code-optimizer-explainer/frontend/public/docs/security_audit.png" width="250" alt="Security Audit"/> | <img src="https://raw.githubusercontent.com/Isobit7/OptiCode/main/code-optimizer-explainer/frontend/public/docs/flowchart_engine.png" width="250" alt="Flowchart Engine"/> |
 
 ---
 
