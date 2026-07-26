@@ -226,6 +226,7 @@ code-optimizer-explainer/
 | 2026-07-24 | Added PRODUCT_ROADMAP.md detailing Security Audit, Code Translator, PR Reviewer, and Logic Flowcharts |
 | 2026-07-24 | Added FRONTEND_DASHBOARD_SPECS.md for frontend developer integration |
 | 2026-07-24 | Added explanation depth levels, humanize modes, structured alternatives with Big-O bounds, SEO 0-100 scoring, and 9-test backend test suite |
+| 2026-07-26 | Created frontend/vercel.json (Vite build + SPA rewrites) and updated backend/vercel.json (PYTHONPATH, maxLambdaSize) for Vercel deployment. Updated frontend/.env.example with VITE_GOOGLE_CLIENT_ID. Created deployment_guide.md artifact with step-by-step Vercel + Render instructions. |
 | 2026-07-22 | Initial PRD, tech stack, architecture, and starter scaffold created |
 
 ---
