@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from "react";
-import { ArrowRight, Check, Eye, EyeOff, Loader2 } from "lucide-react";
+import { ArrowRight, Check, Eye, EyeOff, Loader2, Sparkles } from "lucide-react";
 
 interface RegisterFormProps {
   onSubmit: (email: string, password: string, fullName: string) => Promise<void>;
@@ -26,7 +26,7 @@ export function RegisterForm({ onSubmit, loading, error, success }: RegisterForm
   return (
     <form onSubmit={handleSubmit} className="space-y-4" aria-label="Create account form">
       <div className="space-y-2">
-        <label htmlFor="register-name" className="block text-xs font-semibold text-(--auth-ink)">
+        <label htmlFor="register-name" className="block text-xs font-semibold text-zinc-900 dark:text-zinc-100">
           Full name
         </label>
         <input
@@ -39,12 +39,12 @@ export function RegisterForm({ onSubmit, loading, error, success }: RegisterForm
           onChange={(event) => setFullName(event.target.value)}
           placeholder="Alex Morgan"
           disabled={loading}
-          className="h-12 w-full rounded-xl border border-(--auth-border) bg-(--auth-paper) px-4 text-sm text-(--auth-ink) outline-none transition placeholder:text-(--auth-muted)/65 focus-visible:border-(--auth-accent) focus-visible:ring-2 focus-visible:ring-(--auth-accent)/20 disabled:cursor-not-allowed disabled:opacity-55"
+          className="h-12 w-full rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 text-sm text-zinc-900 dark:text-white outline-none transition placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus-visible:border-orange-500 focus-visible:ring-2 focus-visible:ring-orange-500/20 disabled:cursor-not-allowed disabled:opacity-55"
         />
       </div>
 
       <div className="space-y-2">
-        <label htmlFor="register-email" className="block text-xs font-semibold text-(--auth-ink)">
+        <label htmlFor="register-email" className="block text-xs font-semibold text-zinc-900 dark:text-zinc-100">
           Email address
         </label>
         <input
@@ -56,12 +56,12 @@ export function RegisterForm({ onSubmit, loading, error, success }: RegisterForm
           onChange={(event) => setEmail(event.target.value)}
           placeholder="you@company.com"
           disabled={loading}
-          className="h-12 w-full rounded-xl border border-(--auth-border) bg-(--auth-paper) px-4 text-sm text-(--auth-ink) outline-none transition placeholder:text-(--auth-muted)/65 focus-visible:border-(--auth-accent) focus-visible:ring-2 focus-visible:ring-(--auth-accent)/20 disabled:cursor-not-allowed disabled:opacity-55"
+          className="h-12 w-full rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 text-sm text-zinc-900 dark:text-white outline-none transition placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus-visible:border-orange-500 focus-visible:ring-2 focus-visible:ring-orange-500/20 disabled:cursor-not-allowed disabled:opacity-55"
         />
       </div>
 
       <div className="space-y-2">
-        <label htmlFor="register-password" className="block text-xs font-semibold text-(--auth-ink)">
+        <label htmlFor="register-password" className="block text-xs font-semibold text-zinc-900 dark:text-zinc-100">
           Password
         </label>
         <div className="relative">
@@ -75,13 +75,13 @@ export function RegisterForm({ onSubmit, loading, error, success }: RegisterForm
             onChange={(event) => setPassword(event.target.value)}
             placeholder="At least 6 characters"
             disabled={loading}
-            className="h-12 w-full rounded-xl border border-(--auth-border) bg-(--auth-paper) px-4 pr-12 text-sm text-(--auth-ink) outline-none transition placeholder:text-(--auth-muted)/65 focus-visible:border-(--auth-accent) focus-visible:ring-2 focus-visible:ring-(--auth-accent)/20 disabled:cursor-not-allowed disabled:opacity-55"
+            className="h-12 w-full rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 pr-12 text-sm text-zinc-900 dark:text-white outline-none transition placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus-visible:border-orange-500 focus-visible:ring-2 focus-visible:ring-orange-500/20 disabled:cursor-not-allowed disabled:opacity-55"
           />
           <button
             type="button"
             onClick={() => setShowPassword((visible) => !visible)}
             aria-label={showPassword ? "Hide password" : "Show password"}
-            className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-1.5 text-(--auth-muted) transition hover:text-(--auth-ink) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--auth-accent)/30"
+            className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-1.5 text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500/30"
           >
             {showPassword ? (
               <EyeOff className="h-4 w-4" aria-hidden="true" />
@@ -96,21 +96,21 @@ export function RegisterForm({ onSubmit, loading, error, success }: RegisterForm
               {[1, 2, 3].map((level) => (
                 <span
                   key={level}
-                  className={`h-1 flex-1 rounded-full transition-colors ${level <= passwordStrength ? strengthColors[passwordStrength] : "bg-(--auth-border)"}`}
+                  className={`h-1 flex-1 rounded-full transition-colors ${level <= passwordStrength ? strengthColors[passwordStrength] : "bg-zinc-300 dark:bg-zinc-700"}`}
                 />
               ))}
             </div>
-            <p className="text-[11px] text-(--auth-muted)">
-              Password strength: <span className="font-semibold text-(--auth-ink)">{strengthLabels[passwordStrength]}</span>
+            <p className="text-[11px] text-zinc-500">
+              Password strength: <span className="font-semibold text-zinc-900 dark:text-zinc-100">{strengthLabels[passwordStrength]}</span>
             </p>
           </div>
         )}
       </div>
 
-      <ul className="space-y-2 py-1 text-xs text-(--auth-muted)" aria-label="Account benefits">
+      <ul className="space-y-2 py-1 text-xs text-zinc-600 dark:text-zinc-400" aria-label="Account benefits">
         {["Sync your optimization history", "Bring your own API key", "Unlock priority models"].map((benefit) => (
           <li key={benefit} className="flex items-center gap-2">
-            <Check className="h-3.5 w-3.5 shrink-0 text-(--auth-success)" aria-hidden="true" />
+            <Check className="h-3.5 w-3.5 shrink-0 text-emerald-500" aria-hidden="true" />
             {benefit}
           </li>
         ))}
@@ -125,18 +125,23 @@ export function RegisterForm({ onSubmit, loading, error, success }: RegisterForm
         </p>
       )}
 
+      <div className="rounded-xl border border-orange-500/30 bg-orange-500/10 p-3 text-xs text-zinc-900 dark:text-zinc-100 flex items-center gap-2 mb-2 shadow-xs">
+        <Sparkles className="h-4 w-4 text-orange-500 shrink-0" />
+        <span><strong>OptiCode Account:</strong> Sign up with your Gmail/Email ID & password to save all your chats & optimizations.</span>
+      </div>
+
       <button
         type="submit"
         disabled={loading || !fullName || !email || !password}
-        className="group flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-(--auth-accent) px-4 text-sm font-bold text-white shadow-[0_12px_24px_-12px_var(--auth-accent)] transition hover:bg-(--auth-accent-deep) active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--auth-accent) focus-visible:ring-offset-2 focus-visible:ring-offset-(--auth-pearl) disabled:cursor-not-allowed disabled:opacity-45"
+        className="group flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-orange-500 px-4 text-sm font-bold text-white shadow-md transition hover:bg-orange-600 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-45 cursor-pointer"
       >
         {loading ? (
           <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
         ) : success ? (
-          "Account created"
+          "OptiCode Account Created"
         ) : (
           <>
-            <span>Create your account</span>
+            <span>Create OptiCode Account</span>
             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" aria-hidden="true" />
           </>
         )}

@@ -145,6 +145,18 @@
     "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono",
     "Courier New", monospace;
 
+  --color-auth-workspace: var(--auth-workspace);
+  --color-auth-workspace-elevated: var(--auth-workspace-elevated);
+  --color-auth-workspace-deep: var(--auth-workspace-deep);
+  --color-auth-pearl: var(--auth-pearl);
+  --color-auth-paper: var(--auth-paper);
+  --color-auth-ink: var(--auth-ink);
+  --color-auth-muted: var(--auth-muted);
+  --color-auth-accent: var(--auth-accent);
+  --color-auth-accent-deep: var(--auth-accent-deep);
+  --color-auth-success: var(--auth-success);
+  --color-auth-border: var(--auth-border);
+
   --font-body: var(--font-sans);
   --font-headings: var(--font-heading);
   --font-code: var(--font-mono);

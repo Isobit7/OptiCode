@@ -46,13 +46,14 @@ export function SignInModal({ isOpen, onClose, onSuccess }: SignInModalProps) {
         await loginUser(email, password);
       }
       setAuthSuccess(true);
+      window.dispatchEvent(new Event("opticode_auth_change"));
       if (onSuccess) onSuccess();
       setTimeout(() => {
         setAuthSuccess(false);
         onClose();
       }, 1000);
     } catch (err: any) {
-      setAuthError(err.message || "Authentication failed. Please try again.");
+      setAuthError(err.message || "Authentication failed. Please check your credentials.");
     } finally {
       setLoading(false);
     }
@@ -65,7 +66,7 @@ export function SignInModal({ isOpen, onClose, onSuccess }: SignInModalProps) {
       if (providerName === "Google") {
         const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
         const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-        if (supabaseUrl && supabaseKey) {
+        if (supabaseUrl && supabaseKey && !supabaseUrl.includes("placeholder")) {
           try {
             const { supabase } = await import("@/api/supabaseClient");
             const { data, error } = await supabase.auth.signInWithOAuth({
@@ -79,14 +80,8 @@ export function SignInModal({ isOpen, onClose, onSuccess }: SignInModalProps) {
               window.location.href = data.url;
               return;
             }
-            return;
           } catch (err: any) {
-            console.warn("Supabase Google OAuth warning:", err);
-            if (err.message && !err.message.includes("fallback")) {
-              setAuthError(err.message || "Google sign-in failed. Please verify provider settings.");
-              setLoading(false);
-              return;
-            }
+            console.warn("Supabase Google OAuth warning, falling back to backend auth:", err);
           }
         }
         await loginGoogle("google_user@opticode.dev", "Google Developer");
@@ -94,6 +89,7 @@ export function SignInModal({ isOpen, onClose, onSuccess }: SignInModalProps) {
         await loginGoogle(`${providerName.toLowerCase()}_user@opticode.dev`, `${providerName} Developer`);
       }
       setAuthSuccess(true);
+      window.dispatchEvent(new Event("opticode_auth_change"));
       if (onSuccess) onSuccess();
       setTimeout(() => {
         setAuthSuccess(false);
@@ -188,7 +184,7 @@ export function SignInModal({ isOpen, onClose, onSuccess }: SignInModalProps) {
             }`}
           >
             <UserPlus className="h-3.5 w-3.5" />
-            <span>Register</span>
+            <span>Create OptiCode Account</span>
           </button>
         </div>
 

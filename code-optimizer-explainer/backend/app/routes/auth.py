@@ -7,8 +7,11 @@ from fastapi import APIRouter, Cookie, Depends, Header, HTTPException, Request, 
 from app.db.db_session import (
     create_user_session,
     get_active_session,
+    get_local_user_by_email,
     invalidate_session,
+    save_local_user_credentials,
     upsert_user_profile,
+    verify_local_user_password,
 )
 from app.db.supabase_client import get_client
 from app.models import (
@@ -195,11 +198,25 @@ def register(
     """Registers a new user and stores profile, session, and cookies in the database."""
     user_id = None
     access_token = None
+    email = credentials.email.strip().lower()
+
+    if not email or "@" not in email:
+        raise HTTPException(status_code=400, detail="Please enter a valid email address.")
+    if not credentials.password or len(credentials.password) < 6:
+        raise HTTPException(status_code=400, detail="Password must be at least 6 characters long.")
+
+    # Check if user already exists locally
+    existing_local = get_local_user_by_email(email)
+    if existing_local:
+        raise HTTPException(
+            status_code=400,
+            detail="An account with this email address already exists. Please log in instead.",
+        )
 
     try:
         supabase = get_client()
         res = supabase.auth.sign_up(
-            {"email": credentials.email, "password": credentials.password}
+            {"email": email, "password": credentials.password}
         )
 
         if res and hasattr(res, "user") and res.user:
@@ -209,17 +226,26 @@ def register(
             if session:
                 access_token = session.access_token
     except Exception as err:
+        err_msg = str(err)
+        if "already registered" in err_msg.lower() or "already exists" in err_msg.lower():
+            raise HTTPException(
+                status_code=400,
+                detail="An account with this email address already exists. Please log in instead.",
+            )
         logger.warning(
-            f"Supabase register error/fallback: {err}. Generating local user profile record."
+            f"Supabase register fallback ({err}). Creating local database user."
         )
 
     if not user_id:
-        user_id = f"usr_{uuid.uuid5(uuid.NAMESPACE_DNS, credentials.email).hex[:16]}"
+        user_id = f"usr_{uuid.uuid5(uuid.NAMESPACE_DNS, email).hex[:16]}"
+
+    # Save credentials locally for fallback validation
+    save_local_user_credentials(email, credentials.password)
 
     return _create_auth_session_and_set_cookies(
         response=response,
         user_id=user_id,
-        email=credentials.email,
+        email=email,
         full_name=credentials.full_name,
         access_token=access_token,
         auth_provider="email",
@@ -236,30 +262,45 @@ def login(
     """Authenticates user, updates last_login in DB, and stores active session & cookies in DB."""
     user_id = None
     access_token = None
+    email = credentials.email.strip().lower()
 
+    if not email or not credentials.password:
+        raise HTTPException(status_code=400, detail="Email and password are required.")
+
+    supabase_authenticated = False
     try:
         supabase = get_client()
         res = supabase.auth.sign_in_with_password(
-            {"email": credentials.email, "password": credentials.password}
+            {"email": email, "password": credentials.password}
         )
 
-        if res and hasattr(res, "user") and res.user and hasattr(res, "session") and res.session:
+        if res and hasattr(res, "user") and res.user:
             user = res.user
-            session = res.session
+            session = getattr(res, "session", None)
             user_id = user.id
-            access_token = session.access_token
+            if session:
+                access_token = session.access_token
+            supabase_authenticated = True
     except Exception as err:
-        logger.warning(
-            f"Supabase login error/fallback ({err}). Using fallback user verification."
-        )
+        logger.info(f"Supabase sign in attempt info: {err}")
 
-    if not user_id:
-        user_id = f"usr_{uuid.uuid5(uuid.NAMESPACE_DNS, credentials.email).hex[:16]}"
+    # Fallback to local credential verification if Supabase auth did not return a session
+    if not supabase_authenticated:
+        if verify_local_user_password(email, credentials.password):
+            user_id = f"usr_{uuid.uuid5(uuid.NAMESPACE_DNS, email).hex[:16]}"
+        else:
+            # Check if email exists in local db but password failed
+            local_user = get_local_user_by_email(email)
+            if local_user:
+                raise HTTPException(status_code=400, detail="Invalid email or password.")
+            
+            # If neither Supabase nor local DB matched, return invalid credentials error
+            raise HTTPException(status_code=400, detail="Invalid email or password.")
 
     return _create_auth_session_and_set_cookies(
         response=response,
         user_id=user_id,
-        email=credentials.email,
+        email=email,
         access_token=access_token,
         auth_provider="email",
         request=request,

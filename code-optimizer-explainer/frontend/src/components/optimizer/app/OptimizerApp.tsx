@@ -14,6 +14,7 @@ import { RightDashboardPanel } from "../sidebar/RightDashboardPanel";
 const AnalyticsModal = lazy(() => import("../modals/AnalyticsModal").then(m => ({ default: m.AnalyticsModal })));
 const KeyboardShortcutsModal = lazy(() => import("../modals/KeyboardShortcutsModal").then(m => ({ default: m.KeyboardShortcutsModal })));
 const TranslateModal = lazy(() => import("../modals/TranslateModal").then(m => ({ default: m.TranslateModal })));
+const SignInModal = lazy(() => import("../modals/SignInModal").then(m => ({ default: m.SignInModal })));
 
 const LOCAL_STORAGE_KEY = "code_companion_history";
 const ONBOARDING_KEY = "opticode_user_onboarding_prefs";
@@ -40,8 +41,8 @@ export function OptimizerApp() {
   // Global user settings (font size, copy-on-submit, etc.) — persisted in localStorage
   const { settings, updateSetting } = useSettings();
 
-  // Theme state: light or dark (SSR safe)
-  const [theme, setTheme] = useState<"light" | "dark">("light");
+  // Theme state: light or dark (SSR safe) - Defaults to dark for all users
+  const [theme, setTheme] = useState<"light" | "dark">("dark");
 
   type RunActionInput = {
     action: ActionId;
@@ -64,9 +65,14 @@ export function OptimizerApp() {
   useEffect(() => {
     try {
       const saved = localStorage.getItem("opticode_theme");
-      if (saved === "dark") setTheme("dark");
+      if (saved === "light") {
+        setTheme("light");
+      } else {
+        setTheme("dark");
+        if (!saved) localStorage.setItem("opticode_theme", "dark");
+      }
     } catch (err) {
-      void err;
+      setTheme("dark");
     }
   }, []);
 
@@ -194,12 +200,28 @@ export function OptimizerApp() {
   // History & Sidebar state
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [currentUser, setCurrentUser] = useState<any>(null);
+  const [isSignInOpen, setIsSignInOpen] = useState(false);
+
+function getGuestUserId(): string {
+  if (typeof window === "undefined") return "guest_anon";
+  try {
+    let guestId = localStorage.getItem("opticode_guest_id");
+    if (!guestId) {
+      guestId = `guest_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+      localStorage.setItem("opticode_guest_id", guestId);
+    }
+    return guestId;
+  } catch {
+    return "guest_anon";
+  }
+}
 
   const checkUserSession = useCallback(async () => {
     const user = await fetchCurrentUser();
     setCurrentUser(user);
-    if (user) {
-      const serverHistory = await fetchHistory(user.user_id);
+    const targetUserId = user?.user_id || getGuestUserId();
+    if (targetUserId) {
+      const serverHistory = await fetchHistory(targetUserId);
       if (serverHistory && Array.isArray(serverHistory) && serverHistory.length > 0) {
         const mappedItems: HistoryItem[] = serverHistory.map((h: any) => ({
           id: h.id || `hist_${Date.now()}`,
@@ -220,6 +242,17 @@ export function OptimizerApp() {
 
   useEffect(() => {
     checkUserSession();
+    const handleAuthChange = () => {
+      checkUserSession();
+    };
+    if (typeof window !== "undefined") {
+      window.addEventListener("opticode_auth_change", handleAuthChange);
+    }
+    return () => {
+      if (typeof window !== "undefined") {
+        window.removeEventListener("opticode_auth_change", handleAuthChange);
+      }
+    };
   }, [checkUserSession]);
 
   const handleLogout = async () => {
@@ -343,9 +376,10 @@ export function OptimizerApp() {
           language,
           result: res,
         };
-        // Save to server if user is signed in
-        if (currentUser?.user_id && res.output) {
-          saveHistoryEntry(currentUser.user_id, inputSnippet, action, res.output).catch(void 0);
+        // Save to Supabase history database for both logged in users and guest sessions
+        const targetUserId = currentUser?.user_id || getGuestUserId();
+        if (targetUserId && res.output) {
+          saveHistoryEntry(targetUserId, inputSnippet, action, res.output).catch(void 0);
         }
         setActiveHistoryId(newItem.id);
         setHistory((prev) => {
@@ -463,6 +497,7 @@ export function OptimizerApp() {
         theme={theme}
         onToggleTheme={handleToggleTheme}
         currentUser={currentUser}
+        onSignIn={() => setIsSignInOpen(true)}
         onSignOut={handleLogout}
         onOpenAnalytics={() => setIsAnalyticsOpen(true)}
         onOpenShortcuts={() => setIsShortcutsOpen(true)}
@@ -481,7 +516,39 @@ export function OptimizerApp() {
             onSettingChange={updateSetting}
           />
 
-          <div className="flex items-center gap-3" />
+          <div className="flex items-center gap-3">
+            {currentUser ? (
+              <div className="flex items-center gap-2 rounded-xl bg-[var(--bg-surface-alt)] px-3 py-1.5 border border-[var(--border-default)]">
+                {currentUser.avatar_url ? (
+                  <img src={currentUser.avatar_url} alt="User Avatar" className="h-5 w-5 rounded-full object-cover" />
+                ) : (
+                  <div className="grid h-5 w-5 place-items-center rounded-full bg-orange-500 text-[10px] font-bold text-white">
+                    {(currentUser.full_name || currentUser.email || "U")[0].toUpperCase()}
+                  </div>
+                )}
+                <span className="text-xs font-semibold text-[var(--text-primary)]">
+                  {currentUser.full_name || currentUser.email?.split("@")[0] || "Account"}
+                </span>
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  title="Sign Out"
+                  className="p-1 rounded text-[var(--text-muted)] hover:text-red-500 transition cursor-pointer"
+                >
+                  <LogOut className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setIsSignInOpen(true)}
+                className="flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 px-3.5 py-1.5 text-xs font-bold text-white shadow-sm hover:brightness-110 active:scale-95 transition cursor-pointer"
+              >
+                <UserRound className="h-3.5 w-3.5" />
+                <span>Sign In / Account</span>
+              </button>
+            )}
+          </div>
         </header>
 
         {/* Layout Workspace — ChatGPT / Claude / Cursor Pattern */}
@@ -585,6 +652,12 @@ export function OptimizerApp() {
             const targetCode = code.trim() || submittedCode.trim() || (messages.length > 0 ? messages[messages.length - 1].original : "");
             if (targetCode) run("translate", targetCode, targetLanguage);
           }}
+        />
+
+        <SignInModal
+          isOpen={isSignInOpen}
+          onClose={() => setIsSignInOpen(false)}
+          onSuccess={() => checkUserSession()}
         />
       </Suspense>
     </div>

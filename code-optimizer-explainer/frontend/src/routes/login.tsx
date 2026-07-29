@@ -44,7 +44,7 @@ const socialProviders = [
 function LoginRoute() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<AuthTab>("login");
-  const [theme, setTheme] = useState<Theme>("light");
+  const [theme, setTheme] = useState<Theme>("dark");
   const [loading, setLoading] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
   const [authSuccess, setAuthSuccess] = useState(false);
@@ -52,9 +52,14 @@ function LoginRoute() {
   useEffect(() => {
     try {
       const savedTheme = localStorage.getItem("opticode_theme");
-      if (savedTheme === "dark") setTheme("dark");
+      if (savedTheme === "light") {
+        setTheme("light");
+      } else {
+        setTheme("dark");
+        if (!savedTheme) localStorage.setItem("opticode_theme", "dark");
+      }
     } catch {
-      // Use light mode if browser storage is unavailable.
+      setTheme("dark");
     }
   }, []);
 
@@ -69,17 +74,23 @@ function LoginRoute() {
 
   const finishAuth = () => {
     setAuthSuccess(true);
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new Event("opticode_auth_change"));
+    }
     window.setTimeout(() => {
       navigate({ to: "/preferences" });
     }, 750);
   };
 
-  const runAuth = async (request: () => Promise<unknown>) => {
+  const runAuth = async (request: () => Promise<{ redirecting?: boolean } | void | unknown>) => {
     setAuthError(null);
     setAuthSuccess(false);
     setLoading(true);
     try {
-      await request();
+      const res = await request();
+      if (res && typeof res === "object" && "redirecting" in res && (res as any).redirecting) {
+        return;
+      }
       finishAuth();
     } catch (error: unknown) {
       setAuthError(getErrorMessage(error));
@@ -99,18 +110,21 @@ function LoginRoute() {
       if (provider === "Google") {
         const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
         const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-        if (supabaseUrl && supabaseKey) {
-          const { supabase } = await import("@/api/supabaseClient");
-          const { data, error } = await supabase.auth.signInWithOAuth({
-            provider: "google",
-            options: { redirectTo: `${window.location.origin}/preferences` },
-          });
-          if (error) throw error;
-          if (data?.url) {
-            window.location.href = data.url;
-            return;
+        if (supabaseUrl && supabaseKey && !supabaseUrl.includes("placeholder")) {
+          try {
+            const { supabase } = await import("@/api/supabaseClient");
+            const { data, error } = await supabase.auth.signInWithOAuth({
+              provider: "google",
+              options: { redirectTo: `${window.location.origin}/preferences` },
+            });
+            if (error) throw error;
+            if (data?.url) {
+              window.location.href = data.url;
+              return { redirecting: true };
+            }
+          } catch (err: any) {
+            console.warn("Supabase Google OAuth error, falling back to backend auth:", err);
           }
-          return;
         }
         await loginGoogle("google_user@opticode.dev", "Google Developer");
         return;
@@ -184,41 +198,36 @@ function LoginRoute() {
                 </p>
               </div>
 
-              <Tabs.Root value={activeTab} onValueChange={handleTabChange} orientation="horizontal" asChild>
-                <div>
-                  <Tabs.List asChild>
-                    <div className="mb-7 grid grid-cols-2 rounded-xl border border-(--auth-border) bg-(--auth-paper)/55 p-1">
-                      <Tabs.Trigger value="login" asChild>
-                        <button
-                          type="button"
-                          className={`rounded-lg px-4 py-2.5 text-xs font-bold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--auth-accent)/30 ${activeTab === "login" ? "bg-(--auth-ink) text-(--auth-paper) shadow-sm" : "text-(--auth-muted) hover:text-(--auth-ink)"}`}
-                        >
-                          Sign in
-                        </button>
-                      </Tabs.Trigger>
-                      <Tabs.Trigger value="register" asChild>
-                        <button
-                          type="button"
-                          className={`rounded-lg px-4 py-2.5 text-xs font-bold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--auth-accent)/30 ${activeTab === "register" ? "bg-(--auth-ink) text-(--auth-paper) shadow-sm" : "text-(--auth-muted) hover:text-(--auth-ink)"}`}
-                        >
-                          Create account
-                        </button>
-                      </Tabs.Trigger>
-                    </div>
-                  </Tabs.List>
+              <div className="mb-7 grid grid-cols-2 rounded-xl border border-(--auth-border) bg-(--auth-paper)/55 p-1">
+                <button
+                  type="button"
+                  onClick={() => handleTabChange("login")}
+                  className={`rounded-lg px-4 py-2.5 text-xs font-bold transition cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--auth-accent)/30 ${
+                    activeTab === "login"
+                      ? "bg-(--auth-ink) text-(--auth-paper) shadow-sm"
+                      : "text-(--auth-muted) hover:text-(--auth-ink)"
+                  }`}
+                >
+                  Sign in
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleTabChange("register")}
+                  className={`rounded-lg px-4 py-2.5 text-xs font-bold transition cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--auth-accent)/30 ${
+                    activeTab === "register"
+                      ? "bg-(--auth-ink) text-(--auth-paper) shadow-sm"
+                      : "text-(--auth-muted) hover:text-(--auth-ink)"
+                  }`}
+                >
+                  Create OptiCode Account
+                </button>
+              </div>
 
-                  <Tabs.Content value="login" asChild>
-                    <div>
-                      <LoginForm onSubmit={handleLogin} loading={loading} error={authError} success={authSuccess} />
-                    </div>
-                  </Tabs.Content>
-                  <Tabs.Content value="register" asChild>
-                    <div>
-                      <RegisterForm onSubmit={handleRegister} loading={loading} error={authError} success={authSuccess} />
-                    </div>
-                  </Tabs.Content>
-                </div>
-              </Tabs.Root>
+              {activeTab === "login" ? (
+                <LoginForm onSubmit={handleLogin} loading={loading} error={authError} success={authSuccess} />
+              ) : (
+                <RegisterForm onSubmit={handleRegister} loading={loading} error={authError} success={authSuccess} />
+              )}
 
               <div className="mt-8 border-t border-(--auth-border) pt-6">
                 <div className="mb-4 flex items-center gap-3">

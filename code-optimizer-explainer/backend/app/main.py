@@ -42,25 +42,39 @@ app = FastAPI(
     version="1.0.0",
 )
 
-cors_origins_env = os.getenv("CORS_ORIGINS", "*")
+cors_origins_env = os.getenv("CORS_ORIGINS", "")
+default_origins = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "https://opticode-frontend.vercel.app",
+]
 origins = (
     [origin.strip() for origin in cors_origins_env.split(",") if origin.strip()]
-    if cors_origins_env != "*"
-    else ["*"]
+    if cors_origins_env and cors_origins_env != "*"
+    else default_origins
 )
-
-# Standardize CORS preflight compliance for Vercel frontends and wildcard fallback
-allow_credentials = True if origins != ["*"] else False
-origin_regex = r"https://.*\.vercel\.app" if origins == ["*"] else None
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
-    allow_origin_regex=origin_regex,
-    allow_credentials=allow_credentials,
+    allow_origin_regex=r"https://.*\.vercel\.app|http://localhost:\d+|http://127\.0\.0\.1:\d+",
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.middleware("http")
+async def add_security_headers(request: Request, call_next):
+    response = await call_next(request)
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["X-XSS-Protection"] = "1; mode=block"
+    response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    return response
 
 app.include_router(auth.router, prefix="/api", tags=["Authentication"])
 app.include_router(explain.router, prefix="/api", tags=["Explain"])

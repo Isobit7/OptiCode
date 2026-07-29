@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from "react";
-import { ArrowRight, Eye, EyeOff, Loader2 } from "lucide-react";
+import { ArrowRight, Eye, EyeOff, Loader2, Sparkles } from "lucide-react";
 
 interface LoginFormProps {
   onSubmit: (email: string, password: string) => Promise<void>;
@@ -21,7 +21,7 @@ export function LoginForm({ onSubmit, loading, error, success }: LoginFormProps)
   return (
     <form onSubmit={handleSubmit} className="space-y-5" aria-label="Sign in form">
       <div className="space-y-2">
-        <label htmlFor="login-email" className="block text-xs font-semibold text-(--auth-ink)">
+        <label htmlFor="login-email" className="block text-xs font-semibold text-zinc-900 dark:text-zinc-100">
           Email address
         </label>
         <input
@@ -34,12 +34,12 @@ export function LoginForm({ onSubmit, loading, error, success }: LoginFormProps)
           onChange={(event) => setEmail(event.target.value)}
           placeholder="you@company.com"
           disabled={loading}
-          className="h-12 w-full rounded-xl border border-(--auth-border) bg-(--auth-paper) px-4 text-sm text-(--auth-ink) outline-none transition placeholder:text-(--auth-muted)/65 focus-visible:border-(--auth-accent) focus-visible:ring-2 focus-visible:ring-(--auth-accent)/20 disabled:cursor-not-allowed disabled:opacity-55"
+          className="h-12 w-full rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 text-sm text-zinc-900 dark:text-white outline-none transition placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus-visible:border-orange-500 focus-visible:ring-2 focus-visible:ring-orange-500/20 disabled:cursor-not-allowed disabled:opacity-55"
         />
       </div>
 
       <div className="space-y-2">
-        <label htmlFor="login-password" className="block text-xs font-semibold text-(--auth-ink)">
+        <label htmlFor="login-password" className="block text-xs font-semibold text-zinc-900 dark:text-zinc-100">
           Password
         </label>
         <div className="relative">
@@ -53,13 +53,13 @@ export function LoginForm({ onSubmit, loading, error, success }: LoginFormProps)
             onChange={(event) => setPassword(event.target.value)}
             placeholder="Enter your password"
             disabled={loading}
-            className="h-12 w-full rounded-xl border border-(--auth-border) bg-(--auth-paper) px-4 pr-12 text-sm text-(--auth-ink) outline-none transition placeholder:text-(--auth-muted)/65 focus-visible:border-(--auth-accent) focus-visible:ring-2 focus-visible:ring-(--auth-accent)/20 disabled:cursor-not-allowed disabled:opacity-55"
+            className="h-12 w-full rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 pr-12 text-sm text-zinc-900 dark:text-white outline-none transition placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus-visible:border-orange-500 focus-visible:ring-2 focus-visible:ring-orange-500/20 disabled:cursor-not-allowed disabled:opacity-55"
           />
           <button
             type="button"
             onClick={() => setShowPassword((visible) => !visible)}
             aria-label={showPassword ? "Hide password" : "Show password"}
-            className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-1.5 text-(--auth-muted) transition hover:text-(--auth-ink) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--auth-accent)/30"
+            className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-1.5 text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500/30"
           >
             {showPassword ? (
               <EyeOff className="h-4 w-4" aria-hidden="true" />
@@ -72,18 +72,23 @@ export function LoginForm({ onSubmit, loading, error, success }: LoginFormProps)
 
       {error && <AuthError message={error} />}
 
+      <div className="rounded-xl border border-orange-500/30 bg-orange-500/10 p-3 text-xs text-zinc-900 dark:text-zinc-100 flex items-center gap-2 mb-2 shadow-xs">
+        <Sparkles className="h-4 w-4 text-orange-500 shrink-0" />
+        <span><strong>OptiCode Account:</strong> Sign in with your registered Gmail/Email ID & password to load your saved chats & history.</span>
+      </div>
+
       <button
         type="submit"
         disabled={loading || !email || !password}
-        className="group flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-(--auth-accent) px-4 text-sm font-bold text-white shadow-[0_12px_24px_-12px_var(--auth-accent)] transition hover:bg-(--auth-accent-deep) active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--auth-accent) focus-visible:ring-offset-2 focus-visible:ring-offset-(--auth-pearl) disabled:cursor-not-allowed disabled:opacity-45"
+        className="group flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-orange-500 px-4 text-sm font-bold text-white shadow-md transition hover:bg-orange-600 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-45 cursor-pointer"
       >
         {loading ? (
           <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
         ) : success ? (
-          "Signed in"
+          "Signed in to OptiCode"
         ) : (
           <>
-            <span>Sign in to OptiCode</span>
+            <span>Sign in to OptiCode Account</span>
             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" aria-hidden="true" />
           </>
         )}

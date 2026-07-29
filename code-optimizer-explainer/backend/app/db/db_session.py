@@ -1,4 +1,5 @@
 import datetime
+import hashlib
 import logging
 import uuid
 from typing import Any, Dict, Optional, Tuple
@@ -9,7 +10,39 @@ logger = logging.getLogger("code_optimizer.db_session")
 
 # Local in-memory/fallback database storage for session and user profile resilience
 _LOCAL_USERS_DB: Dict[str, Dict[str, Any]] = {}
+_LOCAL_CREDENTIALS_DB: Dict[str, str] = {}  # email -> hashed password
 _LOCAL_SESSIONS_DB: Dict[str, Dict[str, Any]] = {}
+
+
+def hash_password(password: str) -> str:
+    """Generates a secure SHA-256 hash for local password storage."""
+    salt = "opticode_salt_2026_"
+    return hashlib.sha256((salt + password).encode("utf-8")).hexdigest()
+
+
+def get_local_user_by_email(email: str) -> Optional[Dict[str, Any]]:
+    """Finds a local user profile by email address."""
+    clean_email = email.strip().lower()
+    for user in _LOCAL_USERS_DB.values():
+        if user.get("email", "").strip().lower() == clean_email:
+            return user
+    return None
+
+
+def save_local_user_credentials(email: str, password: str) -> None:
+    """Stores local password hash for an email address."""
+    clean_email = email.strip().lower()
+    _LOCAL_CREDENTIALS_DB[clean_email] = hash_password(password)
+
+
+def verify_local_user_password(email: str, password: str) -> bool:
+    """Verifies local password against stored password hash."""
+    clean_email = email.strip().lower()
+    stored_hash = _LOCAL_CREDENTIALS_DB.get(clean_email)
+    if not stored_hash:
+        return False
+    return stored_hash == hash_password(password)
+
 
 
 def upsert_user_profile(

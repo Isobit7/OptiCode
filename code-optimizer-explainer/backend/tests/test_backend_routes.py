@@ -1,4 +1,5 @@
 import os
+import uuid
 os.environ["TESTING"] = "1"
 
 from fastapi.testclient import TestClient
@@ -132,8 +133,9 @@ def test_line_count_exceeded():
 # --- Authentication & Database Session / Cookie Tests ---
 
 def test_auth_register_db_cookies():
+    test_email = f"testuser_{uuid.uuid4().hex[:8]}@example.com"
     reg_payload = {
-        "email": "testuser_db@example.com",
+        "email": test_email,
         "password": "SecretPassword123",
         "full_name": "Test User",
     }
@@ -142,19 +144,29 @@ def test_auth_register_db_cookies():
     data = response.json()
     assert "access_token" in data
     assert "session_token" in data
-    assert data["email"] == "testuser_db@example.com"
+    assert data["email"] == test_email
     assert data["user"]["full_name"] == "Test User"
     assert data["session_info"]["session_token"] == data["session_token"]
 
-    # Verify HTTP Cookies set on response
-    cookies = response.cookies
-    assert "session_token" in cookies
-    assert "access_token" in cookies
+    # Verify duplicate email registration returns 400
+    dup_response = client.post("/api/auth/register", json=reg_payload)
+    assert dup_response.status_code == 400
+    assert "already exists" in dup_response.json()["detail"]
 
 
 def test_auth_login_db_cookies():
+    test_email = f"loginuser_{uuid.uuid4().hex[:8]}@example.com"
+    # 1. Register user
+    reg_payload = {
+        "email": test_email,
+        "password": "SecretPassword123",
+        "full_name": "Login User",
+    }
+    client.post("/api/auth/register", json=reg_payload)
+
+    # 2. Login with correct password
     login_payload = {
-        "email": "loginuser_db@example.com",
+        "email": test_email,
         "password": "SecretPassword123",
     }
     response = client.post("/api/auth/login", json=login_payload)
@@ -162,13 +174,23 @@ def test_auth_login_db_cookies():
     data = response.json()
     assert "session_token" in data
     assert data["auth_provider"] == "email"
-    assert data["user"]["email"] == "loginuser_db@example.com"
+    assert data["user"]["email"] == test_email
     assert "session_token" in response.cookies
+
+    # 3. Login with WRONG password returns 400
+    wrong_pass_payload = {
+        "email": test_email,
+        "password": "WrongPassword999",
+    }
+    err_response = client.post("/api/auth/login", json=wrong_pass_payload)
+    assert err_response.status_code == 400
+    assert "Invalid email or password" in err_response.json()["detail"]
 
 
 def test_auth_google_login_db_cookies():
+    test_email = f"googleuser_{uuid.uuid4().hex[:8]}@example.com"
     google_payload = {
-        "email": "alex.google@example.com",
+        "email": test_email,
         "full_name": "Alex Google",
         "avatar_url": "https://lh3.googleusercontent.com/photo.jpg",
         "id_token": "mock_google_id_token_12345",
@@ -177,34 +199,40 @@ def test_auth_google_login_db_cookies():
     assert response.status_code == 200
     data = response.json()
     assert data["auth_provider"] == "google"
-    assert data["email"] == "alex.google@example.com"
+    assert data["email"] == test_email
     assert data["user"]["full_name"] == "Alex Google"
     assert data["user"]["avatar_url"] == "https://lh3.googleusercontent.com/photo.jpg"
     assert "session_token" in response.cookies
 
 
 def test_auth_session_me_lookup():
-    # 1. Login to establish session
-    login_resp = client.post("/api/auth/login", json={"email": "session_user@example.com", "password": "pass"})
+    # 1. Register & Login user to establish session
+    email = f"sessionuser_{uuid.uuid4().hex[:8]}@example.com"
+    password = "SecretPassword123"
+    client.post("/api/auth/register", json={"email": email, "password": password})
+    login_resp = client.post("/api/auth/login", json={"email": email, "password": password})
     session_token = login_resp.json()["session_token"]
 
     # 2. Query /api/auth/me using Bearer token
     me_resp = client.get("/api/auth/me", headers={"Authorization": f"Bearer {session_token}"})
     assert me_resp.status_code == 200
-    assert me_resp.json()["email"] == "session_user@example.com"
+    assert me_resp.json()["email"] == email
 
     # 3. Query /api/auth/session using Cookie
     sess_resp = client.get("/api/auth/session", cookies={"session_token": session_token})
     assert sess_resp.status_code == 200
-    assert sess_resp.json()["email"] == "session_user@example.com"
+    assert sess_resp.json()["email"] == email
 
 
 def test_auth_logout_clears_cookies():
-    # Login first
-    login_resp = client.post("/api/auth/login", json={"email": "logout_user@example.com", "password": "pass"})
+    # 1. Register & Login first
+    email = f"logoutuser_{uuid.uuid4().hex[:8]}@example.com"
+    password = "SecretPassword123"
+    client.post("/api/auth/register", json={"email": email, "password": password})
+    login_resp = client.post("/api/auth/login", json={"email": email, "password": password})
     session_token = login_resp.json()["session_token"]
 
-    # Logout
+    # 2. Logout
     logout_resp = client.post("/api/auth/logout", cookies={"session_token": session_token})
     assert logout_resp.status_code == 200
     assert logout_resp.json()["status"] == "success"

@@ -3,15 +3,23 @@
 const RAW_BASE_URL =
   (typeof import.meta !== "undefined" &&
     (import.meta as unknown as { env?: { VITE_API_BASE_URL?: string } }).env?.VITE_API_BASE_URL) ||
-  "https://opticode-backend.vercel.app";
+  "http://localhost:8000";
 
 const IS_VERCEL_HOST =
   typeof window !== "undefined" && window.location.hostname.includes("vercel.app");
 
+const IS_LOCALHOST =
+  typeof window !== "undefined" &&
+  (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1");
+
 export const BASE_URL = (
-  IS_VERCEL_HOST && (RAW_BASE_URL.includes("localhost") || RAW_BASE_URL.includes("127.0.0.1"))
-    ? "https://opticode-backend.vercel.app"
-    : RAW_BASE_URL
+  IS_LOCALHOST
+    ? (RAW_BASE_URL.includes("localhost") || RAW_BASE_URL.includes("127.0.0.1")
+        ? RAW_BASE_URL
+        : "http://localhost:8000")
+    : (IS_VERCEL_HOST && (RAW_BASE_URL.includes("localhost") || RAW_BASE_URL.includes("127.0.0.1"))
+        ? "https://opticode-backend.vercel.app"
+        : RAW_BASE_URL)
 ).replace(/\/+$/, "");
 
 if (
@@ -549,10 +557,39 @@ export interface AuthResponse {
   user?: UserProfile;
 }
 
+function getAuthHeaders(extraHeaders: Record<string, string> = {}): Record<string, string> {
+  const headers: Record<string, string> = { ...extraHeaders };
+  if (typeof window !== "undefined") {
+    const token = localStorage.getItem("opticode_auth_token");
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+  }
+  return headers;
+}
+
+function saveAuthSession(data: AuthResponse): void {
+  if (typeof window !== "undefined" && data) {
+    if (data.access_token) {
+      localStorage.setItem("opticode_auth_token", data.access_token);
+    }
+    if (data.user) {
+      localStorage.setItem("opticode_user", JSON.stringify(data.user));
+    } else if (data.email || data.user_id) {
+      const fallbackUser: UserProfile = {
+        user_id: data.user_id,
+        email: data.email,
+        auth_provider: data.auth_provider || "google",
+      };
+      localStorage.setItem("opticode_user", JSON.stringify(fallbackUser));
+    }
+  }
+}
+
 export async function registerUser(email: string, password: string, full_name?: string): Promise<AuthResponse> {
   const res = await fetch(`${BASE_URL}/api/auth/register`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: getAuthHeaders({ "Content-Type": "application/json" }),
     credentials: "include",
     body: JSON.stringify({ email, password, full_name }),
   });
@@ -560,13 +597,15 @@ export async function registerUser(email: string, password: string, full_name?: 
     const err = await res.json().catch(() => ({ detail: "Registration failed" }));
     throw new Error(err.detail || "Registration failed");
   }
-  return (await res.json()) as AuthResponse;
+  const data = (await res.json()) as AuthResponse;
+  saveAuthSession(data);
+  return data;
 }
 
 export async function loginUser(email: string, password: string): Promise<AuthResponse> {
   const res = await fetch(`${BASE_URL}/api/auth/login`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: getAuthHeaders({ "Content-Type": "application/json" }),
     credentials: "include",
     body: JSON.stringify({ email, password }),
   });
@@ -574,13 +613,15 @@ export async function loginUser(email: string, password: string): Promise<AuthRe
     const err = await res.json().catch(() => ({ detail: "Invalid email or password" }));
     throw new Error(err.detail || "Invalid email or password");
   }
-  return (await res.json()) as AuthResponse;
+  const data = (await res.json()) as AuthResponse;
+  saveAuthSession(data);
+  return data;
 }
 
 export async function loginGoogle(email?: string, full_name?: string, avatar_url?: string, id_token?: string): Promise<AuthResponse> {
   const res = await fetch(`${BASE_URL}/api/auth/google`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: getAuthHeaders({ "Content-Type": "application/json" }),
     credentials: "include",
     body: JSON.stringify({ email, full_name, avatar_url, id_token }),
   });
@@ -588,26 +629,48 @@ export async function loginGoogle(email?: string, full_name?: string, avatar_url
     const err = await res.json().catch(() => ({ detail: "Google authentication failed" }));
     throw new Error(err.detail || "Google authentication failed");
   }
-  return (await res.json()) as AuthResponse;
+  const data = (await res.json()) as AuthResponse;
+  saveAuthSession(data);
+  return data;
 }
 
 export async function fetchCurrentUser(): Promise<UserProfile | null> {
   try {
     const res = await fetch(`${BASE_URL}/api/auth/me`, {
       method: "GET",
+      headers: getAuthHeaders(),
       credentials: "include",
     });
-    if (!res.ok) return null;
-    return (await res.json()) as UserProfile;
+    if (!res.ok) {
+      if (typeof window !== "undefined") {
+        const local = localStorage.getItem("opticode_user");
+        if (local) return JSON.parse(local) as UserProfile;
+      }
+      return null;
+    }
+    const user = (await res.json()) as UserProfile;
+    if (user && typeof window !== "undefined") {
+      localStorage.setItem("opticode_user", JSON.stringify(user));
+    }
+    return user;
   } catch {
+    if (typeof window !== "undefined") {
+      const local = localStorage.getItem("opticode_user");
+      if (local) return JSON.parse(local) as UserProfile;
+    }
     return null;
   }
 }
 
 export async function logoutUser(): Promise<void> {
+  if (typeof window !== "undefined") {
+    localStorage.removeItem("opticode_auth_token");
+    localStorage.removeItem("opticode_user");
+  }
   try {
     await fetch(`${BASE_URL}/api/auth/logout`, {
       method: "POST",
+      headers: getAuthHeaders(),
       credentials: "include",
     });
   } catch (err) {
@@ -618,7 +681,11 @@ export async function logoutUser(): Promise<void> {
 export async function fetchHistory(user_id?: string): Promise<any[]> {
   try {
     const url = user_id ? `${BASE_URL}/api/history?user_id=${encodeURIComponent(user_id)}` : `${BASE_URL}/api/history`;
-    const res = await fetch(url, { method: "GET", credentials: "include" });
+    const res = await fetch(url, {
+      method: "GET",
+      headers: getAuthHeaders(),
+      credentials: "include",
+    });
     if (!res.ok) return [];
     return (await res.json()) as any[];
   } catch {

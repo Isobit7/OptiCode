@@ -23,6 +23,7 @@ if (typeof window !== "undefined" && import.meta.env.VITE_SUPABASE_URL) {
           if (res.access_token) {
             localStorage.setItem("opticode_auth_token", res.access_token);
           }
+          window.dispatchEvent(new Event("opticode_auth_change"));
         }
       } catch (err) {
         console.warn("FastAPI backend Google OAuth session sync warning:", err);

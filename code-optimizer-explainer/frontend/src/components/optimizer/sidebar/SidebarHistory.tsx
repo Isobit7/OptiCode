@@ -1,4 +1,6 @@
 import { useState } from "react";
+import logoWebp from "@/assets/logo.webp";
+import logoPng from "@/assets/logo.png";
 import {
   Plus,
   Search,
@@ -272,9 +274,9 @@ export function SidebarHistory({
         {!collapsed ? (
           <div className="flex items-center">
             <picture>
-              <source srcSet="/logo.webp" type="image/webp" />
+              <source srcSet={logoWebp} type="image/webp" />
               <img
-                src="/logo.png"
+                src={logoPng}
                 alt="OptiCode Logo"
                 width={28}
                 height={28}

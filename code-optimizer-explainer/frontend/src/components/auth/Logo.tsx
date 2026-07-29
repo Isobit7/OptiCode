@@ -1,3 +1,6 @@
+import logoWebp from "@/assets/logo.webp";
+import logoPng from "@/assets/logo.png";
+
 interface LogoProps {
   size?: "sm" | "md" | "lg";
 }
@@ -9,9 +12,9 @@ export function Logo({ size = "md" }: LogoProps) {
   return (
     <div className="flex items-center gap-2.5">
       <picture>
-        <source srcSet="/logo.webp" type="image/webp" />
+        <source srcSet={logoWebp} type="image/webp" />
         <img
-          src="/logo.png"
+          src={logoPng}
           alt="OptiCode"
           width={size === "sm" ? 28 : size === "lg" ? 48 : 36}
           height={size === "sm" ? 28 : size === "lg" ? 48 : 36}
