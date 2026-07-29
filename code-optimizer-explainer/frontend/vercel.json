@@ -1,7 +1,13 @@
 {
   "version": 2,
-  "buildCommand": "npx cross-env NITRO_PRESET=vercel npm run build",
-  "installCommand": "npm install",
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ],
   "headers": [
     {
       "source": "/assets/(.*)",
