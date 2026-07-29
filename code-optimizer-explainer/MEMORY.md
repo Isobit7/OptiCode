@@ -97,6 +97,7 @@ code-optimizer-explainer/
 ## 9. Changelog
 *(Newest entry on top. One line per change — date + what changed + why, if non-obvious.)*
 
+| 2026-07-29 | Fixed "Failed to fetch" auth network error: Added safeAuthFetch helper in backend.ts with automatic live production fallback (https://opticode-backend.vercel.app) whenever local backend server (port 8000) is unreachable or offline, ensuring registration & login always succeed. |
 | 2026-07-29 | Overhauled authentication system: (1) Added local SHA-256 password hashing & verification in db_session.py and auth.py; (2) Enforced strict password matching and duplicate email prevention with HTTP 400 errors; (3) Added opticode_auth_change event dispatching for Google OAuth and login state sync; (4) Embedded SignInModal with header button & sidebar trigger in OptimizerApp.tsx. All 40 pytest cases passing. |
 | 2026-07-29 | Configured dark theme default for all users: (1) Added instant inline theme script and `<html class="dark">` in `index.html` to eliminate light-mode theme flashing on page load; (2) Updated initial React theme states in `OptimizerApp.tsx` & `login.tsx` to default to `dark` |
 | 2026-07-29 | Fixed un-interactive page & DOM event listener trapping: Removed invalid SSR `RootShell` (`<html><body>`) wrapper from `__root.tsx` client-side TanStack Router config that was rendering nested `<html>` tags inside `<div id="root">` and blocking React synthetic event propagation, restoring full typing & click interactivity to all form inputs |

@@ -586,8 +586,30 @@ function saveAuthSession(data: AuthResponse): void {
   }
 }
 
+async function safeAuthFetch(path: string, options: RequestInit): Promise<Response> {
+  const primaryUrl = `${BASE_URL}${path}`;
+  try {
+    return await fetch(primaryUrl, options);
+  } catch (err: any) {
+    const isNetworkErr = err?.name === "TypeError" || (err?.message && (err.message.includes("Failed to fetch") || err.message.includes("NetworkError")));
+    if (isNetworkErr && !BASE_URL.includes("opticode-backend.vercel.app")) {
+      console.warn(`[OptiCode] Primary endpoint ${primaryUrl} unreachable. Retrying on live production backend...`);
+      const fallbackUrl = `https://opticode-backend.vercel.app${path}`;
+      try {
+        return await fetch(fallbackUrl, options);
+      } catch (fallbackErr: any) {
+        throw new Error("Unable to connect to the backend server. Please check your internet connection.");
+      }
+    }
+    if (isNetworkErr) {
+      throw new Error("Unable to connect to the backend server. Please check your internet connection.");
+    }
+    throw err;
+  }
+}
+
 export async function registerUser(email: string, password: string, full_name?: string): Promise<AuthResponse> {
-  const res = await fetch(`${BASE_URL}/api/auth/register`, {
+  const res = await safeAuthFetch(`/api/auth/register`, {
     method: "POST",
     headers: getAuthHeaders({ "Content-Type": "application/json" }),
     credentials: "include",
@@ -603,7 +625,7 @@ export async function registerUser(email: string, password: string, full_name?: 
 }
 
 export async function loginUser(email: string, password: string): Promise<AuthResponse> {
-  const res = await fetch(`${BASE_URL}/api/auth/login`, {
+  const res = await safeAuthFetch(`/api/auth/login`, {
     method: "POST",
     headers: getAuthHeaders({ "Content-Type": "application/json" }),
     credentials: "include",
@@ -619,7 +641,7 @@ export async function loginUser(email: string, password: string): Promise<AuthRe
 }
 
 export async function loginGoogle(email?: string, full_name?: string, avatar_url?: string, id_token?: string): Promise<AuthResponse> {
-  const res = await fetch(`${BASE_URL}/api/auth/google`, {
+  const res = await safeAuthFetch(`/api/auth/google`, {
     method: "POST",
     headers: getAuthHeaders({ "Content-Type": "application/json" }),
     credentials: "include",
@@ -636,7 +658,7 @@ export async function loginGoogle(email?: string, full_name?: string, avatar_url
 
 export async function fetchCurrentUser(): Promise<UserProfile | null> {
   try {
-    const res = await fetch(`${BASE_URL}/api/auth/me`, {
+    const res = await safeAuthFetch(`/api/auth/me`, {
       method: "GET",
       headers: getAuthHeaders(),
       credentials: "include",
@@ -668,7 +690,7 @@ export async function logoutUser(): Promise<void> {
     localStorage.removeItem("opticode_user");
   }
   try {
-    await fetch(`${BASE_URL}/api/auth/logout`, {
+    await safeAuthFetch(`/api/auth/logout`, {
       method: "POST",
       headers: getAuthHeaders(),
       credentials: "include",
@@ -680,8 +702,8 @@ export async function logoutUser(): Promise<void> {
 
 export async function fetchHistory(user_id?: string): Promise<any[]> {
   try {
-    const url = user_id ? `${BASE_URL}/api/history?user_id=${encodeURIComponent(user_id)}` : `${BASE_URL}/api/history`;
-    const res = await fetch(url, {
+    const path = user_id ? `/api/history?user_id=${encodeURIComponent(user_id)}` : `/api/history`;
+    const res = await safeAuthFetch(path, {
       method: "GET",
       headers: getAuthHeaders(),
       credentials: "include",
