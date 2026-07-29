@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, Rocket, Sparkles, Code, Github } from "lucide-react";
+import { ArrowLeft, ArrowRight, Rocket, Sparkles, Code, Github } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 // ── Inline WebGL liquid-chrome so z-index is never an issue ──────────────────
@@ -169,21 +169,21 @@ export function HeroPreviewPage() {
         pointerEvents: "none",
       }} />
 
-      {/* ── Back link ── */}
+      {/* ── Sign In / Get Started link ── */}
       <Link
         to="/login"
         style={{
           position: "fixed", top: 16, left: 16, zIndex: 50,
           display: "inline-flex", alignItems: "center", gap: 6,
-          padding: "6px 12px", borderRadius: 6,
-          background: "rgba(0,0,0,0.5)", border: "1px solid rgba(255,255,255,0.12)",
-          color: "rgba(255,255,255,0.7)", fontSize: 12, fontWeight: 500,
+          padding: "8px 16px", borderRadius: 8,
+          background: "rgba(0,0,0,0.6)", border: "1px solid rgba(255,255,255,0.18)",
+          color: "rgba(255,255,255,0.9)", fontSize: 13, fontWeight: 600,
           textDecoration: "none", backdropFilter: "blur(8px)",
-          transition: "color 0.2s, background 0.2s",
+          transition: "all 0.2s ease",
         }}
       >
-        <ArrowLeft style={{ width: 14, height: 14 }} />
-        Get Started
+        Sign In / Get Started
+        <ArrowRight style={{ width: 14, height: 14, color: "#f97316" }} />
       </Link>
 
       {/* ── Main content ── */}
