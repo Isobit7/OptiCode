@@ -346,7 +346,17 @@ function TurnCardBase({ message, onRetry }: Props) {
                   </span>
                 )}
                 <span className="text-[10px] font-mono font-bold text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
-                  {message.action === "explain" ? "Line-by-Line Walkthrough" : message.action === "security-audit" ? "Security Audit Scan" : message.action === "translate" ? "Language Port" : "Optimized Code Diff"}
+                  {message.action === "explain"
+                    ? "Line-by-Line Walkthrough"
+                    : message.action === "security-audit"
+                    ? "Security Audit Scan"
+                    : message.action === "translate"
+                    ? "Translated Code"
+                    : message.action === "prettify"
+                    ? "Prettified Code"
+                    : message.action === "humanize"
+                    ? "Humanized Code"
+                    : "Optimized Code Diff"}
                 </span>
               </div>
 
@@ -424,6 +434,12 @@ function TurnCardBase({ message, onRetry }: Props) {
                     </pre>
                   </div>
                 ))}
+              </div>
+            ) : (message.action === "prettify" || message.action === "translate" || message.action === "humanize") && message.result.output ? (
+              <div className="space-y-1.5 font-mono text-xs">
+                <pre className="p-3 bg-[var(--bg-surface-alt)] border border-[var(--border-default)] rounded-lg overflow-x-auto text-[var(--text-primary)] leading-relaxed min-h-[120px]">
+                  <code>{message.result.output}</code>
+                </pre>
               </div>
             ) : message.result.output ? (
               <SimpleDiffView
