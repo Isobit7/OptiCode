@@ -3,9 +3,16 @@
 const RAW_BASE_URL =
   (typeof import.meta !== "undefined" &&
     (import.meta as unknown as { env?: { VITE_API_BASE_URL?: string } }).env?.VITE_API_BASE_URL) ||
-  "http://localhost:8000";
+  "https://opticode-backend.vercel.app";
 
-export const BASE_URL = RAW_BASE_URL.replace(/\/+$/, "");
+const IS_VERCEL_HOST =
+  typeof window !== "undefined" && window.location.hostname.includes("vercel.app");
+
+export const BASE_URL = (
+  IS_VERCEL_HOST && (RAW_BASE_URL.includes("localhost") || RAW_BASE_URL.includes("127.0.0.1"))
+    ? "https://opticode-backend.vercel.app"
+    : RAW_BASE_URL
+).replace(/\/+$/, "");
 
 if (
   typeof window !== "undefined" &&
