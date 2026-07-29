@@ -97,6 +97,7 @@ code-optimizer-explainer/
 ## 9. Changelog
 *(Newest entry on top. One line per change — date + what changed + why, if non-obvious.)*
 
+| 2026-07-29 | Fixed frontend blank screen runtime crash: wrapped `App` with `@tanstack/react-query` `QueryClientProvider` in `main.jsx`, eliminating `Error: No QueryClient set` exception and enabling 100% full live UI rendering at `https://opticode-lake.vercel.app` |
 | 2026-07-29 | Fixed Vercel frontend & Render/Vercel backend deployments: (1) Sanitized trailing slash on `VITE_API_BASE_URL` in `backend.ts`; (2) Added cross-platform `cross-env` script & SPA rewrites in `frontend/vercel.json`; (3) Fixed `main.py` CORS & `sys.path` serverless imports; (4) Added `backend/api/index.py`, `.python-version` (3.11.9), health check in `render.yaml`, and complete `DEPLOYMENT.md` guide |
 | 2026-07-26 | Removed `Try Sample` snippet button from `CodeInputBar.tsx` per user directive |
 | 2026-07-26 | Restored concise action button labels (`EXPLAIN`, `HUMANIZE`, `AUDIT SECURITY`, etc.) in `CodeInputBar.tsx` per user screenshot request |
