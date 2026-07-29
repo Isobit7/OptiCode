@@ -61,10 +61,12 @@ class AlternativesResponse(BaseModel):
 
 class PrettifyResponse(BaseModel):
     formatted_code: str = Field(..., description="Formatted / prettified code.")
+    detected_language: Optional[str] = Field(None, description="Detected programming language.")
 
 
 class ShortenResponse(BaseModel):
     shortened_code: str = Field(..., description="Minified / shortened code.")
+    detected_language: Optional[str] = Field(None, description="Detected programming language.")
 
 
 class SeoChecklistItem(BaseModel):

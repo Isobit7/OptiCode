@@ -22,8 +22,10 @@ def prettify_code(request: CodeRequest) -> PrettifyResponse:
         return PrettifyResponse(**cached)
 
     try:
+        from app.llm_interface.client import detect_language
+        detected = detect_language(request.code, request.language)
         formatted = tools.prettify(request.code, request.language)
-        result = PrettifyResponse(formatted_code=formatted)
+        result = PrettifyResponse(formatted_code=formatted, detected_language=detected)
         cache.set("prettify", request.code, request.language, None, result.model_dump())
         return result
     except HTTPException:

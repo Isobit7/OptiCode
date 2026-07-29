@@ -25,7 +25,7 @@ DEFAULT_MODELS: str = (
 
 def detect_language(code: str, language: Optional[str] = None) -> str:
     """Detects programming language from input code or falls back to provided hint."""
-    if language and language.strip():
+    if language and language.strip() and language.strip().lower() != "auto":
         return language.strip().lower()
 
     if not code or not code.strip():

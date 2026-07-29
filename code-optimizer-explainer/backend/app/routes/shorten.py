@@ -22,8 +22,10 @@ def shorten_code(request: CodeRequest) -> ShortenResponse:
         return ShortenResponse(**cached)
 
     try:
+        from app.llm_interface.client import detect_language
+        detected = detect_language(request.code, request.language)
         shortened = tools.shorten(request.code, request.language)
-        result = ShortenResponse(shortened_code=shortened)
+        result = ShortenResponse(shortened_code=shortened, detected_language=detected)
         cache.set("shorten", request.code, request.language, None, result.model_dump())
         return result
     except HTTPException:

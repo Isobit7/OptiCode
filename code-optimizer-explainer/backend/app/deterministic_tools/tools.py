@@ -13,6 +13,9 @@ logger = logging.getLogger("code_optimizer.tools")
 def prettify(code: str, language: Optional[str] = None) -> str:
     """Formats code using deterministic formatters (Black for Python, JSBeautifier for Web)."""
     lang = (language or "").strip().lower()
+    if not lang or lang == "auto":
+        from app.llm_interface.client import detect_language
+        lang = detect_language(code, language)
 
     if lang in ["python", "py"]:
         try:
@@ -38,6 +41,9 @@ def prettify(code: str, language: Optional[str] = None) -> str:
 def shorten(code: str, language: Optional[str] = None) -> str:
     """Performs AST-based or deterministic comment & whitespace minification."""
     lang = (language or "").strip().lower()
+    if not lang or lang == "auto":
+        from app.llm_interface.client import detect_language
+        lang = detect_language(code, language)
 
     if lang in ["python", "py"]:
         try:

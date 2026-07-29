@@ -352,12 +352,18 @@ export async function runAction(
         };
       }
       case "prettify": {
-        const data = await post<{ formatted_code: string }>("/api/prettify", payload);
-        return { action, output: data.formatted_code };
+        const data = await post<{ formatted_code: string; detected_language?: string }>(
+          "/api/prettify",
+          payload,
+        );
+        return { action, output: data.formatted_code, detectedLanguage: data.detected_language };
       }
       case "shorten": {
-        const data = await post<{ shortened_code: string }>("/api/shorten", payload);
-        return { action, output: data.shortened_code };
+        const data = await post<{ shortened_code: string; detected_language?: string }>(
+          "/api/shorten",
+          payload,
+        );
+        return { action, output: data.shortened_code, detectedLanguage: data.detected_language };
       }
       case "seo-optimize": {
         const data = await post<{ optimized_code: string; suggestions?: string[] }>(
