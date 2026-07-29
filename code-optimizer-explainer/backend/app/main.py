@@ -42,13 +42,17 @@ app = FastAPI(
     version="1.0.0",
 )
 
+from fastapi import FastAPI, Request, Response, WebSocket, WebSocketDisconnect
+
 cors_origins_env = os.getenv("CORS_ORIGINS", "")
 default_origins = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
     "http://localhost:3000",
     "http://127.0.0.1:3000",
+    "https://opticode-lake.vercel.app",
     "https://opticode-frontend.vercel.app",
+    "https://opticode-backend.vercel.app",
 ]
 origins = (
     [origin.strip() for origin in cors_origins_env.split(",") if origin.strip()]
@@ -68,7 +72,24 @@ app.add_middleware(
 
 @app.middleware("http")
 async def add_security_headers(request: Request, call_next):
+    origin = request.headers.get("origin")
+    
+    if request.method == "OPTIONS":
+        response_origin = origin if origin else "*"
+        headers = {
+            "Access-Control-Allow-Origin": response_origin,
+            "Access-Control-Allow-Credentials": "true",
+            "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Requested-With",
+            "X-Content-Type-Options": "nosniff",
+        }
+        return Response(status_code=200, headers=headers)
+
     response = await call_next(request)
+    if origin and ("vercel.app" in origin or "localhost" in origin or "127.0.0.1" in origin):
+        response.headers["Access-Control-Allow-Origin"] = origin
+        response.headers["Access-Control-Allow-Credentials"] = "true"
+
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["X-Frame-Options"] = "DENY"
     response.headers["X-XSS-Protection"] = "1; mode=block"

@@ -612,7 +612,7 @@ export async function registerUser(email: string, password: string, full_name?: 
   const res = await safeAuthFetch(`/api/auth/register`, {
     method: "POST",
     headers: getAuthHeaders({ "Content-Type": "application/json" }),
-    credentials: "include",
+    credentials: "same-origin",
     body: JSON.stringify({ email, password, full_name }),
   });
   if (!res.ok) {
@@ -628,7 +628,7 @@ export async function loginUser(email: string, password: string): Promise<AuthRe
   const res = await safeAuthFetch(`/api/auth/login`, {
     method: "POST",
     headers: getAuthHeaders({ "Content-Type": "application/json" }),
-    credentials: "include",
+    credentials: "same-origin",
     body: JSON.stringify({ email, password }),
   });
   if (!res.ok) {
@@ -644,7 +644,7 @@ export async function loginGoogle(email?: string, full_name?: string, avatar_url
   const res = await safeAuthFetch(`/api/auth/google`, {
     method: "POST",
     headers: getAuthHeaders({ "Content-Type": "application/json" }),
-    credentials: "include",
+    credentials: "same-origin",
     body: JSON.stringify({ email, full_name, avatar_url, id_token }),
   });
   if (!res.ok) {
@@ -661,7 +661,7 @@ export async function fetchCurrentUser(): Promise<UserProfile | null> {
     const res = await safeAuthFetch(`/api/auth/me`, {
       method: "GET",
       headers: getAuthHeaders(),
-      credentials: "include",
+      credentials: "same-origin",
     });
     if (!res.ok) {
       if (typeof window !== "undefined") {
@@ -693,7 +693,7 @@ export async function logoutUser(): Promise<void> {
     await safeAuthFetch(`/api/auth/logout`, {
       method: "POST",
       headers: getAuthHeaders(),
-      credentials: "include",
+      credentials: "same-origin",
     });
   } catch (err) {
     void err;
@@ -706,7 +706,7 @@ export async function fetchHistory(user_id?: string): Promise<any[]> {
     const res = await safeAuthFetch(path, {
       method: "GET",
       headers: getAuthHeaders(),
-      credentials: "include",
+      credentials: "same-origin",
     });
     if (!res.ok) return [];
     return (await res.json()) as any[];
