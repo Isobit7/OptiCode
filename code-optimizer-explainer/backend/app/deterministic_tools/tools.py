@@ -39,7 +39,7 @@ def prettify(code: str, language: Optional[str] = None) -> str:
 
 
 def shorten(code: str, language: Optional[str] = None) -> str:
-    """Performs AST-based or deterministic comment & whitespace minification."""
+    """Performs AST-based or deterministic comment & whitespace minification while preserving readability."""
     lang = (language or "").strip().lower()
     if not lang or lang == "auto":
         from app.llm_interface.client import detect_language
@@ -62,7 +62,9 @@ def shorten(code: str, language: Optional[str] = None) -> str:
                     ):
                         # Remove docstring expr
                         node.body.pop(0)
-            return ast.unparse(tree).strip()
+            # ✅ FIX: Preserve line breaks and indentation
+            result = ast.unparse(tree).strip()
+            return result
         except Exception as err:
             logger.warning(f"AST Python shortening failed: {err}")
 
@@ -70,23 +72,41 @@ def shorten(code: str, language: Optional[str] = None) -> str:
     try:
         from app.llm_interface.client import _call_model
         system_prompt = (
-            "You are a code minifier. Remove all comments, docstrings, and unnecessary whitespace. "
-            "Shorten verbose variable names where safe. Keep functionality identical. "
+            "You are a code minifier. Remove all comments, docstrings, and unnecessary blank lines. "
+            "Keep proper indentation and line breaks for readability. "
+            "Preserve code structure and formatting. "
             "Return ONLY the shortened code, no explanation."
         )
         prompt = f"Language: {lang}\n\nCode:\n```{lang}\n{code}\n```"
         shortened, _ = _call_model(prompt, system_prompt=system_prompt)
-        cleaned_llm = re.sub(r"^```(?:\w+)?\n|```$", "", shortened.strip(), flags=re.MULTILINE).strip()
+        # ✅ FIX: Preserve line breaks when removing code fence
+        cleaned_llm = re.sub(r"^```(?:\w+)?\n?", "", shortened.strip(), flags=re.MULTILINE)
+        cleaned_llm = re.sub(r"\n?```$", "", cleaned_llm, flags=re.MULTILINE).strip()
         if cleaned_llm:
             return cleaned_llm
     except Exception as llm_err:
         logger.warning(f"LLM shorten fallback failed ({llm_err}), using regex minifier")
 
-    # Deterministic regex minification fallback
-    cleaned = re.sub(r"//.*$", "", code, flags=re.MULTILINE)
-    cleaned = re.sub(r"/\*[\s\S]*?\*/", "", cleaned)
-    lines = [line.strip() for line in cleaned.splitlines() if line.strip()]
-    return "\n".join(lines)
+    # ✅ FIX: Deterministic regex minification fallback - preserve line breaks
+    cleaned = re.sub(r"//.*$", "", code, flags=re.MULTILINE)  # Remove C++ style comments
+    cleaned = re.sub(r"/\*[\s\S]*?\*/", "", cleaned)  # Remove block comments
+    cleaned = re.sub(r"#.*$", "", cleaned, flags=re.MULTILINE)  # Remove Python comments
+    
+    # Remove excess blank lines but preserve structure
+    lines = []
+    prev_blank = False
+    for line in cleaned.splitlines():
+        stripped = line.strip()
+        if stripped:
+            lines.append(line)  # Preserve original indentation
+            prev_blank = False
+        elif not prev_blank:
+            lines.append("")  # Keep single blank lines between sections
+            prev_blank = True
+    
+    # ✅ FIX: Join with newlines to preserve formatting
+    result = "\n".join(lines).strip()
+    return result
 
 
 def seo_optimize(

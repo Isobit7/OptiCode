@@ -1,8 +1,12 @@
 import logging
+import os
 import secrets
 import uuid
 from typing import Optional
+
 from fastapi import APIRouter, Cookie, Depends, Header, HTTPException, Request, Response
+from fastapi_csrf_protect import CsrfProtect
+from pydantic import BaseModel
 
 from app.db.db_session import (
     create_user_session,
@@ -25,6 +29,21 @@ from app.models import (
 
 logger = logging.getLogger("code_optimizer.routes.auth")
 router = APIRouter()
+
+
+# ✅ SECURITY FIX: CSRF Configuration
+class CsrfSettings(BaseModel):
+    secret_key: str = os.getenv("CSRF_SECRET_KEY", "dev-secret-change-in-prod")
+    cookie_domain: str = os.getenv("COOKIE_DOMAIN", "localhost")
+    cookie_path: str = "/"
+    cookie_samesite: str = "strict"
+    cookie_secure: bool = os.getenv("ENVIRONMENT") == "production"
+    cookie_httponly: bool = True
+
+
+@CsrfProtect.load_config
+def load_csrf_config():
+    return CsrfSettings()
 
 
 def _create_auth_session_and_set_cookies(
@@ -64,7 +83,7 @@ def _create_auth_session_and_set_cookies(
     cookie_config = {
         "name": "session_token",
         "httponly": True,
-        "samesite": "lax",
+        "samesite": "strict",  # ✅ SECURITY FIX: Changed from "lax" to "strict"
         "path": "/",
         "max_age": 604800,  # 7 days
     }
@@ -75,7 +94,7 @@ def _create_auth_session_and_set_cookies(
         value=session_token,
         max_age=604800,
         httponly=True,
-        samesite="lax",
+        samesite="strict",  # ✅ SECURITY FIX: Changed from "lax" to "strict"
         path="/",
     )
     response.set_cookie(
@@ -83,7 +102,7 @@ def _create_auth_session_and_set_cookies(
         value=valid_access_token,
         max_age=604800,
         httponly=True,
-        samesite="lax",
+        samesite="strict",  # ✅ SECURITY FIX: Changed from "lax" to "strict"
         path="/",
     )
 
@@ -189,13 +208,26 @@ def get_current_user_from_header(
     raise HTTPException(status_code=401, detail="Invalid or expired session token.")
 
 
+@router.get("/csrf-token", tags=["Security"])
+async def get_csrf_token(
+    request: Request,
+    csrf_protect: CsrfProtect = Depends(),
+) -> dict:
+    """✅ SECURITY FIX: Returns CSRF token for frontend."""
+    await csrf_protect.generate_csrf(request)
+    return {"csrf_token": request.state.csrf_token}
+
+
 @router.post("/auth/register", response_model=AuthResponse)
-def register(
+async def register(
     credentials: UserRegisterRequest,
     response: Response,
     request: Request,
+    csrf_protect: CsrfProtect = Depends(),  # ✅ SECURITY FIX: CSRF protection
 ) -> AuthResponse:
-    """Registers a new user and stores profile, session, and cookies in the database."""
+    """✅ SECURITY FIX: Registers a new user with CSRF validation."""
+    await csrf_protect.validate_csrf(request)  # ✅ SECURITY FIX: Validate CSRF token
+    
     user_id = None
     access_token = None
     email = credentials.email.strip().lower()
@@ -254,12 +286,15 @@ def register(
 
 
 @router.post("/auth/login", response_model=AuthResponse)
-def login(
+async def login(
     credentials: UserLoginRequest,
     response: Response,
     request: Request,
+    csrf_protect: CsrfProtect = Depends(),  # ✅ SECURITY FIX: CSRF protection
 ) -> AuthResponse:
-    """Authenticates user, updates last_login in DB, and stores active session & cookies in DB."""
+    """✅ SECURITY FIX: Authenticates user with CSRF validation."""
+    await csrf_protect.validate_csrf(request)  # ✅ SECURITY FIX: Validate CSRF token
+    
     user_id = None
     access_token = None
     email = credentials.email.strip().lower()
@@ -308,12 +343,15 @@ def login(
 
 
 @router.post("/auth/google", response_model=AuthResponse)
-def google_login(
+async def google_login(
     payload: GoogleAuthRequest,
     response: Response,
     request: Request,
+    csrf_protect: CsrfProtect = Depends(),  # ✅ SECURITY FIX: CSRF protection
 ) -> AuthResponse:
-    """Authenticates user via Google OAuth, storing user info, session, and cookies in DB."""
+    """✅ SECURITY FIX: Authenticates user via Google OAuth with CSRF validation."""
+    await csrf_protect.validate_csrf(request)  # ✅ SECURITY FIX: Validate CSRF token
+    
     email = payload.email
     full_name = payload.full_name
     avatar_url = payload.avatar_url
@@ -370,13 +408,17 @@ def get_me(
 
 
 @router.post("/auth/logout")
-def logout(
+async def logout(
     response: Response,
+    request: Request,
     authorization: Optional[str] = Header(None),
     session_token: Optional[str] = Cookie(None),
     access_token: Optional[str] = Cookie(None),
+    csrf_protect: CsrfProtect = Depends(),  # ✅ SECURITY FIX: CSRF protection
 ) -> dict:
-    """Invalidates active session in database and clears HTTP cookies."""
+    """✅ SECURITY FIX: Invalidates active session with CSRF validation."""
+    await csrf_protect.validate_csrf(request)  # ✅ SECURITY FIX: Validate CSRF token
+    
     token = None
     if authorization and authorization.startswith("Bearer "):
         token = authorization.split("Bearer ")[1].strip()

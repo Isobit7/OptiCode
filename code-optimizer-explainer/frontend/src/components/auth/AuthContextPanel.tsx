@@ -31,7 +31,7 @@ export function AuthContextPanel() {
         >
           <Logo size="md" />
         </Link>
-        <span className="font-mono text-[10px] uppercase tracking-[0.24em] text-white/40">
+        <span className="font-mono text-[10px] uppercase tracking-[0.24em] text-white/40" style={{display: 'none'}}>
           Developer workspace
         </span>
       </div>

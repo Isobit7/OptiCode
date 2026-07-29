@@ -602,7 +602,7 @@ function getGuestUserId(): string {
               </div>
 
               {/* Pinned Bottom Composer with Fade Mask */}
-              <div className="sticky bottom-0 z-30 w-full bg-gradient-to-t from-[var(--bg-base)] via-[var(--bg-base)] to-transparent pt-6 pb-4 px-4 sm:px-6 border-t border-[var(--border-subtle)]">
+              <div className="sticky bottom-0 z-30 w-full bg-gradient-to-t from-[var(--bg-base)] via-[var(--bg-base)] to-transparent pt-6 pb-4 px-4 sm:px-6">
                 <CodeInputBar
                   code={code}
                   onChange={setCode}

@@ -65,9 +65,24 @@ function SafeCodeBlock({ code, language }: { code: string; language?: string }) 
           {copied ? "Copied" : "Copy"}
         </button>
       </div>
-      <pre className="p-3 overflow-x-auto text-sm leading-relaxed text-foreground">
-        <code dangerouslySetInnerHTML={{ __html: html }} />
+      {/* ✅ FIX: No left border line - clean code display */}
+      <pre className="p-3 overflow-x-auto text-sm leading-relaxed text-foreground border-l-0" style={{counterReset: 'line'}}>
+        <code 
+          dangerouslySetInnerHTML={{ __html: html }} 
+          style={{
+            display: 'block',
+            counterIncrement: 'line 0',
+            borderLeft: 'none',
+          }}
+          className="[&>span]:no-underline [&>span]:border-l-0"
+        />
       </pre>
+      <style>{`
+        pre { border-left: 0 !important; }
+        .hljs-line-number { display: none !important; }
+        .hljs-deletion { text-decoration: none !important; color: inherit !important; background: none !important; }
+        code span { text-decoration: none !important; border-left: 0 !important; }
+      `}</style>
     </div>
   );
 }

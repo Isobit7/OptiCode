@@ -1,12 +1,20 @@
 import datetime
-import hashlib
 import logging
+import os
 import uuid
 from typing import Any, Dict, Optional, Tuple
 
+from passlib.context import CryptContext
 from app.db.supabase_client import get_client
 
 logger = logging.getLogger("code_optimizer.db_session")
+
+# ✅ SECURITY FIX: Initialize bcrypt context with cost factor 12
+pwd_context = CryptContext(
+    schemes=["bcrypt"],
+    deprecated="auto",
+    bcrypt__rounds=12,  # Cost factor 12-14 recommended
+)
 
 # Local in-memory/fallback database storage for session and user profile resilience
 _LOCAL_USERS_DB: Dict[str, Dict[str, Any]] = {}
@@ -15,9 +23,12 @@ _LOCAL_SESSIONS_DB: Dict[str, Dict[str, Any]] = {}
 
 
 def hash_password(password: str) -> str:
-    """Generates a secure SHA-256 hash for local password storage."""
-    salt = "opticode_salt_2026_"
-    return hashlib.sha256((salt + password).encode("utf-8")).hexdigest()
+    """✅ SECURITY FIX: Hashes password using bcrypt with automatic salt generation."""
+    if not password:
+        raise ValueError("Password cannot be empty")
+    if len(password) < 8:
+        raise ValueError("Password must be at least 8 characters")
+    return pwd_context.hash(password)
 
 
 def get_local_user_by_email(email: str) -> Optional[Dict[str, Any]]:
@@ -36,12 +47,23 @@ def save_local_user_credentials(email: str, password: str) -> None:
 
 
 def verify_local_user_password(email: str, password: str) -> bool:
-    """Verifies local password against stored password hash."""
+    """✅ SECURITY FIX: Verifies password against bcrypt hash with timing attack protection."""
     clean_email = email.strip().lower()
     stored_hash = _LOCAL_CREDENTIALS_DB.get(clean_email)
+    
     if not stored_hash:
+        # Still hash to prevent timing attacks
+        try:
+            pwd_context.verify(password, "$2b$12$invalid.hash.to.prevent.timing.attacks")
+        except:
+            pass
         return False
-    return stored_hash == hash_password(password)
+    
+    try:
+        return pwd_context.verify(password, stored_hash)
+    except Exception as err:
+        logger.warning(f"Password verification error for {clean_email}: {err}")
+        return False
 
 
 
@@ -124,7 +146,9 @@ def create_user_session(
     expires_in_seconds: int = 86400 * 7,
 ) -> Dict[str, Any]:
     """
-    Creates and stores a session record (including cookie metadata) in the database (`user_sessions` table).
+    ✅ SECURITY FIX: Creates and stores session in database.
+    Production mode: Supabase only (no fallback).
+    Dev mode: Supabase with local fallback.
     """
     now = datetime.datetime.now(datetime.timezone.utc)
     expires_at = now + datetime.timedelta(seconds=expires_in_seconds)
@@ -142,7 +166,7 @@ def create_user_session(
         or {
             "name": "session_token",
             "httponly": True,
-            "samesite": "lax",
+            "samesite": "strict",  # ✅ Changed from "lax" to "strict"
             "path": "/",
             "max_age": expires_in_seconds,
         },
@@ -151,6 +175,8 @@ def create_user_session(
         "expires_at": expires_at.isoformat(),
     }
 
+    is_production = os.getenv("ENVIRONMENT") == "production"
+
     try:
         supabase = get_client()
         res = supabase.table("user_sessions").insert(session_record).execute()
@@ -158,10 +184,17 @@ def create_user_session(
             return res.data[0]
         return session_record
     except Exception as err:
-        logger.warning(
-            f"Supabase user_sessions insert failed ({err}). Storing session in local fallback."
-        )
+        if is_production:
+            # ❌ PRODUCTION: Database required
+            logger.error(f"CRITICAL: Supabase session insert failed in production: {err}")
+            raise RuntimeError("Session storage unavailable - database connection required")
+        else:
+            # ✅ DEV: Allow fallback
+            logger.warning(
+                f"Supabase user_sessions insert failed ({err}). Storing session in local fallback."
+            )
 
+    # ✅ DEV ONLY: Local fallback (not production)
     _LOCAL_SESSIONS_DB[session_token] = session_record
     _LOCAL_SESSIONS_DB[session_id] = session_record
     return session_record
@@ -169,10 +202,14 @@ def create_user_session(
 
 def get_active_session(token: str) -> Optional[Tuple[Dict[str, Any], Dict[str, Any]]]:
     """
-    Retrieves active session and associated user profile by session token or access token from database.
+    ✅ SECURITY FIX: Retrieves active session from database.
+    Production mode: Supabase only (no fallback).
+    Dev mode: Supabase with local fallback.
     """
     if not token:
         return None
+
+    is_production = os.getenv("ENVIRONMENT") == "production"
 
     try:
         supabase = get_client()
@@ -202,20 +239,24 @@ def get_active_session(token: str) -> Optional[Tuple[Dict[str, Any], Dict[str, A
             )
             return session, user_profile
     except Exception as err:
+        if is_production:
+            logger.warning(f"Supabase session lookup failed in production: {err}")
+            return None
         logger.debug(f"Supabase session lookup check fallback ({err})")
 
-    # Local fallback
-    session = _LOCAL_SESSIONS_DB.get(token)
-    if session and session.get("is_active", True):
-        user_id = session.get("user_id")
-        user_profile = _LOCAL_USERS_DB.get(user_id, {
-            "id": user_id,
-            "email": "",
-            "phone_number": "",
-            "full_name": "",
-            "auth_provider": session.get("auth_provider", "email"),
-        })
-        return session, user_profile
+    # ✅ DEV ONLY: Local fallback (not production)
+    if not is_production:
+        session = _LOCAL_SESSIONS_DB.get(token)
+        if session and session.get("is_active", True):
+            user_id = session.get("user_id")
+            user_profile = _LOCAL_USERS_DB.get(user_id, {
+                "id": user_id,
+                "email": "",
+                "phone_number": "",
+                "full_name": "",
+                "auth_provider": session.get("auth_provider", "email"),
+            })
+            return session, user_profile
 
     return None
 

@@ -397,7 +397,7 @@ function TurnCardBase({ message, onRetry }: Props) {
                   <div className="text-[10px] font-mono font-bold uppercase tracking-wider text-rose-500 bg-rose-500/10 px-2 py-1 rounded border border-rose-500/20">
                     Original Code
                   </div>
-                  <pre className="p-3 bg-[var(--bg-surface-alt)] border border-[var(--border-default)] rounded-lg overflow-x-auto text-[var(--text-secondary)] leading-relaxed h-full min-h-[120px]">
+                  <pre className="p-3 bg-[var(--bg-surface-alt)] border border-[var(--border-default)] rounded-lg overflow-x-auto text-[var(--text-secondary)] leading-relaxed h-full min-h-[120px] whitespace-pre-wrap break-words">
                     <code>{message.original}</code>
                   </pre>
                 </div>
@@ -405,10 +405,17 @@ function TurnCardBase({ message, onRetry }: Props) {
                   <div className="text-[10px] font-mono font-bold uppercase tracking-wider text-emerald-500 bg-emerald-500/10 px-2 py-1 rounded border border-emerald-500/20">
                     Transformed Output
                   </div>
-                  <pre className="p-3 bg-[var(--bg-surface-alt)] border border-[var(--border-default)] rounded-lg overflow-x-auto text-[var(--text-primary)] leading-relaxed h-full min-h-[120px]">
+                  <pre className="p-3 bg-[var(--bg-surface-alt)] border border-[var(--border-default)] rounded-lg overflow-x-auto text-[var(--text-primary)] leading-relaxed h-full min-h-[120px] whitespace-pre-wrap break-words">
                     <code>{message.result.output}</code>
                   </pre>
                 </div>
+              </div>
+            ) : message.action === "shorten" && message.result.output ? (
+              /* ✅ FIX: Shorten output with proper code formatting and line breaks - NO LEFT BORDER */
+              <div className="space-y-1.5 font-mono text-xs">
+                <pre className="p-3 bg-[var(--bg-surface-alt)] border border-[var(--border-default)] rounded-lg overflow-x-auto text-[var(--text-primary)] leading-relaxed min-h-[120px] whitespace-pre">
+                  <code>{message.result.output}</code>
+                </pre>
               </div>
             ) : message.action === "explain" || message.action === "pr-review" || message.action === "diff-story" ? (
               <MarkdownRenderer content={message.result.output || ""} />
@@ -429,7 +436,7 @@ function TurnCardBase({ message, onRetry }: Props) {
                       </span>
                       <CopyButton text={alt.code} />
                     </div>
-                    <pre className="font-mono text-xs text-[var(--text-primary)] overflow-x-auto leading-relaxed">
+                    <pre className="font-mono text-xs text-[var(--text-primary)] overflow-x-auto leading-relaxed whitespace-pre">
                       <code>{alt.code}</code>
                     </pre>
                   </div>
@@ -437,7 +444,7 @@ function TurnCardBase({ message, onRetry }: Props) {
               </div>
             ) : (message.action === "prettify" || message.action === "translate" || message.action === "humanize") && message.result.output ? (
               <div className="space-y-1.5 font-mono text-xs">
-                <pre className="p-3 bg-[var(--bg-surface-alt)] border border-[var(--border-default)] rounded-lg overflow-x-auto text-[var(--text-primary)] leading-relaxed min-h-[120px]">
+                <pre className="p-3 bg-[var(--bg-surface-alt)] border border-[var(--border-default)] rounded-lg overflow-x-auto text-[var(--text-primary)] leading-relaxed min-h-[120px] whitespace-pre">
                   <code>{message.result.output}</code>
                 </pre>
               </div>

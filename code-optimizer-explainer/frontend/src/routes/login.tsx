@@ -184,7 +184,7 @@ function LoginRoute() {
           <div className="relative z-10 mx-auto flex w-full max-w-[600px] flex-1 flex-col justify-center px-5 py-12 sm:px-8 lg:px-12">
             <div className="mx-auto w-full max-w-[430px] animate-fade-in-up">
               <div className="mb-8">
-                <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-(--auth-border) bg-(--auth-paper)/70 px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.16em] text-(--auth-muted)">
+                <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-(--auth-border) bg-(--auth-paper)/70 px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.16em] text-(--auth-muted)" style={{display: 'none'}}>
                   <Sparkles className="h-3 w-3 text-(--auth-accent)" aria-hidden="true" />
                   The developer workspace
                 </div>

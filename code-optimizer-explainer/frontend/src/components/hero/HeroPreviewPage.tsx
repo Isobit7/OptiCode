@@ -158,11 +158,7 @@ export function HeroPreviewPage() {
       <LiquidBg paused={reduced} />
 
       {/* ── Colour overlays on top of canvas ── */}
-      <div style={{
-        position: "absolute", inset: 0,
-        background: "radial-gradient(ellipse at top, rgba(249,115,22,0.18) 0%, transparent 60%)",
-        pointerEvents: "none",
-      }} />
+      {/* ✅ REMOVED: Decorative radial gradient circles */}
       <div style={{
         position: "absolute", inset: 0,
         background: "rgba(0,0,0,0.38)",
@@ -204,8 +200,7 @@ export function HeroPreviewPage() {
           fontSize: 11, fontWeight: 500, letterSpacing: "0.05em",
           color: "rgba(255,255,255,0.85)",
         }}>
-          <Sparkles style={{ width: 12, height: 12, color: "#f97316", flexShrink: 0 }} />
-          Liquid Chrome · WebGL Fragment Shader
+          {/* ✅ REMOVED: Liquid Chrome badge */}
         </span>
 
         {/* Headline */}
@@ -225,7 +220,6 @@ export function HeroPreviewPage() {
           <span style={{ color: "#f97316", transition: "none" }}>
             cleaner versions
           </span>
-          .
         </h1>
 
         {/* Sub-headline */}
@@ -269,20 +263,7 @@ export function HeroPreviewPage() {
           marginTop: 44,
           display: "flex", flexWrap: "wrap", gap: 8, justifyContent: "center",
         }}>
-          {[
-            { icon: <Code style={{ width: 12, height: 12, color: "#f97316", flexShrink: 0 }} />, text: "10 AI Actions · Explain, Humanize, Security, Translate, PR Review, Flowchart, Prettify, Shorten, SEO, Alternatives" },
-            { icon: <Sparkles style={{ width: 12, height: 12, color: "#818cf8", flexShrink: 0 }} />, text: "TanStack Start SSR · Radix Primitives · Tailwind v4" },
-          ].map(({ icon, text }) => (
-            <span key={text} style={{
-              display: "inline-flex", alignItems: "center", gap: 6,
-              padding: "4px 10px", borderRadius: 9999,
-              border: "1px solid rgba(255,255,255,0.15)",
-              background: "rgba(0,0,0,0.35)", backdropFilter: "blur(8px)",
-              fontSize: 11, color: "rgba(255,255,255,0.75)",
-            }}>
-              {icon}{text}
-            </span>
-          ))}
+          {/* ✅ REMOVED: AI Actions and TanStack display */}
         </div>
       </main>
     </div>

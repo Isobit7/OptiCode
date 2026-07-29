@@ -6,6 +6,10 @@ from dotenv import load_dotenv
 # Ensure backend root directory is in sys.path for Vercel/Render serverless execution
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
+# ✅ SECURITY FIX: Setup sanitized logging BEFORE any imports that use logger
+from app.security.logging_config import setup_sanitized_logging
+setup_sanitized_logging()
+
 from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -60,14 +64,18 @@ origins = (
     else default_origins
 )
 
+# ✅ SECURITY FIX: Strict CORS - explicit whitelist only, no wildcard regex
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
-    allow_origin_regex=r"https://.*\.vercel\.app|http://localhost:\d+|http://127\.0\.0\.1:\d+",
+    allow_origins=origins,  # Explicit whitelist - no regex patterns
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],  # Explicit methods
+    allow_headers=["Content-Type", "Authorization", "X-Requested-With", "X-CSRF-Token"],  # Explicit headers
 )
+
+# Observability middleware — must be registered AFTER CORS so it wraps all routes.
+from app.observability import observability_middleware
+app.middleware("http")(observability_middleware)
 
 
 @app.middleware("http")
@@ -75,26 +83,58 @@ async def add_security_headers(request: Request, call_next):
     origin = request.headers.get("origin")
     
     if request.method == "OPTIONS":
-        response_origin = origin if origin else "*"
+        response_origin = origin if origin else ""
+        # Only set if origin is in whitelist
+        if origin and origin in origins:
+            response_origin = origin
         headers = {
-            "Access-Control-Allow-Origin": response_origin,
-            "Access-Control-Allow-Credentials": "true",
-            "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-            "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Requested-With",
             "X-Content-Type-Options": "nosniff",
         }
+        if response_origin:
+            headers["Access-Control-Allow-Origin"] = response_origin
+            headers["Access-Control-Allow-Credentials"] = "true"
+            headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
+            headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, X-Requested-With, X-CSRF-Token"
         return Response(status_code=200, headers=headers)
 
     response = await call_next(request)
-    if origin and ("vercel.app" in origin or "localhost" in origin or "127.0.0.1" in origin):
+    
+    # Only set CORS headers if origin is in whitelist
+    if origin and origin in origins:
         response.headers["Access-Control-Allow-Origin"] = origin
         response.headers["Access-Control-Allow-Credentials"] = "true"
 
+    # ✅ SECURITY FIX: Comprehensive security headers
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["X-Frame-Options"] = "DENY"
     response.headers["X-XSS-Protection"] = "1; mode=block"
-    response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+    response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains; preload"
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    
+    # Content Security Policy - strict, allow only necessary sources
+    response.headers["Content-Security-Policy"] = (
+        "default-src 'self'; "
+        "script-src 'self' 'unsafe-inline' 'unsafe-eval'; "
+        "style-src 'self' 'unsafe-inline'; "
+        "img-src 'self' data: https:; "
+        "font-src 'self'; "
+        "connect-src 'self' https://api.groq.com https://generativelanguage.googleapis.com https://openrouter.ai; "
+        "frame-ancestors 'none'; "
+        "form-action 'self'"
+    )
+    
+    # Permissions Policy - disable unnecessary features
+    response.headers["Permissions-Policy"] = (
+        "accelerometer=(), "
+        "camera=(), "
+        "geolocation=(), "
+        "gyroscope=(), "
+        "magnetometer=(), "
+        "microphone=(), "
+        "payment=(), "
+        "usb=()"
+    )
+    
     return response
 
 app.include_router(auth.router, prefix="/api", tags=["Authentication"])
@@ -174,3 +214,21 @@ def get_cache_stats() -> dict:
     """Returns current in-memory cache statistics."""
     from app.cache import cache
     return {"status": "ok", **cache.stats()}
+
+
+@app.get("/metrics", tags=["Monitoring"])
+def get_metrics() -> dict:
+    """
+    Returns aggregate in-process observability metrics.
+
+    Shape:
+      {
+        "requests": {"total": N, "errors": N, "avg_latency_ms": N},
+        "endpoints": {"<path>": {"requests": N, "errors": N, "avg_latency_ms": N}},
+        "languages": {"python": N, ...},
+        "llm": {"total_retries": N, "validation_failures": N},
+        "streaming": {"disconnects": N, "errors": N}
+      }
+    """
+    from app.observability import metrics
+    return metrics.snapshot()

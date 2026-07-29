@@ -558,3 +558,67 @@ pre, code {
   word-break: break-word;
   overflow-wrap: break-word;
 }
+
+
+/* ✅ FIX: Remove wavy line/decorative border from top of input area */
+header,
+header::before,
+header::after {
+  border-top: none !important;
+  border-top-width: 0 !important;
+  box-shadow: none !important;
+}
+
+/* Remove decorative elements from composer */
+.composer-loading::before,
+.composer-loading::after {
+  display: none !important;
+}
+
+/* Remove any SVG decorations */
+svg[class*="wave"],
+svg[class*="decorative"],
+[class*="wave"] svg {
+  display: none !important;
+}
+
+/* Remove red/block left border line from code displays */
+pre,
+pre code,
+code {
+  border-left: none !important;
+  border-left-color: transparent !important;
+}
+
+pre::before,
+pre::after,
+code::before,
+code::after {
+  display: none !important;
+}
+
+/* Hide line numbers and strikethrough formatting from highlight.js */
+.hljs-line-number,
+[data-line-number] {
+  display: none !important;
+}
+
+/* Remove strikethrough/deletion styling */
+.hljs-deletion,
+code del,
+code span del {
+  text-decoration: none !important;
+  color: inherit !important;
+  background: none !important;
+}
+
+/* Clean up code block styling */
+pre code {
+  counter-reset: line !important;
+}
+
+pre code span {
+  text-decoration: none !important;
+  background: none !important;
+  border-left: none !important;
+}
