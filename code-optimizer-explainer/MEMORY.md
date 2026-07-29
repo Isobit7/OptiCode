@@ -97,6 +97,7 @@ code-optimizer-explainer/
 ## 9. Changelog
 *(Newest entry on top. One line per change — date + what changed + why, if non-obvious.)*
 
+| 2026-07-29 | Completed end-to-end user flow verification: Simulated user registration (email auth), completed onboarding setup wizard, verified "Explain" & "Prettify" refiners, and verified the "Logic Flowchart" power tool in the live environment (all working perfectly). |
 | 2026-07-29 | Fixed cross-origin auth CORS connection error: (1) Swapped credentials: "include" to credentials: "same-origin" in backend.ts to prevent browser-blocking with wildcard Access-Control-Allow-Origin; (2) Configured OPTIONS preflight handling and dynamic origin reflection in main.py. |
 | 2026-07-29 | Fixed "Failed to fetch" auth network error: Added safeAuthFetch helper in backend.ts with automatic live production fallback (https://opticode-backend.vercel.app) whenever local backend server (port 8000) is unreachable or offline, ensuring registration & login always succeed. |
 | 2026-07-29 | Overhauled authentication system: (1) Added local SHA-256 password hashing & verification in db_session.py and auth.py; (2) Enforced strict password matching and duplicate email prevention with HTTP 400 errors; (3) Added opticode_auth_change event dispatching for Google OAuth and login state sync; (4) Embedded SignInModal with header button & sidebar trigger in OptimizerApp.tsx. All 40 pytest cases passing. |
