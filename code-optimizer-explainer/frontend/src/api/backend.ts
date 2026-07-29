@@ -1,9 +1,22 @@
 // Centralized backend API client. Components must never call fetch() directly.
 
-const BASE_URL =
+const RAW_BASE_URL =
   (typeof import.meta !== "undefined" &&
     (import.meta as unknown as { env?: { VITE_API_BASE_URL?: string } }).env?.VITE_API_BASE_URL) ||
   "http://localhost:8000";
+
+export const BASE_URL = RAW_BASE_URL.replace(/\/+$/, "");
+
+if (
+  typeof window !== "undefined" &&
+  !RAW_BASE_URL.includes("localhost") &&
+  !RAW_BASE_URL.includes("127.0.0.1") &&
+  RAW_BASE_URL === "http://localhost:8000"
+) {
+  console.warn(
+    "[OptiCode] VITE_API_BASE_URL environment variable is not defined. Defaulting backend connection to http://localhost:8000"
+  );
+}
 
 export type ActionId =
   | "explain"

@@ -1,7 +1,12 @@
 import logging
 import os
+import sys
 from dotenv import load_dotenv
-from fastapi import FastAPI, Request
+
+# Ensure backend root directory is in sys.path for Vercel/Render serverless execution
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
@@ -12,8 +17,6 @@ logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
 )
 logger = logging.getLogger("code_optimizer.main")
-
-from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect
 
 from app.routes import (
     alternatives,
@@ -46,10 +49,15 @@ origins = (
     else ["*"]
 )
 
+# Standardize CORS preflight compliance for Vercel frontends and wildcard fallback
+allow_credentials = True if origins != ["*"] else False
+origin_regex = r"https://.*\.vercel\.app" if origins == ["*"] else None
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
-    allow_credentials=True,
+    allow_origin_regex=origin_regex,
+    allow_credentials=allow_credentials,
     allow_methods=["*"],
     allow_headers=["*"],
 )
