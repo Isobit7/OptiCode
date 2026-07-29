@@ -1,5 +1,8 @@
-import { OptimizerApp } from "./components/optimizer/app/OptimizerApp";
+import { RouterProvider } from "@tanstack/react-router";
+import { getRouter } from "./router";
+
+const router = getRouter();
 
 export default function App() {
-  return <OptimizerApp />;
+  return <RouterProvider router={router} />;
 }
