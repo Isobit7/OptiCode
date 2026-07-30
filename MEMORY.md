@@ -95,7 +95,8 @@ code-optimizer-explainer/
 ## 9. Changelog
 *(Newest entry on top. One line per change — date + what changed + why, if non-obvious.)*
 
-| 2026-07-30 | Configured Google Search Console indexing assets: (1) Updated sitemap.xml and robots.txt domains to opticode-lake.vercel.app; (2) Verified HTML meta site-verification tag in index.html; (3) Created comprehensive PDF-ready GSC setup guide. |
+| 2026-07-30 | Deployed Google Search Console HTML verification file google8286d920d6fcd994.html to https://opticode-lab.vercel.app/google8286d920d6fcd994.html (HTTP 200 OK verified). |
+| 2026-07-30 | Configured Google Search Console indexing assets: (1) Updated sitemap.xml and robots.txt domains to opticode-lab.vercel.app; (2) Verified HTML meta site-verification tag in index.html; (3) Created comprehensive PDF-ready GSC setup guide. |
 | 2026-07-30 | Updated favicon and brand logo assets across public/ and src/assets/ using user-provided squircle OC mark design, and added multi-size icon metadata tags to index.html. |
 | 2026-07-30 | Updated auth.py samesite cookie attribute to lax (commit e4fea26) and pushed to GitHub main branch to enable seamless Google OAuth redirects. |
 | 2026-07-30 | Verified live deployment end-to-end via automated browser subagent on https://opticode-lake.vercel.app (guest login, code input, AI explanation returned with 200 OK status from Render backend at https://opticode-zc3b.onrender.com). |
