@@ -28,6 +28,8 @@ def hash_password(password: str) -> str:
         raise ValueError("Password cannot be empty")
     if len(password) < 8:
         raise ValueError("Password must be at least 8 characters")
+    # ✅ Truncate to 72 bytes (bcrypt hard limit)
+    password = password[:72]
     return pwd_context.hash(password)
 
 
