@@ -1,6 +1,4 @@
 import { useState } from "react";
-import logoWebp from "@/assets/logo.webp";
-import logoPng from "@/assets/logo.png";
 import {
   Plus,
   Search,

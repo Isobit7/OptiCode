@@ -1,6 +1,4 @@
 import { useState, useRef, useEffect } from "react";
-import logoWebp from "@/assets/logo.webp";
-import logoPng from "@/assets/logo.png";
 import {
   ChevronDown, Check, Sparkles, UserRound, Code, Layers,
   AlignLeft, Copy, Maximize2, ScanText, Type, Shield, Terminal, Key, Cpu, AlertCircle,
