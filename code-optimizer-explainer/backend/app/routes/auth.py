@@ -81,7 +81,7 @@ def _create_auth_session_and_set_cookies(
     cookie_config = {
         "name": "session_token",
         "httponly": True,
-        "samesite": "strict",  # ✅ SECURITY FIX: Changed from "lax" to "strict"
+        "samesite": "lax",
         "path": "/",
         "max_age": 604800,  # 7 days
     }
@@ -92,7 +92,7 @@ def _create_auth_session_and_set_cookies(
         value=session_token,
         max_age=604800,
         httponly=True,
-        samesite="strict",  # ✅ SECURITY FIX: Changed from "lax" to "strict"
+        samesite="lax",
         path="/",
     )
     response.set_cookie(
@@ -100,7 +100,7 @@ def _create_auth_session_and_set_cookies(
         value=valid_access_token,
         max_age=604800,
         httponly=True,
-        samesite="strict",  # ✅ SECURITY FIX: Changed from "lax" to "strict"
+        samesite="lax",
         path="/",
     )
 

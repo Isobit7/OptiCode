@@ -97,6 +97,9 @@ code-optimizer-explainer/
 ## 9. Changelog
 *(Newest entry on top. One line per change — date + what changed + why, if non-obvious.)*
 
+| 2026-07-30 | Verified live deployment end-to-end via automated browser subagent on https://opticode-lake.vercel.app (guest login, code input, AI explanation returned with 200 OK status from Render backend at https://opticode-zc3b.onrender.com). |
+| 2026-07-30 | Verified live Render backend deployment at https://opticode-zc3b.onrender.com (returns HTTP 200 health status ok). |
+| 2026-07-30 | Committed and pushed dynamic CORS & deployment BASE_URL updates to GitHub origin/main (commit 3103949). |
 | 2026-07-30 | Updated backend CORS middleware in main.py to dynamically allow all *.vercel.app origins and custom Render environment domains, preventing CORS preflight failures when changing deployment URLs. |
 | 2026-07-30 | Configured and provided complete deployment step-by-step instructions for Frontend (Vercel) and Backend (Render) per user request. |
 | 2026-07-30 | Started local backend FastAPI dev server on http://127.0.0.1:8000 and frontend Vite dev server on http://localhost:5173 per user directive. |
