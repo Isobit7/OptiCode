@@ -78,9 +78,8 @@ s:/PROJECT/OptiCode/
 
 | Date | Category | Milestone Description |
 |---|---|---|
+| **2026-07-30** | **Branding & UI** | Removed squircle logo icons from Sign in/Create Account pages, sidebars, and headers; generated clean 100% transparent Code-Spark favicon set; configured versioned `-v5.js` asset filenames to purge browser disk cache. |
 | **2026-07-30** | **SEO & GSC** | Deployed Google Search Console verification file `google8286d920d6fcd994.html` live to `https://opticode-lab.vercel.app/google8286d920d6fcd994.html` (200 OK verified). Updated `sitemap.xml` & `robots.txt` domain pointers and created PDF setup guide. |
-| **2026-07-30** | **Deployment** | Configured and verified dual production deployments: Frontend live on Vercel (`opticode-lab.vercel.app`), Backend live on Render (`opticode-zc3b.onrender.com`). |
-| **2026-07-30** | **Branding** | Updated brand identity assets with custom squircle OC mark across favicon, touch icons, and header logos. |
 | **2026-07-29** | **Authentication** | Overhauled authentication system with strict credential verification, SHA-256 local fallback hashing, Google OAuth event sync, and embedded `SignInModal`. All 40 backend pytest cases passing. |
 | **2026-07-29** | **Resilience** | Implemented `safeAuthFetch` network fallback in frontend to ensure zero connection failures during authentication. |
 | **2026-07-29** | **UI & UX** | Fixed DOM event handling, restored form interactivity, configured default dark mode, and added syntax-highlighted output blocks. |
