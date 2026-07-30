@@ -231,7 +231,6 @@ function LoginRoute() {
 
               <div className="mt-8 border-t border-(--auth-border) pt-6">
                 <div className="mb-4 flex items-center gap-3">
-                  <LockKeyhole className="h-3.5 w-3.5 text-(--auth-muted)" aria-hidden="true" />
                   <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-(--auth-muted)">
                     Or continue securely with
                   </p>

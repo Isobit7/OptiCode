@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from "react";
-import { ArrowRight, Check, Eye, EyeOff, Loader2, Sparkles } from "lucide-react";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 
 interface RegisterFormProps {
   onSubmit: (email: string, password: string, fullName: string) => Promise<void>;
@@ -110,8 +110,7 @@ export function RegisterForm({ onSubmit, loading, error, success }: RegisterForm
       <ul className="space-y-2 py-1 text-xs text-zinc-600 dark:text-zinc-400" aria-label="Account benefits">
         {["Sync your optimization history", "Bring your own API key", "Unlock priority models"].map((benefit) => (
           <li key={benefit} className="flex items-center gap-2">
-            <Check className="h-3.5 w-3.5 shrink-0 text-emerald-500" aria-hidden="true" />
-            {benefit}
+            <span>• {benefit}</span>
           </li>
         ))}
       </ul>
@@ -126,7 +125,6 @@ export function RegisterForm({ onSubmit, loading, error, success }: RegisterForm
       )}
 
       <div className="rounded-xl border border-orange-500/30 bg-orange-500/10 p-3 text-xs text-zinc-900 dark:text-zinc-100 flex items-center gap-2 mb-2 shadow-xs">
-        <Sparkles className="h-4 w-4 text-orange-500 shrink-0" />
         <span><strong>OptiCode Account:</strong> Sign up with your Gmail/Email ID & password to save all your chats & optimizations.</span>
       </div>
 
@@ -140,10 +138,7 @@ export function RegisterForm({ onSubmit, loading, error, success }: RegisterForm
         ) : success ? (
           "OptiCode Account Created"
         ) : (
-          <>
-            <span>Create OptiCode Account</span>
-            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" aria-hidden="true" />
-          </>
+          <span>Create OptiCode Account</span>
         )}
       </button>
     </form>

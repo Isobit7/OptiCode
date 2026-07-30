@@ -171,7 +171,6 @@ export function SignInModal({ isOpen, onClose, onSuccess }: SignInModalProps) {
                 : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white"
             }`}
           >
-            <LogIn className="h-3.5 w-3.5" />
             <span>Log In</span>
           </button>
           <button
@@ -183,7 +182,6 @@ export function SignInModal({ isOpen, onClose, onSuccess }: SignInModalProps) {
                 : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white"
             }`}
           >
-            <UserPlus className="h-3.5 w-3.5" />
             <span>Create OptiCode Account</span>
           </button>
         </div>

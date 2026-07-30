@@ -19,10 +19,8 @@ export function SocialButton({ provider, icon: Icon, loading, onClick }: SocialB
     >
       {loading ? (
         <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-      ) : (
-        <Icon className="h-4 w-4 text-(--auth-muted) transition group-hover:text-(--auth-accent)" aria-hidden="true" />
-      )}
-      <span className="hidden sm:inline">{provider}</span>
+      ) : null}
+      <span className="inline-block">{provider}</span>
     </button>
   );
 }

@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from "react";
-import { ArrowRight, Eye, EyeOff, Loader2, Sparkles } from "lucide-react";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 
 interface LoginFormProps {
   onSubmit: (email: string, password: string) => Promise<void>;
@@ -73,7 +73,6 @@ export function LoginForm({ onSubmit, loading, error, success }: LoginFormProps)
       {error && <AuthError message={error} />}
 
       <div className="rounded-xl border border-orange-500/30 bg-orange-500/10 p-3 text-xs text-zinc-900 dark:text-zinc-100 flex items-center gap-2 mb-2 shadow-xs">
-        <Sparkles className="h-4 w-4 text-orange-500 shrink-0" />
         <span><strong>OptiCode Account:</strong> Sign in with your registered Gmail/Email ID & password to load your saved chats & history.</span>
       </div>
 
@@ -87,10 +86,7 @@ export function LoginForm({ onSubmit, loading, error, success }: LoginFormProps)
         ) : success ? (
           "Signed in to OptiCode"
         ) : (
-          <>
-            <span>Sign in to OptiCode Account</span>
-            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" aria-hidden="true" />
-          </>
+          <span>Sign in to OptiCode Account</span>
         )}
       </button>
     </form>

@@ -583,7 +583,6 @@ function getGuestUserId(): string {
                 onClick={() => setIsSignInOpen(true)}
                 className="flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 px-3.5 py-1.5 text-xs font-bold text-white shadow-sm hover:brightness-110 active:scale-95 transition cursor-pointer"
               >
-                <UserRound className="h-3.5 w-3.5" />
                 <span>Sign In / Account</span>
               </button>
             )}

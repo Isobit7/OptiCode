@@ -182,7 +182,6 @@ export function PreferencesDropdown({
           title="Select AI Model & Preferences"
           className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-lg bg-[var(--accent-muted)] border border-[var(--accent)]/30 text-[var(--accent)] hover:bg-[var(--accent)]/20 transition-all cursor-pointer shadow-xs"
         >
-          <Sparkles className="h-3.5 w-3.5" />
           <span>{activeModel.name.replace("OptiCode ", "")}</span>
           <ChevronDown
             className={`h-3.5 w-3.5 transition-transform duration-150 ${isOpen ? "rotate-180" : ""}`}
