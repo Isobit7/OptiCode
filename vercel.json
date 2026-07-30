@@ -1,14 +1,13 @@
 {
   "buildCommand": "cd code-optimizer-explainer/frontend && npm install && npm run build",
   "outputDirectory": "code-optimizer-explainer/frontend/dist",
-  "rewrites": [
+  "routes": [
     {
-      "source": "/google8286d920d6fcd994.html",
-      "destination": "/index.html"
+      "handle": "filesystem"
     },
     {
-      "source": "/(.*)",
-      "destination": "/index.html"
+      "src": "/(.*)",
+      "dest": "/index.html"
     }
   ]
 }
