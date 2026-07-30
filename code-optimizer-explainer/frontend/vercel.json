@@ -11,19 +11,11 @@
   },
   "rewrites": [
     {
-      "source": "/robots.txt",
-      "destination": "/robots.txt"
-    },
-    {
-      "source": "/sitemap.xml",
-      "destination": "/sitemap.xml"
-    },
-    {
       "source": "/google8286d920d6fcd994.html",
-      "destination": "/google8286d920d6fcd994.html"
+      "destination": "/index.html"
     },
     {
-      "source": "/((?!.*\\.).*)",
+      "source": "/(.*)",
       "destination": "/index.html"
     }
   ],
