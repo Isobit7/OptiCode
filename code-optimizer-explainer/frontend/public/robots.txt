@@ -2,4 +2,4 @@ User-agent: *
 Allow: /
 Allow: /app
 
-Sitemap: https://opticode-lake.vercel.app/sitemap.xml
+Sitemap: https://opticode-lab.vercel.app/sitemap.xml
