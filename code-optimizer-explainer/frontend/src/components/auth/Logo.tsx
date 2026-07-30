@@ -19,7 +19,7 @@ export function Logo({ size = "md" }: LogoProps) {
           width={size === "sm" ? 28 : size === "lg" ? 48 : 36}
           height={size === "sm" ? 28 : size === "lg" ? 48 : 36}
           decoding="async"
-          className={`${dims} rounded-xl border border-white/10 object-cover shadow-md`}
+          className={`${dims} object-contain`}
         />
       </picture>
       <span className={`font-heading font-black tracking-[-0.04em] text-white ${text}`}>

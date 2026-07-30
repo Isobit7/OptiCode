@@ -281,7 +281,7 @@ export function SidebarHistory({
                 width={28}
                 height={28}
                 decoding="async"
-                className="h-7 w-7 rounded-md object-cover shadow-xs border border-[var(--border-subtle)]"
+                className="h-7 w-7 object-contain"
               />
             </picture>
           </div>
