@@ -170,10 +170,6 @@ export function PreferencesDropdown({
     <div className="flex items-center gap-3">
       {/* Brand title */}
       <span className="font-headings text-lg font-bold tracking-tight text-[var(--text-primary)] select-none flex items-center gap-2">
-        <picture>
-          <source srcSet={logoWebp} type="image/webp" />
-          <img src={logoPng} alt="OptiCode Logo" className="h-6 w-6 object-contain" />
-        </picture>
         <span>OptiCode</span>
       </span>
 

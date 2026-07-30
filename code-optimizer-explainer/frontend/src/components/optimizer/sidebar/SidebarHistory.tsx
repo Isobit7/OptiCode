@@ -273,17 +273,9 @@ export function SidebarHistory({
       <div className="flex items-center justify-between p-2.5 border-b border-[var(--border-subtle)] bg-[var(--bg-surface)]">
         {!collapsed ? (
           <div className="flex items-center">
-            <picture>
-              <source srcSet={logoWebp} type="image/webp" />
-              <img
-                src={logoPng}
-                alt="OptiCode Logo"
-                width={28}
-                height={28}
-                decoding="async"
-                className="h-7 w-7 object-contain"
-              />
-            </picture>
+            <span className="font-heading font-black text-base tracking-tight text-[var(--text-primary)] px-1">
+              Opti<span className="text-[var(--accent)]">Code</span>
+            </span>
           </div>
         ) : (
           <button
