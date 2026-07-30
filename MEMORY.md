@@ -1,270 +1,86 @@
 # MEMORY.md
-## Persistent Project Memory — Auto-Updated
+## Persistent Project Memory — Single Source of Truth
 
-> ⚠️ **MANDATORY INSTRUCTION FOR ANY AI ASSISTANT WORKING IN THIS REPO** (Claude Code, Cursor, Copilot, etc.):
->
-> This file is the single source of truth for project context. You MUST:
-> 1. **Read this entire file before doing any work**, every session.
-> 2. **After making ANY change** — new feature, architecture decision, tech stack swap, file added/removed, bug fix that changes behavior, decision the user makes — **update this file in the same turn**, before ending your response. Do not wait to be asked.
-> 3. Update the specific section that changed (Sections 3-7 below), and add one line to the **Changelog** (Section 9) with the date and what changed.
-> 4. If a change conflicts with something already documented here, flag the conflict to the user before proceeding — don't silently overwrite past decisions.
-> 5. Never leave this file stale. A future session (or a different AI tool) depends entirely on this file being current — treat it as more important than the code comments.
+> 💡 **GUIDELINE FOR AI ASSISTANTS**:
+> Update this file at **logical milestones or when convenient** (e.g. major feature completions, architecture updates, deployment changes). Keep this document clean, well-structured, proper, and concise.
 
 ---
 
-## 1. What This Project Is
+## 1. Project Overview
 
-A free, open-source web app called **Code Optimizer & Explainer**. Users paste any code (language-agnostic) and get AI-assisted transformations and explanations.
+**OptiCode** (Code Optimizer & Explainer) is a modern, high-performance, open-source web application designed to help developers, students, and engineers understand, humanize, optimize, translate, and format code seamlessly.
 
-**Target users:** students, professional developers, and non-coders — all of the above.
+- **Live Frontend**: [https://opticode-lab.vercel.app](https://opticode-lab.vercel.app)
+- **Live Backend**: [https://opticode-zc3b.onrender.com](https://opticode-zc3b.onrender.com) (Fallback: `https://opticode-backend.vercel.app`)
+
+---
 
 ## 2. Core Features
 
-| Feature | What it does |
+| Feature | Description |
 |---|---|
-| **Explainer** | Plain-language explanation of pasted code, adjustable depth (`beginner`, `intermediate`, `advanced`) |
-| **Humanizer** | Rewrites code with configurable modes: `de-ai` (remove AI clichés), `simplify` (readable structure), `idiomatic` (standard idioms) |
-| **Prettifier** | Formats code to language-standard style conventions (Black for Python, JSBeautifier for Web) |
-| **Shortener** | Minifies/condenses code while preserving behavior (AST-based for Python, regex for Web/C) |
-| **SEO-Friendly Optimizer** | Static HTML analysis returning a 0–100 SEO health score, structured checklist, and optimized markup |
-| **Code Alternatives** | Generates 2-3 alternative implementations with tradeoff labels, pros/cons lists, and $O(...)$ time/space bounds |
-
-Input/output handling: always show original input, transformed output, and a diff view.
-
-## 3. Tech Stack (update this section if the stack ever changes)
-
-- **Frontend:** React (Vite), deployed on **Vercel**
-- **Backend:** FastAPI (Python), deployed on **Render/Fly.io** (not Vercel)
-- **Database:** Supabase (Postgres + optional Auth)
-- **LLM layer:** Custom-built interface (`backend/app/llm_interface/client.py`) with multi-model fallback (`poolside/laguna-s-2.1:free`, `google/gemma-4-31b-it:free`)
-- **Deterministic tools:** Prettify/Shorten/SEO run WITHOUT the LLM (Black, JSBeautifier, BeautifulSoup static analysis)
-
-## 4. Key Product Decisions (update this section as new decisions are made)
-
-- Free and open-source (license not yet chosen)
-- Language-agnostic: any language pasted, auto-detected
-- Input limit: ~5,000 lines per request
-- Login is optional — anonymous use fully works; login only needed to save history
-- No fixed launch deadline — quality over speed
-- Web-app only for v1 (no browser extension/public API yet — v2 candidates)
-- Frontend dashboard buttons & API contracts fully specified in `code-optimizer-explainer/FRONTEND_DASHBOARD_SPECS.md` for frontend teammate integration.
-
-## 5. Architecture Rules (update this section if architecture changes)
-
-- Frontend never calls Supabase directly for data — only FastAPI does. Frontend may call Supabase directly ONLY for Auth, using the public anon key.
-- All secrets live server-side in FastAPI, never in frontend code.
-- One FastAPI route per feature (`/api/explain`, `/api/humanize`, `/api/prettify`, `/api/shorten`, `/api/seo-optimize`, `/api/alternatives`), plus `/api/auth` and `/api/history`.
-- Supabase Row Level Security so users only read/write their own history.
-- Rate-limit `/api/*` to control LLM inference cost.
-
-## 6. Project Structure (update this section if structure changes)
-
-```
-code-optimizer-explainer/
-├── FRONTEND_DASHBOARD_SPECS.md   Full UI buttons & API integration specs for frontend developer
-├── frontend/               React app (Vercel)
-│   └── src/api/             backend.js (FastAPI calls), supabaseClient.js (auth only)
-└── backend/                 FastAPI app (Render/Fly.io)
-    ├── app/
-    │   ├── routes/           one file per feature
-    │   ├── llm_interface/    OpenRouter LLM provider client with multi-model fallback
-    │   ├── deterministic_tools/ prettify/shorten/seo — Black, JSBeautifier, BeautifulSoup
-    │   ├── db/                Supabase client wrapper
-    │   └── models.py          Pydantic request/response schemas
-    └── tests/                Pytest suite (test_backend_routes.py)
-```
-
-## 7. Open Decisions (move items out of here into Section 4 once resolved)
-
-- Open-source license (MIT/Apache 2.0/etc.)
-- Auth provider details for Supabase login (email vs. OAuth)
-- Data retention policy for saved history
-
-## 8. Reference Docs In This Repo
-
-- `PRD_Code_Optimizer_Explainer.md` — full product requirements
-- `code-optimizer-explainer/PROJECT_SYSTEM_OVERVIEW_AND_REQUEST_FLOW.md` — visual system overview, sequence diagrams, component map, and request lifecycle
-- `code-optimizer-explainer/OPTICODE_FULL_SPECIFICATION_MASTER.md` — single master document containing all 3 specs verbatim (Dashboard Specs, Zero Disturbance UX, Product Roadmap)
-- `code-optimizer-explainer/ZERO_DISTURBANCE_UX_AND_STANDOUT_FEATURES.md` — technical architecture for zero-error resilience and standout features
-- `code-optimizer-explainer/PRODUCT_ROADMAP.md` — strategic roadmap detailing security scanner, PR summary, translator, and flowchart features
-- `code-optimizer-explainer/FRONTEND_DASHBOARD_SPECS.md` — UI buttons, controls, and API response contracts for frontend developer
-- `Tech_Stack_Options.md` — why this stack was chosen
-- `System_Architecture.md` — detailed request flow and component responsibilities
-- `README.md` — setup/run instructions
-
-## 9. Changelog
-*(Newest entry on top. One line per change — date + what changed + why, if non-obvious.)*
-
-| 2026-07-30 | Deployed Google Search Console HTML verification file google8286d920d6fcd994.html to https://opticode-lab.vercel.app/google8286d920d6fcd994.html (HTTP 200 OK verified). |
-| 2026-07-30 | Configured Google Search Console indexing assets: (1) Updated sitemap.xml and robots.txt domains to opticode-lab.vercel.app; (2) Verified HTML meta site-verification tag in index.html; (3) Created comprehensive PDF-ready GSC setup guide. |
-| 2026-07-30 | Updated favicon and brand logo assets across public/ and src/assets/ using user-provided squircle OC mark design, and added multi-size icon metadata tags to index.html. |
-| 2026-07-30 | Updated auth.py samesite cookie attribute to lax (commit e4fea26) and pushed to GitHub main branch to enable seamless Google OAuth redirects. |
-| 2026-07-30 | Verified live deployment end-to-end via automated browser subagent on https://opticode-lake.vercel.app (guest login, code input, AI explanation returned with 200 OK status from Render backend at https://opticode-zc3b.onrender.com). |
-| 2026-07-30 | Verified live Render backend deployment at https://opticode-zc3b.onrender.com (returns HTTP 200 health status ok). |
-| 2026-07-30 | Committed and pushed dynamic CORS & deployment BASE_URL updates to GitHub origin/main (commit 3103949). |
-| 2026-07-30 | Updated backend CORS middleware in main.py to dynamically allow all *.vercel.app origins and custom Render environment domains, preventing CORS preflight failures when changing deployment URLs. |
-| 2026-07-30 | Configured and provided complete deployment step-by-step instructions for Frontend (Vercel) and Backend (Render) per user request. |
-| 2026-07-30 | Started local backend FastAPI dev server on http://127.0.0.1:8000 and frontend Vite dev server on http://localhost:5173 per user directive. |
-| 2026-07-29 | Fixed language auto-detection in Prettify & Shorten: (1) Updated detect_language in client.py to ignore "auto" string and run detection logic; (2) Configured tools.prettify and tools.shorten to trigger auto-detection if language is "auto" or empty; (3) Added detected_language support to PrettifyResponse/ShortenResponse schemas and backend.ts API response parsing. |
-| 2026-07-29 | Enhanced output formatting: Swapped the diff view for a clean syntax-highlighted code output block for Prettify, Translate, and Humanize actions in TurnCard.tsx per user preference. |
-| 2026-07-29 | Completed end-to-end user flow verification: Simulated user registration (email auth), completed onboarding setup wizard, verified "Explain" & "Prettify" refiners, and verified the "Logic Flowchart" power tool in the live environment (all working perfectly). |
-| 2026-07-29 | Fixed cross-origin auth CORS connection error: (1) Swapped credentials: "include" to credentials: "same-origin" in backend.ts to prevent browser-blocking with wildcard Access-Control-Allow-Origin; (2) Configured OPTIONS preflight handling and dynamic origin reflection in main.py. |
-| 2026-07-29 | Fixed "Failed to fetch" auth network error: Added safeAuthFetch helper in backend.ts with automatic live production fallback (https://opticode-backend.vercel.app) whenever local backend server (port 8000) is unreachable or offline, ensuring registration & login always succeed. |
-| 2026-07-29 | Overhauled authentication system: (1) Added local SHA-256 password hashing & verification in db_session.py and auth.py; (2) Enforced strict password matching and duplicate email prevention with HTTP 400 errors; (3) Added opticode_auth_change event dispatching for Google OAuth and login state sync; (4) Embedded SignInModal with header button & sidebar trigger in OptimizerApp.tsx. All 40 pytest cases passing. |
-| 2026-07-29 | Configured dark theme default for all users: (1) Added instant inline theme script and `<html class="dark">` in `index.html` to eliminate light-mode theme flashing on page load; (2) Updated initial React theme states in `OptimizerApp.tsx` & `login.tsx` to default to `dark` |
-| 2026-07-29 | Fixed un-interactive page & DOM event listener trapping: Removed invalid SSR `RootShell` (`<html><body>`) wrapper from `__root.tsx` client-side TanStack Router config that was rendering nested `<html>` tags inside `<div id="root">` and blocking React synthetic event propagation, restoring full typing & click interactivity to all form inputs |
-| 2026-07-29 | Fixed login form input responsiveness & text visibility: (1) Added `--color-auth-*` theme tokens in `styles.css` `@theme inline` block; (2) Replaced un-evaluated `--auth-*` input utility classes with explicit high-contrast Tailwind CSS input styles (`bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white border-zinc-300 dark:border-zinc-700`) in `LoginForm.tsx` & `RegisterForm.tsx` so typed text & cursor focus are 100% visible and interactive |
-| 2026-07-29 | Fixed tab interactivity & launched local FastAPI backend: (1) Replaced Radix `Tabs.Root` wrapper in `login.tsx` with direct interactive tab buttons (`Sign in` / `Create OptiCode Account`) to eliminate event-handler swallowing; (2) Launched local Uvicorn FastAPI backend server on `http://127.0.0.1:8000` alongside Vite frontend for full end-to-end local testing |
-| 2026-07-29 | Updated UI branding to `OptiCode Account`: (1) Renamed user-facing text from `Supabase Account` to `OptiCode Account` across `RegisterForm.tsx`, `LoginForm.tsx`, `login.tsx`, and `SignInModal.tsx` per user instruction; (2) Kept full backend database storage & credential verification powered seamlessly by Supabase |
-| 2026-07-29 | Enhanced Supabase Account registration & login UI: (1) Added explicit `Create Supabase Account` options & info banners in `RegisterForm.tsx`, `LoginForm.tsx`, `login.tsx`, and `SignInModal.tsx`; (2) Email/Gmail ID + password accounts register and verify directly against Supabase auth & database (`user_profiles`, `user_sessions`); (3) On sign-in, all past chat history and code optimizations from Supabase `history` table are fetched and restored into the chat workspace |
-| 2026-07-29 | Configured Supabase database persistence for user logins & session activity: (1) Automatic user profile (`user_profiles`) and active session (`user_sessions`) upserts on every login; (2) Persistent saving of all searches, inputs, and code optimizations to Supabase `history` table for both authenticated and guest session IDs |
-| 2026-07-29 | Fixed Google Login & Auth persistence: (1) Added `Authorization: Bearer <token>` headers to `backend.ts` API requests to bypass third-party cookie restrictions across Vercel subdomains; (2) Added `saveAuthSession` to automatically persist `access_token` & `user` profile in `localStorage` on login; (3) Prevented SPA client router navigation (`finishAuth`) from cancelling external browser redirect to Google OAuth URL in `login.tsx`; (4) Added automatic fallback to backend `/api/auth/google` in `SignInModal.tsx` & `login.tsx` |
-| 2026-07-29 | Fixed missing logo issue: (1) Updated `frontend/vercel.json` rewrites pattern to `/((?!.*\\.[^/]+$).*)` so static images (`/logo.png`, `/logo.webp`) are served directly without being rewritten to `index.html`; (2) Imported bundled logo assets in `Logo.tsx`, `SidebarHistory.tsx`, and `PreferencesDropdown.tsx` for 100% reliable Vite asset resolution |
-| 2026-07-29 | Fixed frontend blank screen runtime crash: wrapped `App` with `@tanstack/react-query` `QueryClientProvider` in `main.jsx`, eliminating `Error: No QueryClient set` exception and enabling 100% full live UI rendering at `https://opticode-lake.vercel.app` |
-| 2026-07-29 | Fixed Vercel frontend & Render/Vercel backend deployments: (1) Sanitized trailing slash on `VITE_API_BASE_URL` in `backend.ts`; (2) Added cross-platform `cross-env` script & SPA rewrites in `frontend/vercel.json`; (3) Fixed `main.py` CORS & `sys.path` serverless imports; (4) Added `backend/api/index.py`, `.python-version` (3.11.9), health check in `render.yaml`, and complete `DEPLOYMENT.md` guide |
-| 2026-07-26 | Removed `Try Sample` snippet button from `CodeInputBar.tsx` per user directive |
-| 2026-07-26 | Restored concise action button labels (`EXPLAIN`, `HUMANIZE`, `AUDIT SECURITY`, etc.) in `CodeInputBar.tsx` per user screenshot request |
-| 2026-07-26 | Removed 3-step workflow indicator (`1. Paste Code` → `2. Pick Action` → `3. Instant Diff`) from empty state hero header per user directive in `OptimizerApp.tsx` |
-| 2026-07-26 | Cleaned up obsolete markdown files per user audio request: removed `PRD_Code_Optimizer_Explainer.md`, `System_Architecture.md`, `CLAUDE.md`, `DESIGN.md`, `FRONTEND_DASHBOARD_SPECS.md`, `PRODUCT_ROADMAP.md`, `RULES.md`, and `task.md` |
-| 2026-07-26 | Executed `/clarify` UX copy improvements: (1) Updated submit button text in `CodeInputBar.tsx` to active verbs (`EXPLAIN CODE LINE-BY-LINE`, `SCAN SECURITY VULNERABILITIES`, etc.); (2) Enhanced action pill tooltips in `ActionPills.tsx`; (3) Replaced generic `O(N) Optimized` badge in `TurnCard.tsx` with clear execution badges |
-| 2026-07-26 | Executed `/onboard` user experience: (1) Added 3-step workflow indicator (`1. Paste Code` → `2. Pick Action` → `3. Instant Diff`) in `OptimizerApp.tsx`; (2) Added 1-click `Try Sample` snippet button in `CodeInputBar.tsx`; (3) Added dismissable pro-tip hint bar with `localStorage` persistence |
-| 2026-07-26 | Executed `/harden` interface resilience: (1) Added 15s AbortController request timeouts & network error fallbacks in `backend.ts`; (2) Added double-submission protection and large input warning badges (>20k chars) in `CodeInputBar.tsx`; (3) Added `prefers-reduced-motion` media queries and `break-word` overflow safety in `styles.css` |
-| 2026-07-26 | Removed `AI Code Optimizer & Explainer` pill badge from top of empty state hero header per user directive in `OptimizerApp.tsx` |
-| 2026-07-26 | Removed Quick-Start Presets grid from empty state landing view per user directive in `OptimizerApp.tsx` and `Thread.tsx` |
-| 2026-07-26 | Executed `/bolder` visual amplification: (1) Added hero welcome section with 4 interactive 1-click code preset cards (Python Fib, React Hook, SQL Security, HTML SEO) in `Thread.tsx`; (2) Amplified active action pill contrast and hover physics in `ActionPills.tsx`; (3) Enhanced diff line contrast in `DiffLine.tsx` |
-| 2026-07-26 | Optimized `logo.png` image asset: resized 1254x1254 PNG (734 KB) to 128x128 compressed PNG (7.2 KB) and WebP (1.7 KB) — a **99% reduction in image payload size**; updated `Logo.tsx` and `SidebarHistory.tsx` with `<picture>` element fallbacks |
-| 2026-07-26 | Executed interface performance optimizations (`/optimize`): (1) Lazy loaded secondary modals in `OptimizerApp.tsx` (reduced main JS bundle size from 118.96 kB to 104.04 kB); (2) Added Satoshi woff2 font preloading in `index.html`; (3) Added CSS `contain: content` & `content-visibility: auto` in `styles.css`; (4) Memoized `TurnCard` with `React.memo` |
-| 2026-07-26 | Executed `/teach-impeccable` setup: gathered project UX design context and persisted core design principles to `task.md` |
-| 2026-07-26 | Fixed UI action tab execution & result rendering: (1) Connected `FlowchartViewer` & `SecurityScorecard` in `TurnCard.tsx` for visual Mermaid diagrams and security scorecards; (2) Added active code snippet fallback in `OptimizerApp.tsx` so clicking sidebar tabs or action pills works even after textarea is cleared |
-| 2026-07-26 | Removed "5 Utilities" badge pill from `RightDashboardPanel` section header per user directive |
-| 2026-07-26 | Redesigned `RightDashboardPanel` header: replaced generic "AI TOOLS DASHBOARD" and "PRO SUITE" with clean developer aesthetics ("Code Intelligence", `Cpu` icon, and "Analysis Modules") |
-| 2026-07-26 | Fixed CSS syntax error in `frontend/src/styles.css` by resolving duplicate `@theme inline` declaration and unclosed braces that broke Tailwind CSS compilation in Vite |
-| 2026-07-26 | Fixed Light Mode text visibility & contrast (WCAG AA): updated `:root` theme tokens (`#0f172a` text, `#ea580c` high-contrast orange, pure white `#ffffff` cards, `#f8fafc` base), fixed white brand title text in `PreferencesDropdown`, and adapted `RightDashboardPanel`, `TranslateBarControl`, `VoiceInputButton`, and `PreferencesDropdown` to theme variables |
-| 2026-07-26 | Started FastAPI backend dev server (port 8000) and Vite frontend dev server (port 8080) as background tasks |
-| 2026-07-25 | Added conic-gradient spinning border + glow-pulse loading animation on `CodeInputBar` composer card via `.composer-loading` CSS class (keyframes `border-spin` + `composer-glow-pulse` in `styles.css`) |
-| 2026-07-25 | Fixed `CodeInputBar.tsx` double focus ring bug: removed inner `<textarea>` orange focus outline (`focus:outline-none focus:ring-0 focus-visible:ring-0 border-none p-0`) so only a single sleek outer card border highlights when active |
-| 2026-07-25 | Executed interface hardening (`/harden`): added `role="dialog"`, `aria-modal="true"`, and labeled headers to `AnalyticsModal.tsx` & `KeyboardShortcutsModal.tsx`, implemented Escape key dismiss listeners, and added overflow resilience to `ActionPills.tsx` |
-| 2026-07-25 | Implemented OptiCode Dashboard Enhancements: added `AnalyticsModal.tsx` for usage/Big-O analytics and JSON export, `KeyboardShortcutsModal.tsx` power-user cheatsheet, Side-by-Side Split View toggle in `TurnCard.tsx`, and Big-O efficiency rating badges |
-| 2026-07-25 | Reduced `CodeInputBar.tsx` height to compact search box per user reference (`min-h-[56px]`, `p-3`, compact action pills & controls row) |
-| 2026-07-25 | Installed `lenis` package and integrated Lenis momentum smooth scrolling in `OptimizerApp.tsx` (`duration: 1.2`, exponential ease-out curve, GPU RAF loop, prefers-reduced-motion safe) |
-| 2026-07-25 | Applied strategic semantic action badges (`/colorize`): added action-specific subtle badge color tints (Indigo for Explain, Amber for Humanize, Mint/Emerald for Prettify & SEO, Coral/Rose for Shorten, Violet for Alternatives) while keeping the main app background & primary CTA `#f97316` intact per `DESIGN.md` |
-| 2026-07-25 | Integrated Developer Delight Suite (`/delight`): rotating humorous developer loading messages ("Optimizing Big-O...", "De-spaghettifying loops...", "Teaching AI idioms..."), browser DevTools console ASCII easter egg banner, copy sparkle flash feedback, and power-user shortcut hints |
-| 2026-07-25 | Executed visual amplification (`/bolder`): elevated typography contrast with oversized Satoshi 900 black headline (`text-3xl sm:text-4xl lg:text-5xl font-black`), amplified primary `RUN ACTION ↑` focal CTA button (`font-black tracking-widest hover:scale-[1.02] active:scale-[0.96]`), while strictly maintaining `DESIGN.md` flat principles (zero mesh gradients, zero glassmorphism) |
-| 2026-07-25 | Fixed `PreferencesDropdown.tsx` popover theme colors: replaced hardcoded dark `bg-zinc-950` classes with dynamic CSS design tokens (`var(--bg-surface)`, `var(--border-default)`, `var(--text-primary)`, `var(--text-secondary)`, `var(--accent-muted)`), ensuring 100% seamless palette matching in both light (`#ededed`) and dark (`#121212`) modes |
-| 2026-07-25 | Implemented developer-focused animation strategy (`/animate`) with `cubic-bezier(0.16, 1, 0.3, 1)` easing: added `animate-turn-card` keyframe entrance (0.22s, 8px slide + fade), `animate-check` checkmark bounce on copy, accordion expand/collapse transitions (`transition-all duration-200 ease-out`), popIn popover entrance, and active press scale feedback |
-| 2026-07-25 | Performed comprehensive final polish pass (`/polish`) using `ui-ux-pro-max` guidelines: added ARIA roles & tablist semantics (`role="tablist"`, `role="tab"`, `aria-selected`), explicit `aria-label`s on all interactive buttons, visible focus rings (`focus-visible:ring-2 focus-visible:ring-[var(--accent)]`), min touch target sizes, prefers-reduced-motion accessibility rules, and eliminated residual blur/glass classes in `SidebarHistory.tsx` |
-| 2026-07-25 | Updated light mode color tokens in `styles.css` with exact `#ededed` palette (`--bg-base: #ededed`, `--bg-surface: #e5e5e5`, `--bg-surface-alt: #dedede`, `--border-default: #d1d1d1`, `--border-subtle: #dcdcdc`, `--text-primary: #131313`, `--text-secondary: #646464`, `--text-muted: #949494`) |
-| 2026-07-25 | Updated dark mode color tokens in `styles.css` with exact `#121212` palette (`--bg-base: #121212`, `--bg-surface: #1a1a1a`, `--bg-surface-alt: #212121`, `--border-default: #2e2e2e`, `--border-subtle: #232323`, `--text-primary: #ececec`, `--text-secondary: #9b9b9b`, `--text-muted: #6b6b6b`) |
-| 2026-07-25 | Implemented full `OptiCode — UI/UX Build Spec` architecture: ChatGPT/Claude/Cursor thread pattern (`<Thread>` + `<TurnCard>`), 760px centered scrolling column, pinned bottom composer (`CodeInputBar`) with gradient fade mask, compact collapsible code preview header, custom `<DiffLine>` renderer for Shorten & SEO, action-specific loading skeletons, in-card error retry states, and disabled submit state |
-| 2026-07-25 | Completely overhauled OptiCode UI per `DESIGN.md` spec: eliminated generic AI SaaS tells (mesh gradient backgrounds, glowing orbs, glassmorphism overload), established solid color tokens (`#0d1017` dark / `#f7f8fa` light), converted action pills to borderless segmented tabs, styled `RUN ACTION ↑` as the single filled orange button with `Ctrl+Enter` badge, and enlarged editor textarea to `min-h-[180px]` |
-| 2026-07-25 | Verified GitHub repository (`Isobit7/OptiCode.git`) is completely up-to-date on `main` branch with clean working tree |
-| 2026-07-25 | Restored exact commit `cdc037b` frontend codebase matching reference video `VID_20260725_WA0000.mp4`: stacked `History`/`Saved`/`Settings` sidebar pills, `+ New Session` button, translucent glass input card with top ActionPills row, filled orange `RUN ACTION ↑` button, and warm sunset mesh gradient |
-| 2026-07-25 | Verified 100% exact visual match against reference screenshot via automated browser subagent: expanded default sidebar, unified white `OptiCode` header logo, single-line headline (`Paste your code — let's clean it up`), `SEO Optimize` pill label, embedded top action pills row, and filled orange `RUN ACTION ↑` button |
-| 2026-07-25 | Recreated exact reference layout matching user's screenshot: hero headline (`Paste your code — let's clean it up`), subtitle (`Transform, explain, prettify, or optimize any snippet instantly with AI.`), embedded top `ActionPills` with labels (`📖 Explain`, `👤 Humanize`, etc.), glass container card, and filled orange `RUN ACTION ↑` button |
-| 2026-07-25 | Restored vibrant orange & pink sunset background gradient (`style={{ background: "var(--app-gradient)" }}`) with multi-point glowing light spheres across the entire application workspace in `OptimizerApp.tsx` |
-| 2026-07-25 | Fixed unstyled UI issue: removed `source(none)` from `@import "tailwindcss"` and added `@source "../src"` in `styles.css` so Tailwind v4 scans all components and generates all utility CSS classes (restored full 101.8kB stylesheet) |
-| 2026-07-25 | Fixed frontend build & runtime errors: installed missing dependencies (`framer-motion`, `highlight.js`) via `npm install` and restored missing `:root {` selector wrapper in `styles.css` |
-| 2026-07-25 | Pushed all recent commits and fixes successfully to GitHub repository (`Isobit7/OptiCode.git`) on `main` branch |
-| 2026-07-25 | Brightened "Code" text in header title to match exact warm sunset palette (`#f4914a` / `from-[#f4914a] via-[#ff9e59] to-[#ffb86c]`) in PreferencesDropdown.tsx & styles.css |
-| 2026-07-25 | Verified active background execution of FastAPI backend (`http://127.0.0.1:8000`) & React Vite frontend (`http://localhost:8080/`) with HMR update for PreferencesDropdown.tsx |
-| 2026-07-25 | Configured split OptiCode header title ("Opti" in white, "Code" in orange `#f97316`) with `--color-orange-500` in `@theme inline` & fallback inline color in PreferencesDropdown.tsx & styles.css |
-| 2026-07-25 | Restarted React Vite frontend dev server (`http://localhost:8080/`) |
-| 2026-07-25 | Launched live FastAPI backend server (`http://127.0.0.1:8000`) & React Vite frontend dev server (`http://localhost:8080/`) |
-| 2026-07-25 | Executed Pytest backend test suite (`python -m pytest`) with 14/14 tests passing cleanly (100% pass rate) |
-| 2026-07-25 | Removed legacy database state (.swarm/, ruvector.db) and temporary python caches (__pycache__, .pytest_cache) |
-| 2026-07-25 | Removed legacy AI configs (.claude/, .claude-flow/), duplicate root docs (DESIGN.md, RULES.md), and boilerplate/cache readmes (.pytest_cache/README.md, src/routes/README.md) |
-| 2026-07-25 | Executed full test suite (14/14 passed), verified React Vite frontend production build, and launched live FastAPI backend server (http://127.0.0.1:8000) & Vite frontend dev server (http://localhost:8080) |
-| 2026-07-25 | Fixed `@tailwindcss/vite` CSS parsing error `Missing opening {` by restoring missing `:root {` selector wrapper around theme variables in styles.css |
-| 2026-07-25 | Ran backend test suite (14/14 tests passed) and verified active execution of FastAPI backend server (http://127.0.0.1:8000) and React Vite frontend dev server (http://localhost:8081) |
-| 2026-07-24 | Redesigned header title into a ChatGPT-style `OptiCode ▾` model selector dropdown listing Explainer Models (Standard, Beginner, Pro Architect) and Humanizer Modes (De-AI, Idiomatic, Simplified) as rich option rows with checkmarks (`✓`) in PreferencesDropdown.tsx & OptimizerApp.tsx |
-| 2026-07-24 | Added glassmorphic `PreferencesDropdown` button next to `OptiCode` header title allowing dynamic selection of Explainer Depth (Beginner, Intermediate, Advanced) and Humanizer Style (De-AI Natural, Idiomatic Clean, Simplified) passed directly to backend requests in PreferencesDropdown.tsx, backend.ts, & OptimizerApp.tsx |
-| 2026-07-24 | Positioned `History` and `Saved` navigation bar buttons directly in the sidebar footer right above the `Settings` bar button in SidebarHistory.tsx |
-| 2026-07-24 | Separated History and Saved into distinct, stacked full-width navigation bar buttons (`[ 🕒 History (7) ]` and `[ ⭐ Saved (0) ]`) in SidebarHistory.tsx |
-| 2026-07-24 | Cleaned collapsed sidebar rail: removed history items from collapsed state (`if (collapsed) return null`) so rail contains only expand, new session, and settings controls in SidebarHistory.tsx |
-| 2026-07-24 | Restored original vibrant orange and pink background gradient (`style={{ background: "var(--app-gradient)" }}`) while retaining all surface depth, warm shadows, 2-tier font hierarchy, pill micro-interactions, and floating scroll pill button in OptimizerApp.tsx |
-| 2026-07-24 | Completed 7-point design system overhaul: radial mesh gradient + SVG grain texture overlay, warm palette shadows (`shadow-warm-md`), 2-tier font hierarchy, locked radius scale (8px/16px/24px), warm outline action pills with hover lift, and refined glass scroll button across OptimizerApp, SidebarHistory, ActionPills, CodeInputBar, & ResultsPanel |
-| 2026-07-24 | Integrated professional AI MarkdownRenderer: parses bullet points with accent dots, numbered steps, section headers (`###`), inline code badges, and code blocks in ResultsPanel.tsx & client.py |
-| 2026-07-24 | Redesigned output cards to theme-aware ambient glassmorphism (`bg-white/80 dark:bg-[#121620]/95 backdrop-blur-2xl`) matching the exact background palette vibe in ResultsPanel.tsx |
-| 2026-07-24 | Expanded text blocks to display 100% full content: removed `max-w-2xl`, `max-h-48`, `max-h-[500px]`, and `max-w-[110px]` height/width restrictions in ResultsPanel.tsx & SidebarHistory.tsx |
-| 2026-07-24 | Positioned vertical scrollbar on the far right edge of the full-width workspace container (instead of centered in the middle of max-w-4xl) in OptimizerApp.tsx |
-| 2026-07-24 | Enabled visible sleek up-down scrollbar (`6px rgba(249, 115, 22, 0.45)` thumb) and added floating scroll-to-bottom button (`<ArrowDown />`) in OptimizerApp.tsx & styles.css |
-| 2026-07-24 | Enabled multi-turn chat conversation stream: every submission appends a new message turn, automatically clears input box (`setCode("")`) for next input, and scrolls down smoothly in OptimizerApp.tsx & ResultsPanel.tsx |
-| 2026-07-24 | Eliminated ugly native browser scrollbars globally: added custom thin 4px scrollbar styling and `.no-scrollbar` utilities across workspace containers in styles.css & OptimizerApp.tsx |
-| 2026-07-24 | Matched bottom sticky bar background directly to page color palette gradient (`bg-gradient-to-t from-[var(--app-gradient)]`) removing all borders for seamless floating card aesthetic in OptimizerApp.tsx |
-| 2026-07-24 | Fixed black background box around bottom sticky input bar by switching container to theme-aware glassmorphism (`bg-white/40 dark:bg-[#0d1017]/95`) in OptimizerApp.tsx |
-| 2026-07-24 | Redesigned history items to thin, single-line slides with truncated code previews, relative time tags, and slide hover micro-interactions in SidebarHistory.tsx |
-| 2026-07-26 | Sanitized all 4 SVG preview vector graphics (`workspace_preview.svg`, `diff_view.svg`, `security_audit.svg`, `flowchart_engine.svg`) by removing raw multi-byte emoji symbols and `-apple-system` font fallbacks, ensuring 100% strict XML validity across GitHub Camo image proxies. |
-| 2026-07-26 | Fixed XML entity parsing error in `workspace_preview.svg` by escaping unescaped `&` to `&amp;` on text node line 84, enabling clean SVG rendering on GitHub image proxies. |
-| 2026-07-26 | Replaced image preview assets in `README.md` with custom dark-theme SVG vector UI graphics (`workspace_preview.svg`, `diff_view.svg`, `security_audit.svg`, `flowchart_engine.svg`) featuring ambient glassmorphism gradients, glowing orange/emerald accents, code editors, and side-by-side diff views. |
-| 2026-07-26 | Replaced broken `via.placeholder.com` image URLs in `README.md` with high quality PNG preview assets (`workspace_preview.png`, `diff_view.png`, `security_audit.png`, `flowchart_engine.png`) generated and stored in `code-optimizer-explainer/frontend/public/docs/`, pushed directly to GitHub raw content URLs. |
-| 2026-07-26 | Generated polished, production-ready GitHub `README.md` containing all requested sections: Project Title & Tagline, Badges (MIT, React, FastAPI, Supabase, PRs Welcome), Overview, Key Features matrix, Demo placeholders, Tech Stack, Getting Started, Usage, Terminal CLI docs, Project Structure, Roadmap (real-time collaboration), Contributing, License, and Acknowledgments. |
-| 2026-07-26 | Created comprehensive GitHub README.md in root and code-optimizer-explainer with badges, feature matrix (Core Refiners & Power Tools), Mermaid architecture diagram, tech stack breakdown, local setup guide, Terminal CLI docs, GitHub Action integration, and pytest instructions. |
-| 2026-07-26 | Configured Google OAuth login & signup flow: created `frontend/.env` with Supabase & Google Client IDs, added automatic Supabase OAuth session auto-sync listener (`onAuthStateChange`) with FastAPI backend `/api/auth/google` in `supabaseClient.ts`, updated `SignInModal.tsx` and `login.tsx` for proper OAuth URL redirection. |
-| 2026-07-26 | Implemented Google Authentication with dual Supabase OAuth (signInWithOAuth) and FastAPI database auth session fallback in SignInModal.tsx and OnboardingModal.tsx, with typed supabaseClient.ts and installed @supabase/supabase-js. |
-| 2026-07-26 | Restructured app flow to Hero → Login/Skip → Preferences → Workspace: added flowPhase state in OptimizerApp.tsx ("login" → "preferences" → "workspace"), removed Q6 login step from OnboardingModal.tsx (now 5 pure preference steps), first-time users see SignInModal first with skip option then OnboardingModal preferences wizard before entering workspace. |
-| 2026-07-26 | Updated modal colors (OnboardingModal.tsx, PreferencesDropdown.tsx & dialog.tsx) to pure neutral dark zinc/charcoal (bg-zinc-950 & bg-zinc-900 with #1c1917 stone/charcoal background stars) removing blue undertones. |
-| 2026-07-26 | Moved StarsBackground animated star field to full-screen page backdrop overlay (DialogOverlay in dialog.tsx), surrounding the setup modal cleanly across the entire screen. |
-| 2026-07-26 | Created animated StarsBackground component (stars.tsx using framer-motion) with parallax motion and multi-layered star field, integrated into OnboardingModal and PreferencesDropdown wizard backgrounds. |
-| 2026-07-26 | Updated DialogOverlay styling in dialog.tsx to bg-black/90 backdrop-blur-md so background chat/workspace is completely dimmed and blurred when setup/preference wizard modals are open. |
-| 2026-07-26 | Redesigned PreferencesDropdown.tsx with dark glassmorphism aesthetic (#0f1219/98 backdrop, rounded-2xl cards, amber/orange highlights, segmented pill tabs, and API key manager) matching OptiCode's overall design system. |
-| 2026-07-26 | Updated OptiCode workspace (OptimizerApp.tsx & RightDashboardPanel.tsx) to default both Left History Sidebar and Right Dashboard Panel to collapsed/closed icon rails on open. |
-| 2026-07-26 | Configured OptiCode workspace (OptimizerApp.tsx) to always present the clean initial hero view ("Paste your code — let's clean it up") when entering /app regardless of authentication state. |
-| 2026-07-26 | Implemented OptiCode Improvement Plan features: Shareable Review Links (/api/shared-reviews & /share/$slug), GitHub Action CI Mode (/api/ci/scan & action.yml), Beginner ELI5 Explain Mode, and Diff Storytelling (/api/diff-story). All 40 pytest cases passing. |
-| 2026-07-26 | Fixed close button text overlap in OnboardingModal.tsx by removing duplicate custom close button and adding pr-8 right padding to step header line. |
-| 2026-07-26 | Implemented Onboarding Assistant wizard (OnboardingModal.tsx) asking 6 plain-language setup questions, storing answers in localStorage, auto-configuring Humanizer mode, Explainer depth, primary language, and default action, with optional login handoff. |
-| 2026-07-26 | Removed Power Tools row from bottom composer bar ActionPills.tsx to eliminate duplicate action controls, leaving Power Tools exclusively in the Right Side Dashboard Panel. |
-| 2026-07-26 | Streamlined RightDashboardPanel sidebar in RightDashboardPanel.tsx to strictly display Power Tools (Security Audit, Universal Translator, PR Review, Logic Flowchart) and removed the Core AI Refiners section per user request. |
-| 2026-07-26 | Implemented RightDashboardPanel sidebar component for the right side of the workspace, placing Power Tools (Security Audit, Universal Translator, PR Review, Logic Flowchart) and Core AI Refiners in a dedicated right dashboard sidebar inside OptimizerApp.tsx. |
-| 2026-07-26 | Updated ActionPills layout to a vertical stacked category alignment: Row 1 Power Tools (Security, Translate, PR Review, Flowchart) with animated pulse badges, Row 2 Refine Tools (Explain, Humanize, Prettify, Shorten, SEO, Alternatives). |
-| 2026-07-26 | Redesigned ActionPills layout into distinct Core Tools and Power Tools sub-containers with warm orange badge styling and vertical divider for clear visual hierarchy in ActionPills.tsx. |
-| 2026-07-26 | Extended Diff View tab section in ResultsPanel.tsx for Security Audit, Translate, PR Review, and Flowchart actions, enabling side-by-side and inline diff comparisons for all power tool outputs. |
-| 2026-07-26 | Configured Hero Page landing at / to stay on hero until explicit click on CTA button ("Open the Optimizer"), which navigates to /app workspace. Removed auto-timer redirect. |
-| 2026-07-26 | Configured root route (/) to land on Liquid Chrome Hero Page first with 2.5s auto-redirect to /app chat workspace, updated hero CTA button link to /app, and started both backend (127.0.0.1:8000) and frontend (localhost:8080) dev servers in the background. |
-| 2026-07-30 | Created root `package.json` and `vercel.json` pointing Vercel to `code-optimizer-explainer/frontend/dist` for automatic monorepo deployment. Pushed commit `2a36e94` to GitHub main. |
-| 2026-07-30 | Updated `frontend/vercel.json` SPA rewrite regex to `/((?!.*\\.).*)` so static files (`sitemap.xml`, `robots.txt`, verification tags) are preserved and served directly. Pushed commit `29797fb` to GitHub main. |
-| 2026-07-30 | Added user's Google Search Console verification meta tag (`0KSvyPAhmHMjJ0M4bDGO83hGM2iuuzcuQktImd44dWE`) to `frontend/index.html`. Committed and pushed to GitHub main (`a62151f`). |
-| 2026-07-30 | Added `google-site-verification` meta tag in `frontend/index.html` for Google Search Console ownership verification. |
-| 2026-07-30 | Created `public/sitemap.xml` and `public/robots.txt` for OptiCode SEO and Google Search Console indexing on `https://opticode-lab.vercel.app`. Committed and pushed to GitHub main (`4209cdc`). |
-| 2026-07-30 | Pushed commit `f9d4850` to GitHub repository (`Isobit7/OptiCode.git` main branch) containing persistent login session, auto guest history migration on login, and Vercel custom domain configuration. |
-| 2026-07-30 | Enhanced persistent login authentication session management: user credentials, session tokens (`opticode_auth_token`), and profile metadata (`opticode_user`) are persisted in browser local storage and verified on site load so returning users stay logged in across page reloads and future visits until explicitly logging out. |
-| 2026-07-30 | Added automatic guest cache memory migration on login: local history entries generated before signing in are automatically preserved, merged, and synced to the user's Supabase backend database upon authentication. |
-| 2026-07-30 | User configured custom Vercel domain `opticode-lab.vercel.app` for frontend production deployment. |
-| 2026-07-26 | Implemented dedicated frontend quick-action controls: built TranslateBarControl inline target selector component, updated ActionPills to highlight Power Tools (Security, Translate, PR Review, Flowchart), wired target language state in CodeInputBar & OptimizerApp, and verified 0 TypeScript errors and clean production build. |
-| 2026-07-26 | Completed full OptiCode upgrade suite: built Security Audit & Secret Scanner (/api/security-audit), Universal Code Translator (/api/translate), PR Review Generator (/api/pr-review), Logic Flowchart Engine (/api/flowchart), Carbon-Style Shareable Snippet Card Modal, Terminal CLI tool (opticode_cli.py), and GitHub Action workflow (opticode-review.yml). 35/35 backend tests passed and 0 TypeScript compilation errors. |
-| 2026-07-26 | Directive: Initiate full OptiCode upgrade suite (Security Audit, Universal Code Translator, PR Review Generator, Mermaid Logic Flowcharts, Carbon-style Shareable Code Cards, CLI Tool, GitHub Action) excluding offline PWA. |
-| 2026-07-26 | Fixed hero page CTA button text visibility by applying high-contrast sunset orange-amber gradient background (`bg-gradient-to-r from-orange-500 to-amber-500`) and pure white text (`text-white font-bold`) in hero.tsx |
-| 2026-07-26 | Completed full project audit: fixed TypeScript type mismatch in frontend streamAction payload, resolved Button variant type issue in hero.tsx, standardized line/character limit error detail in backend explain.py, removed unused Request imports across backend route modules, and verified 100% backend test pass and 0 TypeScript compile errors. |
-| 2026-07-24 | Updated header title **OptiCode** to solid pure white text (`text-white font-black drop-shadow-md`) across all themes in OptimizerApp.tsx |
-| 2026-07-24 | Updated header title **OptiCode** to crisp bold white text (`text-zinc-900 dark:text-white font-extrabold`) in OptimizerApp.tsx |
-| 2026-07-24 | Styled header title **OptiCode** with sunset orange-amber gradient (`from-orange-500 via-amber-500 to-rose-500 bg-clip-text text-transparent`) matching the design color palette in OptimizerApp.tsx |
-| 2026-07-24 | Placed bold **OptiCode** branding title on the left side of top main workspace header bar in OptimizerApp.tsx |
-| 2026-07-24 | Removed "OptiCode" text from sidebar top header in SidebarHistory.tsx, displaying only the clean logo icon |
-| 2026-07-24 | Created dedicated Settings bar button in sidebar footer with expandable drawer housing Theme mode selector (Light/Dark), session stats, and export/clear controls |
-| 2026-07-24 | Redesigned ResultsPanel.tsx to match Claude AI conversation thread UI: right-aligned user input chat bubble, left-aligned markdown/code AI stream block with thought summary badge and copy buttons |
-| 2026-07-24 | Separated History and Starred into two dedicated sidebar tabs with individual item counter badges, dynamic search placeholders, and tailored empty states in SidebarHistory.tsx |
-| 2026-07-24 | Removed Templates tab and template rendering section from SidebarHistory.tsx, leaving clean History & Starred navigation tabs |
-| 2026-07-24 | Reduced sidebar width from w-72 sm:w-80 down to slim w-56 sm:w-64 with compact padding and font styling in SidebarHistory.tsx |
-| 2026-07-24 | Updated SidebarHistory header: removed OptiCode and Dashboard (0) text, placed interactive Settings button directly next to the logo |
-| 2026-07-24 | Added Refined & Snappy micro-interactions (pop-in popover animations, tactile button feedback 150ms cubic-bezier, shimmer loading waves) and prefers-reduced-motion accessibility support in styles.css & CodeInputBar.tsx |
-| 2026-07-24 | Implemented BeeBot two-panel workspace layout pattern: attached action chips inside CodeInputBar border, dynamic submit button labels (e.g. EXPLAIN, PRETTIFY), and grouped history sessions (Today, Last 7 Days, Older) in SidebarHistory.tsx |
-| 2026-07-24 | Added Notion/Slack-style Slash Commands popover menu (/explain, /humanize, /prettify, /shorten, /seo, /alternatives) with keyboard selection (Arrow keys + Enter/Tab) in CodeInputBar.tsx |
-| 2026-07-24 | Implemented ChatGPT-style layout transition in OptimizerApp.tsx: anchored CodeInputBar + ActionPills to sticky bottom dock when response is active, rendering ResultsPanel in top viewport |
-| 2026-07-24 | Integrated full React frontend application from frontendopticode into OptiCode/code-optimizer-explainer/frontend, connecting UI components and SignInModal to backend auth, sessions, and AI APIs |
-| 2026-07-26 | Removed unused `GeneratingLoader.tsx` from `components/custom/` — user confirmed TurnCard skeleton loader (rotating dev messages + pulse skeletons) is the preferred loader |
-| 2026-07-24 | Added WhatsApp OTP authentication (`/api/auth/whatsapp/send-otp`, `/api/auth/whatsapp/verify`) storing user profiles (`auth_provider="whatsapp"`), active sessions, and cookies in DB |
-| 2026-07-24 | Integrated Email, Google OAuth, and Phone SMS OTP authentication with database storage for user profiles (`user_profiles`), active sessions, and cookie token metadata (`user_sessions`) in backend |
-| 2026-07-24 | Created PROJECT_SYSTEM_OVERVIEW_AND_REQUEST_FLOW.md detailing full system architecture, Mermaid sequence diagrams, component maps, and request lifecycles |
-| 2026-07-24 | Integrated Triple Provider Architecture (Groq API Primary -> Google Gemini 2.5 Flash Secondary -> OpenRouter Pool Tertiary) in backend/app/llm_interface/client.py |
-| 2026-07-24 | Expanded LLM fallback model chain to 6 high-capacity free models (Llama 3.3 70B, DeepSeek R1, Qwen 2.5 Coder, Gemma 2, Mistral 7B, Poolside) to prevent 429 rate limit failures |
-| 2026-07-24 | Created OPTICODE_FULL_SPECIFICATION_MASTER.md consolidating Dashboard Specs, Zero Disturbance UX Architecture, and Product Roadmap into one complete document |
-| 2026-07-24 | Created MASTER_SYSTEM_AND_PRODUCT_SPECIFICATION.md combining Dashboard Specs, Zero Disturbance UX Architecture, and Product Roadmap into a single master document |
-| 2026-07-24 | Added ZERO_DISTURBANCE_UX_AND_STANDOUT_FEATURES.md detailing multi-tier failovers, React Error Boundaries, and standout features |
-| 2026-07-24 | Added PRODUCT_ROADMAP.md detailing Security Audit, Code Translator, PR Reviewer, and Logic Flowcharts |
-| 2026-07-24 | Added FRONTEND_DASHBOARD_SPECS.md for frontend developer integration |
-| 2026-07-24 | Added explanation depth levels, humanize modes, structured alternatives with Big-O bounds, SEO 0-100 scoring, and 9-test backend test suite |
-| 2026-07-26 | Created frontend/vercel.json (Vite build + SPA rewrites) and updated backend/vercel.json (PYTHONPATH, maxLambdaSize) for Vercel deployment. Updated frontend/.env.example with VITE_GOOGLE_CLIENT_ID. Created deployment_guide.md artifact with step-by-step Vercel + Render instructions. |
-| 2026-07-22 | Initial PRD, tech stack, architecture, and starter scaffold created |
+| **Explainer** | Plain-language code explanations with adjustable depth (`beginner`, `intermediate`, `advanced`) |
+| **Humanizer** | Code refactoring modes: `de-ai` (remove AI clichés), `simplify` (clean structure), `idiomatic` (standard idioms) |
+| **Prettifier** | Deterministic code formatting (Black for Python, JSBeautifier for Web) |
+| **Shortener** | Minifies code while strictly preserving logic (AST-based for Python, regex for Web/C) |
+| **SEO Optimizer** | Static HTML analysis returning a 0–100 SEO health score, actionable checklist, and optimized code |
+| **Code Alternatives** | Generates alternative implementations with tradeoff analysis, pros/cons, and Big-O ($O(N)$) bounds |
+| **Security Audit** | Static analysis & LLM audit detecting secrets, OWASP vulnerabilities, and unsafe patterns |
+| **Logic Flowchart** | Generates interactive Mermaid.js visual logic diagrams for complex code blocks |
+| **Code Translator** | Translates logic between 15+ programming languages |
+| **PR Review Summary** | Auto-generates GitHub Pull Request summaries, risk assessments, and reviewer notes |
 
 ---
 
-**This file has no effect unless kept current.** Its entire value is that it's always accurate — an AI assistant that reads a stale version will make decisions based on wrong context. Update it every time, not "when convenient."
+## 3. Tech Stack & Infrastructure
+
+- **Frontend**: React 19, Vite, TanStack Router, Tailwind CSS (Vite production build on **Vercel**).
+- **Backend**: FastAPI (Python 3.12), Async Uvicorn (Deployed on **Render** with CORS & security headers).
+- **Database & Auth**: Supabase (PostgreSQL, SHA-256 local hash fallback, persistent chat history).
+- **LLM Engine**: Multi-model fallback client (`google/gemma-4-31b-it:free`, `meta-llama/llama-3.3-70b-instruct:free`, `deepseek/deepseek-r1:free`).
+- **SEO & Verification**: Google Search Console verification (`google8286d920d6fcd994.html`), `sitemap.xml`, `robots.txt`.
+
+---
+
+## 4. Key Architectural Decisions
+
+1. **Backend Proxy Pattern**: Frontend never calls Supabase data tables directly — all queries route through FastAPI for security and rate limiting.
+2. **Resilient Network Client (`safeAuthFetch`)**: Automatic fallback to production backend if local Uvicorn instance is offline.
+3. **Zero Disturbance Dark Theme**: Instant inline theme script in `index.html` preventing light-mode flash on load.
+4. **Deterministic & LLM Dual Pipelines**: Formatting (Prettify/Shorten) uses deterministic tools (Black, JSBeautifier); AI features use LLM interface with fallback chains.
+
+---
+
+## 5. Repository Structure
+
+```
+s:/PROJECT/OptiCode/
+├── GOOGLE_SEARCH_CONSOLE_SETUP_GUIDE.md   Complete GSC step-by-step PDF-ready guide
+├── MEMORY.md                               Single source of truth project memory
+├── google8286d920d6fcd994.html             Google Search Console verification file
+└── code-optimizer-explainer/
+    ├── frontend/                           Vite React SPA (Vercel deployment)
+    │   ├── public/                         Favicon assets, sitemap.xml, robots.txt, GSC verification
+    │   └── src/api/                        backend.ts (safeAuthFetch & API client)
+    └── backend/                            FastAPI Python App (Render deployment)
+        ├── app/
+        │   ├── routes/                     auth, explain, humanize, prettify, shorten, security, etc.
+        │   ├── llm_interface/              OpenRouter multi-model fallback engine
+        │   └── db/                         Supabase database session wrapper
+        └── tests/                          Pytest test suite (100% passing)
+```
+
+---
+
+## 6. Milestone Changelog
+
+*(Updated when convenient at logical project milestones)*
+
+| Date | Category | Milestone Description |
+|---|---|---|
+| **2026-07-30** | **SEO & GSC** | Deployed Google Search Console verification file `google8286d920d6fcd994.html` live to `https://opticode-lab.vercel.app/google8286d920d6fcd994.html` (200 OK verified). Updated `sitemap.xml` & `robots.txt` domain pointers and created PDF setup guide. |
+| **2026-07-30** | **Deployment** | Configured and verified dual production deployments: Frontend live on Vercel (`opticode-lab.vercel.app`), Backend live on Render (`opticode-zc3b.onrender.com`). |
+| **2026-07-30** | **Branding** | Updated brand identity assets with custom squircle OC mark across favicon, touch icons, and header logos. |
+| **2026-07-29** | **Authentication** | Overhauled authentication system with strict credential verification, SHA-256 local fallback hashing, Google OAuth event sync, and embedded `SignInModal`. All 40 backend pytest cases passing. |
+| **2026-07-29** | **Resilience** | Implemented `safeAuthFetch` network fallback in frontend to ensure zero connection failures during authentication. |
+| **2026-07-29** | **UI & UX** | Fixed DOM event handling, restored form interactivity, configured default dark mode, and added syntax-highlighted output blocks. |
