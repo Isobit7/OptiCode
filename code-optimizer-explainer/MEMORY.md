@@ -97,6 +97,7 @@ code-optimizer-explainer/
 ## 9. Changelog
 *(Newest entry on top. One line per change — date + what changed + why, if non-obvious.)*
 
+| 2026-07-30 | Updated auth.py samesite cookie attribute to lax (commit e4fea26) and pushed to GitHub main branch to enable seamless Google OAuth redirects. |
 | 2026-07-30 | Verified live deployment end-to-end via automated browser subagent on https://opticode-lake.vercel.app (guest login, code input, AI explanation returned with 200 OK status from Render backend at https://opticode-zc3b.onrender.com). |
 | 2026-07-30 | Verified live Render backend deployment at https://opticode-zc3b.onrender.com (returns HTTP 200 health status ok). |
 | 2026-07-30 | Committed and pushed dynamic CORS & deployment BASE_URL updates to GitHub origin/main (commit 3103949). |
@@ -211,6 +212,9 @@ code-optimizer-explainer/
 | 2026-07-26 | Fixed close button text overlap in OnboardingModal.tsx by removing duplicate custom close button and adding pr-8 right padding to step header line. |
 | 2026-07-26 | Implemented Onboarding Assistant wizard (OnboardingModal.tsx) asking 6 plain-language setup questions, storing answers in localStorage, auto-configuring Humanizer mode, Explainer depth, primary language, and default action, with optional login handoff. |
 | 2026-07-26 | Removed Power Tools row from bottom composer bar ActionPills.tsx to eliminate duplicate action controls, leaving Power Tools exclusively in the Right Side Dashboard Panel. |
+| 2026-07-30 | Enhanced persistent login authentication session management: user credentials, session tokens (`opticode_auth_token`), and profile metadata (`opticode_user`) are persisted in browser local storage and verified on site load so returning users stay logged in across page reloads and future visits until explicitly logging out. |
+| 2026-07-30 | Added automatic guest cache memory migration on login: local history entries generated before signing in are automatically preserved, merged, and synced to the user's Supabase backend database upon authentication. |
+| 2026-07-30 | User configured custom Vercel domain `opticode-lab.vercel.app` for frontend production deployment. |
 | 2026-07-26 | Streamlined RightDashboardPanel sidebar in RightDashboardPanel.tsx to strictly display Power Tools (Security Audit, Universal Translator, PR Review, Logic Flowchart) and removed the Core AI Refiners section per user request. |
 | 2026-07-26 | Implemented RightDashboardPanel sidebar component for the right side of the workspace, placing Power Tools (Security Audit, Universal Translator, PR Review, Logic Flowchart) and Core AI Refiners in a dedicated right dashboard sidebar inside OptimizerApp.tsx. |
 | 2026-07-26 | Updated ActionPills layout to a vertical stacked category alignment: Row 1 Power Tools (Security, Translate, PR Review, Flowchart) with animated pulse badges, Row 2 Refine Tools (Explain, Humanize, Prettify, Shorten, SEO, Alternatives). |

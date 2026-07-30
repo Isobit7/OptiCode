@@ -220,22 +220,60 @@ function getGuestUserId(): string {
     const user = await fetchCurrentUser();
     setCurrentUser(user);
     const targetUserId = user?.user_id || getGuestUserId();
+
+    // Read existing local storage history cache memory
+    let localCacheHistory: HistoryItem[] = [];
+    try {
+      const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) localCacheHistory = parsed;
+      }
+    } catch {
+      // Ignore read errors
+    }
+
     if (targetUserId) {
       const serverHistory = await fetchHistory(targetUserId);
-      if (serverHistory && Array.isArray(serverHistory) && serverHistory.length > 0) {
-        const mappedItems: HistoryItem[] = serverHistory.map((h: any) => ({
-          id: h.id || `hist_${Date.now()}`,
-          timestamp: h.created_at ? new Date(h.created_at).getTime() : Date.now(),
-          action: h.feature_used as ActionId,
-          code: h.input_code,
-          language: "auto",
-          result: {
+      const serverMapped: HistoryItem[] = (serverHistory && Array.isArray(serverHistory))
+        ? serverHistory.map((h: any) => ({
+            id: h.id || `hist_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+            timestamp: h.created_at ? new Date(h.created_at).getTime() : Date.now(),
             action: h.feature_used as ActionId,
-            output: h.output,
-            isProse: h.feature_used === "explain",
-          },
-        }));
-        saveHistory(mappedItems);
+            code: h.input_code,
+            language: "auto",
+            result: {
+              action: h.feature_used as ActionId,
+              output: h.output,
+              isProse: h.feature_used === "explain",
+            },
+          }))
+        : [];
+
+      // If user is authenticated, automatically sync unsynced local guest cache history to user account
+      if (user?.user_id && localCacheHistory.length > 0) {
+        const serverOutputs = new Set(serverMapped.map((s) => s.result.output));
+        for (const item of localCacheHistory) {
+          if (item.result?.output && !serverOutputs.has(item.result.output)) {
+            // Persist guest/local cache history item to Supabase database under user account
+            saveHistoryEntry(user.user_id, item.code, item.action, item.result.output).catch(void 0);
+            serverMapped.push(item);
+          }
+        }
+      }
+
+      // Merge and deduplicate by result output, keeping newest timestamp entries
+      const combinedMap = new Map<string, HistoryItem>();
+      [...serverMapped, ...localCacheHistory].forEach((item) => {
+        const key = item.result?.output ? `${item.action}_${item.result.output.slice(0, 100)}` : item.id;
+        if (!combinedMap.has(key)) {
+          combinedMap.set(key, item);
+        }
+      });
+
+      const mergedList = Array.from(combinedMap.values()).sort((a, b) => b.timestamp - a.timestamp);
+      if (mergedList.length > 0) {
+        saveHistory(mergedList);
       }
     }
   }, []);
@@ -258,6 +296,7 @@ function getGuestUserId(): string {
   const handleLogout = async () => {
     await logoutUser();
     setCurrentUser(null);
+    window.dispatchEvent(new Event("opticode_auth_change"));
   };
 
   const [activeHistoryId, setActiveHistoryId] = useState<string | null>(null);

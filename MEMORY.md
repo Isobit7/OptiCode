@@ -95,6 +95,7 @@ code-optimizer-explainer/
 ## 9. Changelog
 *(Newest entry on top. One line per change — date + what changed + why, if non-obvious.)*
 
+| 2026-07-30 | Updated auth.py samesite cookie attribute to lax (commit e4fea26) and pushed to GitHub main branch to enable seamless Google OAuth redirects. |
 | 2026-07-30 | Verified live deployment end-to-end via automated browser subagent on https://opticode-lake.vercel.app (guest login, code input, AI explanation returned with 200 OK status from Render backend at https://opticode-zc3b.onrender.com). |
 | 2026-07-30 | Verified live Render backend deployment at https://opticode-zc3b.onrender.com (returns HTTP 200 health status ok). |
 | 2026-07-30 | Committed and pushed dynamic CORS & deployment BASE_URL updates to GitHub origin/main (commit 3103949). |
@@ -216,6 +217,9 @@ code-optimizer-explainer/
 | 2026-07-26 | Extended Diff View tab section in ResultsPanel.tsx for Security Audit, Translate, PR Review, and Flowchart actions, enabling side-by-side and inline diff comparisons for all power tool outputs. |
 | 2026-07-26 | Configured Hero Page landing at / to stay on hero until explicit click on CTA button ("Open the Optimizer"), which navigates to /app workspace. Removed auto-timer redirect. |
 | 2026-07-26 | Configured root route (/) to land on Liquid Chrome Hero Page first with 2.5s auto-redirect to /app chat workspace, updated hero CTA button link to /app, and started both backend (127.0.0.1:8000) and frontend (localhost:8080) dev servers in the background. |
+| 2026-07-30 | Enhanced persistent login authentication session management: user credentials, session tokens (`opticode_auth_token`), and profile metadata (`opticode_user`) are persisted in browser local storage and verified on site load so returning users stay logged in across page reloads and future visits until explicitly logging out. |
+| 2026-07-30 | Added automatic guest cache memory migration on login: local history entries generated before signing in are automatically preserved, merged, and synced to the user's Supabase backend database upon authentication. |
+| 2026-07-30 | User configured custom Vercel domain `opticode-lab.vercel.app` for frontend production deployment. |
 | 2026-07-26 | Implemented dedicated frontend quick-action controls: built TranslateBarControl inline target selector component, updated ActionPills to highlight Power Tools (Security, Translate, PR Review, Flowchart), wired target language state in CodeInputBar & OptimizerApp, and verified 0 TypeScript errors and clean production build. |
 | 2026-07-26 | Completed full OptiCode upgrade suite: built Security Audit & Secret Scanner (/api/security-audit), Universal Code Translator (/api/translate), PR Review Generator (/api/pr-review), Logic Flowchart Engine (/api/flowchart), Carbon-Style Shareable Snippet Card Modal, Terminal CLI tool (opticode_cli.py), and GitHub Action workflow (opticode-review.yml). 35/35 backend tests passed and 0 TypeScript compilation errors. |
 | 2026-07-26 | Directive: Initiate full OptiCode upgrade suite (Security Audit, Universal Code Translator, PR Review Generator, Mermaid Logic Flowcharts, Carbon-style Shareable Code Cards, CLI Tool, GitHub Action) excluding offline PWA. |

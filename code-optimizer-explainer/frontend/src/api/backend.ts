@@ -668,31 +668,36 @@ export async function loginGoogle(email?: string, full_name?: string, avatar_url
 }
 
 export async function fetchCurrentUser(): Promise<UserProfile | null> {
+  let cachedUser: UserProfile | null = null;
+  if (typeof window !== "undefined") {
+    const local = localStorage.getItem("opticode_user");
+    if (local) {
+      try {
+        cachedUser = JSON.parse(local) as UserProfile;
+      } catch {
+        cachedUser = null;
+      }
+    }
+  }
+
   try {
     const res = await safeAuthFetch(`/api/auth/me`, {
       method: "GET",
       headers: getAuthHeaders(),
       credentials: "same-origin",
     });
-    if (!res.ok) {
-      if (typeof window !== "undefined") {
-        const local = localStorage.getItem("opticode_user");
-        if (local) return JSON.parse(local) as UserProfile;
+    if (res.ok) {
+      const user = (await res.json()) as UserProfile;
+      if (user && typeof window !== "undefined") {
+        localStorage.setItem("opticode_user", JSON.stringify(user));
       }
-      return null;
+      return user;
     }
-    const user = (await res.json()) as UserProfile;
-    if (user && typeof window !== "undefined") {
-      localStorage.setItem("opticode_user", JSON.stringify(user));
-    }
-    return user;
-  } catch {
-    if (typeof window !== "undefined") {
-      const local = localStorage.getItem("opticode_user");
-      if (local) return JSON.parse(local) as UserProfile;
-    }
-    return null;
+  } catch (err) {
+    console.warn("[OptiCode] Network check for user session failed, using cached session:", err);
   }
+
+  return cachedUser;
 }
 
 export async function logoutUser(): Promise<void> {
@@ -725,6 +730,7 @@ export async function fetchHistory(user_id?: string): Promise<any[]> {
     return [];
   }
 }
+
 
 export interface SharedReviewPayload {
   input_code: string;
