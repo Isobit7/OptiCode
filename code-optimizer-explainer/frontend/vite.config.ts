@@ -9,6 +9,15 @@ export default defineConfig({
     react(),
     tsconfigPaths(),
   ],
+  build: {
+    rollupOptions: {
+      output: {
+        entryFileNames: `assets/[name]-[hash]-v5.js`,
+        chunkFileNames: `assets/[name]-[hash]-v5.js`,
+        assetFileNames: `assets/[name]-[hash]-v5.[ext]`,
+      },
+    },
+  },
   server: {
     allowedHosts: [".e2b.app"],
   },
