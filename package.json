@@ -1,0 +1,7 @@
+{
+  "name": "opticode-root",
+  "private": true,
+  "scripts": {
+    "build": "cd code-optimizer-explainer/frontend && npm run build"
+  }
+}

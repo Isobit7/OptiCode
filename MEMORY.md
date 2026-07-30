@@ -217,6 +217,7 @@ code-optimizer-explainer/
 | 2026-07-26 | Extended Diff View tab section in ResultsPanel.tsx for Security Audit, Translate, PR Review, and Flowchart actions, enabling side-by-side and inline diff comparisons for all power tool outputs. |
 | 2026-07-26 | Configured Hero Page landing at / to stay on hero until explicit click on CTA button ("Open the Optimizer"), which navigates to /app workspace. Removed auto-timer redirect. |
 | 2026-07-26 | Configured root route (/) to land on Liquid Chrome Hero Page first with 2.5s auto-redirect to /app chat workspace, updated hero CTA button link to /app, and started both backend (127.0.0.1:8000) and frontend (localhost:8080) dev servers in the background. |
+| 2026-07-30 | Updated `frontend/vercel.json` SPA rewrite regex to `/((?!.*\\.).*)` so static files (`sitemap.xml`, `robots.txt`, verification tags) are preserved and served directly. Pushed commit `29797fb` to GitHub main. |
 | 2026-07-30 | Added user's Google Search Console verification meta tag (`0KSvyPAhmHMjJ0M4bDGO83hGM2iuuzcuQktImd44dWE`) to `frontend/index.html`. Committed and pushed to GitHub main (`a62151f`). |
 | 2026-07-30 | Added `google-site-verification` meta tag in `frontend/index.html` for Google Search Console ownership verification. |
 | 2026-07-30 | Created `public/sitemap.xml` and `public/robots.txt` for OptiCode SEO and Google Search Console indexing on `https://opticode-lab.vercel.app`. Committed and pushed to GitHub main (`4209cdc`). |
