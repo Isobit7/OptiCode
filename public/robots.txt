@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Allow: /app
+
+Sitemap: https://opticode-lab.vercel.app/sitemap.xml
