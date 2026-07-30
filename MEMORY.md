@@ -95,6 +95,7 @@ code-optimizer-explainer/
 ## 9. Changelog
 *(Newest entry on top. One line per change — date + what changed + why, if non-obvious.)*
 
+| 2026-07-30 | Updated favicon and brand logo assets across public/ and src/assets/ using user-provided squircle OC mark design, and added multi-size icon metadata tags to index.html. |
 | 2026-07-30 | Updated auth.py samesite cookie attribute to lax (commit e4fea26) and pushed to GitHub main branch to enable seamless Google OAuth redirects. |
 | 2026-07-30 | Verified live deployment end-to-end via automated browser subagent on https://opticode-lake.vercel.app (guest login, code input, AI explanation returned with 200 OK status from Render backend at https://opticode-zc3b.onrender.com). |
 | 2026-07-30 | Verified live Render backend deployment at https://opticode-zc3b.onrender.com (returns HTTP 200 health status ok). |
@@ -217,6 +218,7 @@ code-optimizer-explainer/
 | 2026-07-26 | Extended Diff View tab section in ResultsPanel.tsx for Security Audit, Translate, PR Review, and Flowchart actions, enabling side-by-side and inline diff comparisons for all power tool outputs. |
 | 2026-07-26 | Configured Hero Page landing at / to stay on hero until explicit click on CTA button ("Open the Optimizer"), which navigates to /app workspace. Removed auto-timer redirect. |
 | 2026-07-26 | Configured root route (/) to land on Liquid Chrome Hero Page first with 2.5s auto-redirect to /app chat workspace, updated hero CTA button link to /app, and started both backend (127.0.0.1:8000) and frontend (localhost:8080) dev servers in the background. |
+| 2026-07-30 | Created root `package.json` and `vercel.json` pointing Vercel to `code-optimizer-explainer/frontend/dist` for automatic monorepo deployment. Pushed commit `2a36e94` to GitHub main. |
 | 2026-07-30 | Updated `frontend/vercel.json` SPA rewrite regex to `/((?!.*\\.).*)` so static files (`sitemap.xml`, `robots.txt`, verification tags) are preserved and served directly. Pushed commit `29797fb` to GitHub main. |
 | 2026-07-30 | Added user's Google Search Console verification meta tag (`0KSvyPAhmHMjJ0M4bDGO83hGM2iuuzcuQktImd44dWE`) to `frontend/index.html`. Committed and pushed to GitHub main (`a62151f`). |
 | 2026-07-30 | Added `google-site-verification` meta tag in `frontend/index.html` for Google Search Console ownership verification. |
