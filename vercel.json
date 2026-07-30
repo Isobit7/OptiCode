@@ -1,13 +1,10 @@
 {
-  "buildCommand": "cd code-optimizer-explainer/frontend && npm install && npm run build",
+  "buildCommand": "npm run build --prefix code-optimizer-explainer/frontend",
   "outputDirectory": "code-optimizer-explainer/frontend/dist",
-  "routes": [
+  "rewrites": [
     {
-      "handle": "filesystem"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/index.html"
+      "source": "/((?!.*\\.).*)",
+      "destination": "/index.html"
     }
   ]
 }
