@@ -212,6 +212,7 @@ code-optimizer-explainer/
 | 2026-07-26 | Fixed close button text overlap in OnboardingModal.tsx by removing duplicate custom close button and adding pr-8 right padding to step header line. |
 | 2026-07-26 | Implemented Onboarding Assistant wizard (OnboardingModal.tsx) asking 6 plain-language setup questions, storing answers in localStorage, auto-configuring Humanizer mode, Explainer depth, primary language, and default action, with optional login handoff. |
 | 2026-07-26 | Removed Power Tools row from bottom composer bar ActionPills.tsx to eliminate duplicate action controls, leaving Power Tools exclusively in the Right Side Dashboard Panel. |
+| 2026-07-30 | Pushed commit `f9d4850` to GitHub repository (`Isobit7/OptiCode.git` main branch) containing persistent login session, auto guest history migration on login, and Vercel custom domain configuration. |
 | 2026-07-30 | Enhanced persistent login authentication session management: user credentials, session tokens (`opticode_auth_token`), and profile metadata (`opticode_user`) are persisted in browser local storage and verified on site load so returning users stay logged in across page reloads and future visits until explicitly logging out. |
 | 2026-07-30 | Added automatic guest cache memory migration on login: local history entries generated before signing in are automatically preserved, merged, and synced to the user's Supabase backend database upon authentication. |
 | 2026-07-30 | User configured custom Vercel domain `opticode-lab.vercel.app` for frontend production deployment. |
