@@ -1,5 +1,5 @@
 {
-  "buildCommand": "npm run build --prefix code-optimizer-explainer/frontend",
+  "buildCommand": "cd code-optimizer-explainer/frontend && npm install && npm run build",
   "outputDirectory": "code-optimizer-explainer/frontend/dist",
   "rewrites": [
     {
