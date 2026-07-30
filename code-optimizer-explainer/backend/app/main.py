@@ -48,7 +48,7 @@ app = FastAPI(
 
 from fastapi import FastAPI, Request, Response, WebSocket, WebSocketDisconnect
 
-cors_origins_env = os.getenv("CORS_ORIGINS", "")
+cors_origins_env = os.getenv("CORS_ORIGINS", "").strip()
 default_origins = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
@@ -58,19 +58,33 @@ default_origins = [
     "https://opticode-frontend.vercel.app",
     "https://opticode-backend.vercel.app",
 ]
-origins = (
-    [origin.strip() for origin in cors_origins_env.split(",") if origin.strip()]
-    if cors_origins_env and cors_origins_env != "*"
-    else default_origins
-)
 
-# ✅ SECURITY FIX: Strict CORS - explicit whitelist only, no wildcard regex
+configured_origins = [
+    o.rstrip("/") for o in cors_origins_env.split(",") if o.strip() and o != "*"
+] if cors_origins_env else []
+
+origins = list(set(default_origins + configured_origins))
+
+def is_origin_allowed(origin: str | None) -> bool:
+    if not origin:
+        return False
+    clean_origin = origin.rstrip("/")
+    if cors_origins_env == "*" or "*" in configured_origins:
+        return True
+    if clean_origin in origins:
+        return True
+    if clean_origin.endswith(".vercel.app") or "localhost" in clean_origin or "127.0.0.1" in clean_origin:
+        return True
+    return False
+
+# ✅ Dynamic CORS handling for all Vercel deployments & configured origins
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,  # Explicit whitelist - no regex patterns
+    allow_origins=origins,
+    allow_origin_regex=r"https://.*\.vercel\.app",
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],  # Explicit methods
-    allow_headers=["Content-Type", "Authorization", "X-Requested-With", "X-CSRF-Token"],  # Explicit headers
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=["Content-Type", "Authorization", "X-Requested-With", "X-CSRF-Token"],
 )
 
 # Observability middleware — must be registered AFTER CORS so it wraps all routes.
@@ -83,10 +97,7 @@ async def add_security_headers(request: Request, call_next):
     origin = request.headers.get("origin")
     
     if request.method == "OPTIONS":
-        response_origin = origin if origin else ""
-        # Only set if origin is in whitelist
-        if origin and origin in origins:
-            response_origin = origin
+        response_origin = origin if (origin and is_origin_allowed(origin)) else ""
         headers = {
             "X-Content-Type-Options": "nosniff",
         }
@@ -99,8 +110,8 @@ async def add_security_headers(request: Request, call_next):
 
     response = await call_next(request)
     
-    # Only set CORS headers if origin is in whitelist
-    if origin and origin in origins:
+    # Only set CORS headers if origin is in whitelist or allowed
+    if origin and is_origin_allowed(origin):
         response.headers["Access-Control-Allow-Origin"] = origin
         response.headers["Access-Control-Allow-Credentials"] = "true"
 

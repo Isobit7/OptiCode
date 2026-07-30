@@ -2,7 +2,7 @@
 
 const RAW_BASE_URL =
   (typeof import.meta !== "undefined" &&
-    (import.meta as unknown as { env?: { VITE_API_BASE_URL?: string } }).env?.VITE_API_BASE_URL) ||
+    (import.meta as unknown as { env?: { VITE_API_BASE_URL?: string } }).env?.VITE_API_BASE_URL)?.trim() ||
   "http://localhost:8000";
 
 const IS_VERCEL_HOST =

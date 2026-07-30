@@ -97,6 +97,8 @@ code-optimizer-explainer/
 ## 9. Changelog
 *(Newest entry on top. One line per change — date + what changed + why, if non-obvious.)*
 
+| 2026-07-30 | Updated backend CORS middleware in main.py to dynamically allow all *.vercel.app origins and custom Render environment domains, preventing CORS preflight failures when changing deployment URLs. |
+| 2026-07-30 | Configured and provided complete deployment step-by-step instructions for Frontend (Vercel) and Backend (Render) per user request. |
 | 2026-07-30 | Started local backend FastAPI dev server on http://127.0.0.1:8000 and frontend Vite dev server on http://localhost:5173 per user directive. |
 | 2026-07-29 | Fixed language auto-detection in Prettify & Shorten: (1) Updated detect_language in client.py to ignore "auto" string and run detection logic; (2) Configured tools.prettify and tools.shorten to trigger auto-detection if language is "auto" or empty; (3) Added detected_language support to PrettifyResponse/ShortenResponse schemas and backend.ts API response parsing. |
 | 2026-07-29 | Enhanced output formatting: Swapped the diff view for a clean syntax-highlighted code output block for Prettify, Translate, and Humanize actions in TurnCard.tsx per user preference. |
